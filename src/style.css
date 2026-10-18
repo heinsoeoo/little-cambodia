@@ -1,2 +1,423 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-:root{font-family:'DM Sans',sans-serif;color:#f8f7e9;background:#aabec0;font-synthesis:none}*{box-sizing:border-box}body{margin:0;overflow:hidden}#world{position:fixed;inset:0;width:100%;height:100%}header{position:absolute;left:32px;right:32px;top:26px;display:flex;align-items:center;gap:12px}.brand{font-family:'Space Grotesk',sans-serif;font-size:23px;letter-spacing:2px;color:#fff;text-decoration:none;text-shadow:0 1px 12px #233b39}.brand b{color:#dfef9f}.brand small{display:block;font-size:9px;letter-spacing:3px;margin-top:7px}.city{margin-left:auto;font-size:11px;letter-spacing:2px;color:#173b38;background:#e8eddf;padding:12px 16px;border-radius:30px}.city span{margin-left:20px;opacity:.4}button{font:inherit;cursor:pointer;border:0;border-radius:8px;padding:12px 16px;background:#e0efa6;color:#203c36;font-weight:700}button:hover{filter:brightness(1.08)}button:disabled{opacity:.55;cursor:default}header button{color:#fff;background:#183c38b5;font-size:11px}kbd{margin-left:8px;opacity:.5}.panel{background:#143530e8;backdrop-filter:blur(16px);border:1px solid #efffdb22;border-radius:14px;box-shadow:0 10px 30px #102a2920}.mission{position:absolute;top:115px;left:32px;width:290px;padding:22px}.eyebrow{font-size:9px;letter-spacing:2.4px;color:#deebaa;font-weight:700}h2{font-family:'Space Grotesk',sans-serif;font-size:23px;line-height:1.15;margin:14px 0 9px}p{font-size:12px;line-height:1.7;color:#d0ddd5}.mission-bottom{display:flex;justify-content:space-between;border-top:1px solid #ffffff20;padding:18px 0;font-size:12px}.fare{color:#dceda6}#interact{width:100%;font-size:12px}.map{position:absolute;right:32px;bottom:77px;width:250px;padding:14px}.map-heading{display:flex;justify-content:space-between;font-size:9px;letter-spacing:1.5px;color:#c5d5c9}#map{width:220px;height:220px;border-radius:8px;margin:12px 0 5px;background:#1e443c}.map-footer{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.map-footer i{display:inline-block;width:5px;height:5px;border-radius:50%;background:#e2efa6;margin-right:6px}.dash{position:absolute;bottom:77px;left:32px;display:flex;gap:25px;align-items:center;padding:17px 24px}.dash #speed{font:52px 'Space Grotesk',sans-serif;letter-spacing:-3px}.dash small{display:block;font-size:8px;letter-spacing:2px;color:#b5c9bf}.gear{border-left:1px solid #ffffff30;padding-left:25px}.gear b{font-size:26px;color:#ddecab}.wallet{position:absolute;top:115px;right:32px;padding:17px 22px;display:flex;flex-direction:column;gap:7px}.wallet small{font-size:8px;letter-spacing:2px;color:#c1d2c6}.wallet b{font:24px 'Space Grotesk',sans-serif;color:#dfedaa}.wallet>span{font-size:9px;color:#abc0b5}footer{position:absolute;bottom:25px;left:32px;right:32px;display:flex;justify-content:space-between;font-size:9px;letter-spacing:.5px;text-shadow:0 1px 4px #000}footer em{font-style:normal;opacity:.65}footer a{color:white}.welcome{position:absolute;left:calc(50% - 255px);top:23%;width:510px;padding:38px;background:#173b35eb;border:1px solid #e6f4c333;border-radius:20px;box-shadow:0 24px 100px #183e3955}.welcome h1{font:64px/1.02 'Space Grotesk',sans-serif;letter-spacing:-3px;margin:24px 0}.welcome h1 em{color:#e3efa9;font-style:normal}.welcome p{font-size:14px}.welcome button{width:100%;margin:16px 0}.welcome button span{float:right}.welcome small{font-size:9px;color:#a8c0b3}#toast{position:absolute;left:50%;bottom:35px;transform:translateX(-50%);background:#e5efa9;color:#1b3c32;padding:12px 20px;border-radius:30px;font-size:12px;max-width:70%;text-align:center;transition:opacity .3s}.touch{display:none}@media(max-width:800px){header{left:15px;right:15px;top:15px}.brand{font-size:16px}.city{display:none}.mission{left:15px;top:85px;width:230px;padding:15px}.wallet{right:15px;top:85px;padding:12px}.map{right:15px;bottom:135px;width:170px}#map{width:140px;height:140px}.dash{left:15px;bottom:135px;padding:12px}.welcome{left:5%;width:90%;top:20%;padding:25px}.welcome h1{font-size:50px}footer{bottom:10px;left:15px;font-size:8px}footer>span{display:none}.touch{position:absolute;bottom:45px;left:15px;right:15px;display:flex;gap:10px}.touch button{width:60px;height:60px;background:#183c38dc;color:#e6eead;font-size:24px;touch-action:none}.touch button:nth-child(3){margin-left:auto}}
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+:root {
+  font-family: "DM Sans", sans-serif;
+  color: #f8f7e9;
+  background: #aabec0;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  overflow: hidden;
+}
+#world {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+header {
+  position: absolute;
+  left: 32px;
+  right: 32px;
+  top: 26px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 23px;
+  letter-spacing: 2px;
+  color: #fff;
+  text-decoration: none;
+  text-shadow: 0 1px 12px #233b39;
+}
+.brand b {
+  color: #dfef9f;
+}
+.brand small {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 3px;
+  margin-top: 7px;
+}
+.city {
+  margin-left: auto;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #173b38;
+  background: #e8eddf;
+  padding: 12px 16px;
+  border-radius: 30px;
+}
+.city span {
+  margin-left: 20px;
+  opacity: 0.4;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  background: #e0efa6;
+  color: #203c36;
+  font-weight: 700;
+}
+button:hover {
+  filter: brightness(1.08);
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+header button {
+  color: #fff;
+  background: #183c38b5;
+  font-size: 11px;
+}
+kbd {
+  margin-left: 8px;
+  opacity: 0.5;
+}
+.panel {
+  background: #143530e8;
+  backdrop-filter: blur(16px);
+  border: 1px solid #efffdb22;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px #102a2920;
+}
+.mission {
+  position: absolute;
+  top: 115px;
+  left: 32px;
+  width: 290px;
+  padding: 22px;
+}
+.eyebrow {
+  font-size: 9px;
+  letter-spacing: 2.4px;
+  color: #deebaa;
+  font-weight: 700;
+}
+h2 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 23px;
+  line-height: 1.15;
+  margin: 14px 0 9px;
+}
+p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #d0ddd5;
+}
+.mission-bottom {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #ffffff20;
+  padding: 18px 0;
+  font-size: 12px;
+}
+.fare {
+  color: #dceda6;
+}
+#interact {
+  width: 100%;
+  font-size: 12px;
+}
+.map {
+  position: absolute;
+  right: 32px;
+  bottom: 77px;
+  width: 250px;
+  padding: 14px;
+}
+.map-heading {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: #c5d5c9;
+}
+#map {
+  width: 220px;
+  height: 220px;
+  border-radius: 8px;
+  margin: 12px 0 5px;
+  background: #1e443c;
+}
+.map-footer {
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.map-footer i {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #e2efa6;
+  margin-right: 6px;
+}
+.dash {
+  position: absolute;
+  bottom: 77px;
+  left: 32px;
+  display: flex;
+  gap: 25px;
+  align-items: center;
+  padding: 17px 24px;
+}
+.dash #speed {
+  font:
+    52px "Space Grotesk",
+    sans-serif;
+  letter-spacing: -3px;
+}
+.dash small {
+  display: block;
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: #b5c9bf;
+}
+.gear {
+  border-left: 1px solid #ffffff30;
+  padding-left: 25px;
+}
+.gear b {
+  font-size: 26px;
+  color: #ddecab;
+}
+.wallet {
+  position: absolute;
+  top: 115px;
+  right: 32px;
+  padding: 17px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.wallet small {
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: #c1d2c6;
+}
+.wallet b {
+  font:
+    24px "Space Grotesk",
+    sans-serif;
+  color: #dfedaa;
+}
+.wallet > span {
+  font-size: 9px;
+  color: #abc0b5;
+}
+footer {
+  position: absolute;
+  bottom: 25px;
+  left: 32px;
+  right: 32px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 4px #000;
+}
+footer em {
+  font-style: normal;
+  opacity: 0.65;
+}
+footer a {
+  color: white;
+}
+.welcome {
+  position: absolute;
+  left: calc(50% - 255px);
+  top: 23%;
+  width: 510px;
+  padding: 38px;
+  background: #173b35eb;
+  border: 1px solid #e6f4c333;
+  border-radius: 20px;
+  box-shadow: 0 24px 100px #183e3955;
+}
+.welcome h1 {
+  font:
+    64px/1.02 "Space Grotesk",
+    sans-serif;
+  letter-spacing: -3px;
+  margin: 24px 0;
+}
+.welcome h1 em {
+  color: #e3efa9;
+  font-style: normal;
+}
+.welcome p {
+  font-size: 14px;
+}
+.welcome button {
+  width: 100%;
+  margin: 16px 0;
+}
+.welcome button span {
+  float: right;
+}
+.welcome small {
+  font-size: 9px;
+  color: #a8c0b3;
+}
+#toast {
+  position: absolute;
+  left: 50%;
+  bottom: 35px;
+  transform: translateX(-50%);
+  background: #e5efa9;
+  color: #1b3c32;
+  padding: 12px 20px;
+  border-radius: 30px;
+  font-size: 12px;
+  max-width: 70%;
+  text-align: center;
+  transition: opacity 0.3s;
+}
+.touch {
+  display: none;
+}
+@media (max-width: 800px) {
+  header {
+    left: 15px;
+    right: 15px;
+    top: 15px;
+  }
+  .brand {
+    font-size: 16px;
+  }
+  .city {
+    display: none;
+  }
+  .mission {
+    left: 15px;
+    top: 85px;
+    width: 230px;
+    padding: 15px;
+  }
+  .wallet {
+    right: 15px;
+    top: 85px;
+    padding: 12px;
+  }
+  .map {
+    right: 15px;
+    bottom: 135px;
+    width: 170px;
+  }
+  #map {
+    width: 140px;
+    height: 140px;
+  }
+  .dash {
+    left: 15px;
+    bottom: 135px;
+    padding: 12px;
+  }
+  .welcome {
+    left: 5%;
+    width: 90%;
+    top: 20%;
+    padding: 25px;
+  }
+  .welcome h1 {
+    font-size: 50px;
+  }
+  footer {
+    bottom: 10px;
+    left: 15px;
+    font-size: 8px;
+  }
+  footer > span {
+    display: none;
+  }
+  .touch {
+    position: absolute;
+    bottom: 45px;
+    left: 15px;
+    right: 15px;
+    display: flex;
+    gap: 10px;
+  }
+  .touch button {
+    width: 60px;
+    height: 60px;
+    background: #183c38dc;
+    color: #e6eead;
+    font-size: 24px;
+    touch-action: none;
+  }
+  .touch button:nth-child(3) {
+    margin-left: auto;
+  }
+}
+
+[hidden] {
+  display: none !important;
+}
+.pause-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: #0c252482;
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+}
+.pause-card {
+  width: min(390px, 90vw);
+  padding: 30px;
+  text-align: center;
+}
+.pause-card h2 {
+  font-size: 30px;
+}
+.pause-card button {
+  width: 100%;
+  margin-top: 15px;
+}
+@media (max-width: 800px) {
+  header {
+    gap: 6px;
+  }
+  header button {
+    padding: 10px;
+    font-size: 10px;
+  }
+  .brand small {
+    font-size: 7px;
+    letter-spacing: 1px;
+  }
+  .wallet {
+    top: auto;
+    bottom: 210px;
+    left: 15px;
+    right: auto;
+  }
+  .wallet b {
+    font-size: 18px;
+  }
+  .mission {
+    width: 220px;
+  }
+  .mission h2 {
+    font-size: 20px;
+  }
+  .map {
+    width: 160px;
+  }
+  #map {
+    width: 130px;
+    height: 130px;
+  }
+}

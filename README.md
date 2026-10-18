@@ -15,19 +15,20 @@ Open the address printed by Vite (normally http://127.0.0.1:5173). Click **Start
 
 - WASD / arrow keys: accelerate, reverse and steer.
 - Space: brake. E: pick up/drop off when stopped within 15 m.
-- R: return to the nearest road. C: chase/overhead camera.
+- R: return to the nearest road. C: chase/overhead camera. P: pause/resume.
 - Daylight button: toggle evening. Touch arrows appear on narrow screens.
 
-Follow the lime beacon and minimap dot. The dotted line and distance indicate the destination directly, not a calculated driving route. Each completed fare earns 6,000 fictional riel, saved locally in your browser. No login or backend is needed.
+Follow the lime route on the road and minimap. Navigation recalculates every second through connected OSM nodes and respects mapped one-way streets. Restricted and pedestrian-only roads are excluded. If a road connection cannot be found, the map clearly falls back to dotted direct guidance. Pause also activates when you switch away from the game. Each completed fare earns 6,000 fictional riel, saved locally in your browser. No login or backend is needed.
 
 ## What's included
 
-551 OSM road ways and 2,850 building footprints; a roughly 1.6 × 1.9 km district; arcade taxi handling; footprint collision checks; a stylized Independence Monument; procedural trees; five road-snapped fare locations; minimap; day/evening lighting. Counts reflect the bundled extract.
+439 drivable OSM road ways (filtered from 551 source ways) and 2,850 building footprints; a roughly 1.6 × 1.9 km district; arcade taxi handling; footprint collision checks; a stylized Independence Monument; procedural trees; five road-snapped fare locations; minimap; day/evening lighting. Counts reflect the bundled extract.
 
 ## Structure and extension
 
 - `src/cities.js`: city-specific origin, data file, bounds, and fare landmarks.
 - `src/geo.js`: coordinate projection, map parsing, road proximity.
+- `src/navigation.js`: road graph, shortest-path routing, one-way constraints and opening spawn.
 - `src/world.js`: procedural environment, taxi model and spatial collision index.
 - `src/vehicle.js`: fixed-step vehicle simulation.
 - `src/missions.js`: pickup/drop-off rules, rewards and save state.
@@ -41,6 +42,7 @@ To add Siem Reap, provide another city configuration and an OSM extract with the
 
 ```sh
 npm test
+npm run format:check
 npm run build
 ```
 
@@ -48,8 +50,13 @@ Serve `dist/` using any static HTTP server. Do not open index.html directly from
 
 ## Prototype limits
 
-Desktop browser smoke-tested; touch controls implemented but not verified on a physical phone. No traffic AI, walking, multiplayer, turn-by-turn navigation, sound or realistic suspension. Buildings use OSM footprints with mostly generated heights; this is stylized scenery, not an accurate architectural reconstruction. The riverfront lies mostly beyond this compact district. The map edge is bounded; there is no city streaming. Collision uses a point plus 1.5 m footprint clearance, not rigid-body physics. Camera obstruction avoidance and performance profiling remain future work.
+Desktop browser smoke-tested; touch controls implemented but not verified on a physical phone. No traffic AI, walking, multiplayer, turn-by-turn navigation, sound or realistic suspension. Buildings use OSM footprints with mostly generated heights; this is stylized scenery, not an accurate architectural reconstruction. The riverfront lies mostly beyond this compact district. The map edge is bounded; there is no city streaming. Collision uses a point plus 1.5 m footprint clearance, not rigid-body physics. Static geometry is merged by material into 23 mesh draws; actual frame-rate gains depend on the device. Camera obstruction avoidance and broader performance profiling remain future work. Routing does not yet account for turn restrictions, road closures or traffic.
 
 ## Data and credits
 
 © OpenStreetMap contributors, ODbL. Source and license: https://www.openstreetmap.org/copyright . The unmodified source extract is distributed in `public/data/phnom-penh.osm.json`. See `public/data/ATTRIBUTION.md` for query and retrieval details. Three.js is MIT licensed. See installed dependency licenses. No reference game assets or code are included.
+
+
+## Git history
+
+This folder is a Git repository on `main`. The original playable prototype is preserved in the first commit, followed by the navigation and rendering enhancement. Dependencies and generated builds are ignored. No remote is configured yet.

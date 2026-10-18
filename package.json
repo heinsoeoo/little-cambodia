@@ -1,1 +1,20 @@
-{"name":"phnom-drive","version":"0.1.0","private":true,"type":"module","scripts":{"dev":"vite --host 127.0.0.1","build":"vite build","test":"node --test"},"dependencies":{"three":"0.180.0"},"devDependencies":{"vite":"6.1.0"}}
+{
+  "name": "phnom-drive",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "test": "node --test",
+    "format": "prettier --write src test index.html package.json",
+    "format:check": "prettier --check src test index.html package.json"
+  },
+  "dependencies": {
+    "three": "0.180.0"
+  },
+  "devDependencies": {
+    "prettier": "3.6.2",
+    "vite": "6.1.0"
+  }
+}

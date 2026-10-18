@@ -1,1 +1,89 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Phnom Drive · Cambodia</title><link rel="stylesheet" href="/src/style.css"></head><body><canvas id="world" aria-label="3D driving world"></canvas><header><a class="brand" href="#">◈ PHNOM <b>DRIVE</b><small>CAMBODIA / EARLY EXPLORER</small></a><div class="city">PHNOM PENH <span>01</span></div><button id="time">☀ Daylight</button><button id="reset">Reset car <kbd>R</kbd></button></header><aside class="mission panel"><div class="eyebrow">YOUR NEXT JOURNEY</div><h2 id="mission-title">Welcome to Phnom Penh</h2><p id="mission-description">Preparing your city…</p><div class="mission-bottom"><span id="distance">—</span><span class="fare">៛ <b id="fare">6,000</b></span></div><button id="interact" disabled>Drive to the pickup</button></aside><aside class="map panel"><div class="map-heading">CENTRAL DISTRICT <span>N ↑</span></div><canvas id="map" width="280" height="280" aria-label="Road map with car and destination"></canvas><div class="map-footer"><i></i> <span id="road-name">Phnom Penh</span></div></aside><div class="dash panel"><div><span id="speed">00</span><small>KM/H</small></div><div class="gear"><b id="gear">N</b><small>TAXI / FOR HIRE</small></div></div><div class="wallet panel"><small>YOUR EARNINGS</small><b>៛ <span id="earnings">0</span></b><span id="trips">0 trips completed</span></div><footer><span>W A S D / ARROWS <em>drive</em> &nbsp; SPACE <em>brake</em> &nbsp; E <em>pickup / drop off</em> &nbsp; C <em>camera</em></span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors · ODbL</a></footer><section id="welcome" class="welcome"><div class="eyebrow">A LITTLE CITY. A NEW PERSPECTIVE.</div><h1>Take the<br><em>scenic route.</em></h1><p>Discover central Phnom Penh, one fare at a time.<br>Real streets. Your own pace.</p><button id="start">Start your shift <span>↗</span></button><small>Single player prototype · Stylized city · Keyboard + touch</small></section><div id="toast" role="status">Loading OpenStreetMap district…</div><div class="touch"><button data-key="arrowleft" aria-label="Steer left">←</button><button data-key="arrowright" aria-label="Steer right">→</button><button data-key="arrowdown" aria-label="Brake and reverse">↓</button><button data-key="arrowup" aria-label="Accelerate">↑</button></div><script type="module" src="/src/main.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Phnom Drive · Cambodia</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <canvas id="world" aria-label="3D driving world"></canvas>
+    <header>
+      <a class="brand" href="#"
+        >◈ PHNOM <b>DRIVE</b><small>CAMBODIA / EARLY EXPLORER</small></a
+      >
+      <div class="city">PHNOM PENH <span>01</span></div>
+      <button id="time">☀ Daylight</button
+      ><button id="pause" disabled>Pause · P</button
+      ><button id="reset">Reset car <kbd>R</kbd></button>
+    </header>
+    <aside class="mission panel">
+      <div class="eyebrow">YOUR NEXT JOURNEY</div>
+      <h2 id="mission-title">Welcome to Phnom Penh</h2>
+      <p id="mission-description">Preparing your city…</p>
+      <div class="mission-bottom">
+        <span id="distance">—</span
+        ><span class="fare">៛ <b id="fare">6,000</b></span>
+      </div>
+      <button id="interact" disabled>Drive to the pickup</button>
+    </aside>
+    <aside class="map panel">
+      <div class="map-heading">CENTRAL DISTRICT <span>N ↑</span></div>
+      <canvas
+        id="map"
+        width="280"
+        height="280"
+        aria-label="Road map with car and destination"
+      ></canvas>
+      <div class="map-footer">
+        <i></i> <span id="road-name">Phnom Penh</span>
+      </div>
+    </aside>
+    <div class="dash panel">
+      <div><span id="speed">00</span><small>KM/H</small></div>
+      <div class="gear"><b id="gear">N</b><small>TAXI / FOR HIRE</small></div>
+    </div>
+    <div class="wallet panel">
+      <small>YOUR EARNINGS</small><b>៛ <span id="earnings">0</span></b
+      ><span id="trips">0 trips completed</span>
+    </div>
+    <footer>
+      <span
+        >W A S D / ARROWS <em>drive</em> &nbsp; SPACE <em>brake</em> &nbsp; E
+        <em>pickup / drop off</em> &nbsp; C <em>camera</em> &nbsp; P
+        <em>pause</em></span
+      ><a
+        href="https://www.openstreetmap.org/copyright"
+        target="_blank"
+        rel="noopener"
+        >© OpenStreetMap contributors · ODbL</a
+      >
+    </footer>
+    <section id="welcome" class="welcome">
+      <div class="eyebrow">A LITTLE CITY. A NEW PERSPECTIVE.</div>
+      <h1>Take the<br /><em>scenic route.</em></h1>
+      <p>
+        Discover central Phnom Penh, one fare at a time.<br />Real streets. Your
+        own pace.
+      </p>
+      <button id="start">Start your shift <span>↗</span></button
+      ><small>Single player prototype · Stylized city · Keyboard + touch</small>
+    </section>
+    <section id="pause-overlay" class="pause-overlay" hidden>
+      <div class="pause-card panel">
+        <div class="eyebrow">TAKE A BREATHER</div>
+        <h2>Shift paused</h2>
+        <p>Your taxi will wait here. Press P or resume when you’re ready.</p>
+        <button id="resume">Resume driving ↗</button>
+      </div>
+    </section>
+    <div id="toast" role="status">Loading OpenStreetMap district…</div>
+    <div class="touch">
+      <button data-key="arrowleft" aria-label="Steer left">←</button
+      ><button data-key="arrowright" aria-label="Steer right">→</button
+      ><button data-key="arrowdown" aria-label="Brake and reverse">↓</button
+      ><button data-key="arrowup" aria-label="Accelerate">↑</button>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

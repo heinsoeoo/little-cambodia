@@ -15,8 +15,8 @@ Start with a roughly 1.4 × 1.8 km central Phnom Penh district, a single taxi, c
 - UI: minimap, speed, destination, distance, controls and day/night.
 
 ## Expansion
-1. Validate steering, fares and frame rate with players; improve route guidance and traffic rules.
-2. Add road-graph routing, traffic agents, sound and tuned tuk-tuk model.
+1. Road-graph route guidance, one-way routing, drivable-road filtering, pause/resume and static geometry batching implemented in v0.2. Validate steering, fares and frame rate with players; next improve traffic rules.
+2. Add turn instructions, traffic agents, sound and tuned tuk-tuk model.
 3. Stream larger city chunks and introduce authored landmark models and mobile quality tiers.
 4. Add Siem Reap through a second city config + prepared OSM dataset + landmark pack. Keep simulation shared. Multiplayer, accounts and walking are deferred until single-player is stable.
 
