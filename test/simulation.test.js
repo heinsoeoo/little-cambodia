@@ -1,0 +1,15 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {project,nearestRoad,prepare} from '../src/geo.js';
+import {cities} from '../src/cities.js';
+import {stepVehicle} from '../src/vehicle.js';
+import {makeWorld} from '../src/world.js';
+import * as T from 'three';
+const city=cities.phnomPenh,map=prepare(JSON.parse(fs.readFileSync('public/data/phnom-penh.osm.json')),city);
+test('OSM extract contains real roads and buildings',()=>{assert.ok(map.roads.length>50);assert.ok(map.buildings.length>100);assert.deepEqual(project(...city.origin,city.origin),[0,-0]);});
+test('nearest-road projection uses segment interiors',()=>{const n=nearestRoad([4,5],[{points:[[0,0],[10,0]]}]);assert.deepEqual(n.point,[4,0]);assert.equal(n.distance,5);});
+test('car accelerates, brakes, reverses, and rolls back collisions',()=>{const c={x:0,z:0,heading:0,speed:0};for(let i=0;i<120;i++)stepVehicle(c,new Set(['w']),1/60,()=>false);assert.ok(c.speed>10&&c.z>10);const v=c.speed;for(let i=0;i<60;i++)stepVehicle(c,new Set([' ']),1/60,()=>false);assert.ok(c.speed<v*.02);const before=c.z;stepVehicle(c,new Set(['w']),1/60,()=>true);assert.equal(c.z,before);for(let i=0;i<120;i++)stepVehicle(c,new Set(['s']),1/60,()=>false);assert.ok(c.speed<0);});
+test('all fare stops and spawn are accessible outside buildings',()=>{const world=makeWorld(new T.Scene(),map,city);for(const l of city.landmarks){const n=nearestRoad(project(l.lon,l.lat,city.origin),map.roads);assert.ok(!world.collides(...n.point),l.name+' intersects a building');}const p=nearestRoad(project(city.landmarks[0].lon,city.landmarks[0].lat,city.origin),map.roads).point;const spawn=nearestRoad([p[0],p[1]+65],map.roads).point;assert.ok(!world.collides(...spawn));});
+import {Missions} from '../src/missions.js';
+test('fare requires stopped proximity and rewards only completed trips',()=>{const m=new Missions([{point:[0,0]},{point:[100,0]}]);assert.equal(m.interact({x:50,z:0,speed:0}),null);assert.equal(m.interact({x:0,z:0,speed:5}),null);assert.equal(m.interact({x:0,z:0,speed:0}),'pickup');assert.equal(m.balance,0);assert.equal(m.interact({x:0,z:0,speed:0}),null);assert.equal(m.interact({x:100,z:0,speed:0}),'complete');assert.deepEqual(m.save(),{balance:6000,trips:1});assert.equal(m.stage,'pickup');assert.deepEqual(new Missions(m.stops,m.save()).save(),m.save());});
