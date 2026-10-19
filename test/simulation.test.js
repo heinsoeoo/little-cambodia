@@ -7,10 +7,7 @@ import { stepVehicle } from "../src/vehicle.js";
 import { makeWorld } from "../src/world.js";
 import * as T from "three";
 const city = cities.phnomPenh,
-  map = prepare(
-    JSON.parse(fs.readFileSync("public/data/phnom-penh.osm.json")),
-    city,
-  );
+  map = prepare(JSON.parse(fs.readFileSync(`public${city.data}`)), city);
 test("OSM extract contains real roads and buildings", () => {
   assert.ok(map.roads.length > 50);
   assert.ok(map.buildings.length > 100);

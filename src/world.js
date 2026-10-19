@@ -1,13 +1,26 @@
 import * as T from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { project, nearestRoad } from "./geo.js";
+import { insidePolygon } from "./buildings.js";
+import { addFacades } from "./facades.js";
+import { riversidePath } from "./riverside.js";
 export function makeWorld(scene, map, city) {
+  const path = riversidePath(map, city);
+  const westNorth = project(city.bounds[0], city.bounds[3], city.origin),
+    eastSouth = project(city.bounds[2], city.bounds[1], city.origin);
   const ground = new T.Mesh(
-    new T.PlaneGeometry(2800, 3000),
+    new T.PlaneGeometry(
+      eastSouth[0] - westNorth[0] + 1200,
+      eastSouth[1] - westNorth[1] + 1200,
+    ),
     new T.MeshLambertMaterial({ color: 0xa6b58c }),
   );
   ground.rotation.x = -Math.PI / 2;
-  ground.position.y = -0.12;
+  ground.position.set(
+    (westNorth[0] + eastSouth[0]) / 2,
+    -0.12,
+    (westNorth[1] + eastSouth[1]) / 2,
+  );
   scene.add(ground);
   const roadMaterial = new T.MeshLambertMaterial({ color: 0x596362 }),
     curbMaterial = new T.MeshLambertMaterial({ color: 0xc9c6ac });
@@ -17,6 +30,53 @@ export function makeWorld(scene, map, city) {
     if (!batches.has(material)) batches.set(material, []);
     batches.get(material).push(geometry);
   };
+  const waterMaterial = new T.MeshLambertMaterial({ color: 0x568b96 });
+  for (const water of map.water || []) {
+    const shape = new T.Shape();
+    water.points.forEach((p, i) =>
+      i ? shape.lineTo(p[0], -p[1]) : shape.moveTo(p[0], -p[1]),
+    );
+    const geo = new T.ShapeGeometry(shape);
+    geo.rotateX(-Math.PI / 2);
+    geo.translate(0, -0.015, 0);
+    batch(geo, waterMaterial);
+  }
+  if (path.length > 1) {
+    const vertices = [];
+    for (let i = 1; i < path.length; i++) {
+      const a = path[i - 1],
+        b = path[i];
+      vertices.push(
+        a[0] - 4,
+        0.02,
+        a[1],
+        b[0] - 4,
+        0.02,
+        b[1],
+        a[0] + 4,
+        0.02,
+        a[1],
+        a[0] + 4,
+        0.02,
+        a[1],
+        b[0] - 4,
+        0.02,
+        b[1],
+        b[0] + 4,
+        0.02,
+        b[1],
+      );
+    }
+    const geo = new T.BufferGeometry().setAttribute(
+      "position",
+      new T.Float32BufferAttribute(vertices, 3),
+    );
+    geo.computeVertexNormals();
+    batch(
+      geo,
+      new T.MeshLambertMaterial({ color: 0xd5c6a2, side: T.DoubleSide }),
+    );
+  }
   const segment = (a, b, width, y, mat) => {
     const dx = b[0] - a[0],
       dz = b[1] - a[1],
@@ -90,7 +150,18 @@ export function makeWorld(scene, map, city) {
     });
     geo.rotateX(-Math.PI / 2);
     geo.translate(0, 0.1, 0);
-    batch(geo, buildingMaterials[b.id % colors.length]);
+    batch(
+      geo,
+      buildingMaterials[
+        b.kind === "home"
+          ? b.id % 3
+          : b.kind === "shop"
+            ? 3
+            : b.kind === "hotel"
+              ? 4
+              : 5
+      ],
+    );
     const xs = b.points.map((p) => p[0]),
       zs = b.points.map((p) => p[1]);
     obstacles.push({
@@ -101,6 +172,8 @@ export function makeWorld(scene, map, city) {
       maxZ: Math.max(...zs) + 1.2,
     });
   }
+
+  const facades = addFacades(scene, map.buildings, batch);
 
   // Merge static geometry by material instead of issuing one draw per building.
   for (const [material, geometries] of batches) {
@@ -150,6 +223,7 @@ export function makeWorld(scene, map, city) {
       z = ((i * 249.17) % 1800) - 900;
     if (
       nearestRoad([x, z], map.roads).distance < 18 ||
+      (map.water || []).some((w) => insidePolygon(x, z, w.points)) ||
       obstacles.some(
         (b) =>
           x > b.minX - 5 && x < b.maxX + 5 && z > b.minZ - 5 && z < b.maxZ + 5,
@@ -193,7 +267,13 @@ export function makeWorld(scene, map, city) {
     min = project(west, north, city.origin),
     max = project(east, south, city.origin);
   return {
+    path,
+    facades,
     collides(x, z) {
+      if ((map.water || []).some((w) => insidePolygon(x, z, w.points)))
+        return true;
+      if (path.length && nearestRoad([x, z], [{ points: path }]).distance < 4.2)
+        return true;
       if (x < min[0] + 3 || x > max[0] - 3 || z < min[1] + 3 || z > max[1] - 3)
         return true;
       return (

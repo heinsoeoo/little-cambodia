@@ -1,4 +1,8 @@
 import * as T from "three";
+import { CityClock, activityAt } from "./schedule.js";
+import { createStreetLife } from "./street-life.js";
+import { samplePath } from "./riverside.js";
+import { bindHoldControls, needsRotation } from "./mobile.js";
 import { cities } from "./cities.js";
 import { project, prepare, nearestRoad } from "./geo.js";
 import { buildGraph, findRoute, approachSpawn } from "./navigation.js";
@@ -13,6 +17,28 @@ let started = false,
   night = false,
   highCamera = false,
   noticeUntil = 0;
+const clock = new CityClock();
+let streetLife,
+  portraitBlocked = false;
+const clearTouch = bindHoldControls(document, keys);
+function checkOrientation() {
+  portraitBlocked = needsRotation({
+    width: innerWidth,
+    height: innerHeight,
+    coarse:
+      matchMedia("(pointer:coarse)").matches ||
+      navigator.maxTouchPoints > 0 ||
+      innerWidth <= 600,
+  });
+  $("rotate-overlay").hidden = !portraitBlocked;
+  if (portraitBlocked) {
+    keys.clear();
+    clearTouch();
+  }
+}
+addEventListener("resize", checkOrientation);
+addEventListener("orientationchange", checkOrientation);
+checkOrientation();
 let graph,
   route = null,
   routeElapsed = 1;
@@ -67,39 +93,59 @@ addEventListener("keydown", (e) => {
     if (e.key.toLowerCase() === "r") reset();
     if (e.key.toLowerCase() === "c") highCamera = !highCamera;
     if (e.key.toLowerCase() === "p") togglePause();
+    if (e.key.toLowerCase() === "v") talkToVendor();
   }
 });
 addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase()));
 addEventListener("blur", () => {
   keys.clear();
+  clearTouch();
   if (started && !paused) togglePause();
 });
 document.addEventListener("visibilitychange", () => {
   keys.clear();
   if (document.hidden && started && !paused) togglePause();
 });
-for (const button of document.querySelectorAll("[data-key]")) {
-  button.addEventListener("pointerdown", (e) => {
-    e.preventDefault();
-    button.setPointerCapture(e.pointerId);
-    keys.add(button.dataset.key);
-  });
-  for (const event of ["pointerup", "pointercancel", "lostpointercapture"])
-    button.addEventListener(event, () => keys.delete(button.dataset.key));
-}
-$("time").onclick = () => {
-  night = !night;
-  const color = night ? 0x233c4c : 0xc7d6ca;
+function setLighting(time) {
+  const activity = activityAt(time);
+  night = activity.night;
+  const color = night ? 0x182e42 : 0xc7d6ca;
   renderer.setClearColor(color);
   scene.fog.color.setHex(color);
-  ambient.intensity = night ? 0.65 : 2.4;
-  sun.intensity = night ? 0.35 : 2.5;
-  $("time").textContent = night ? "☾ Evening" : "☀ Daylight";
+  ambient.intensity = night ? 0.9 : 2.4;
+  sun.intensity = night ? 0.4 : 2.5;
+  world?.facades.setNight(night);
+}
+$("time-mode").onchange = () => {
+  clock.setMode($("time-mode").value);
+  routeElapsed = 1;
 };
+$("visit-riverside").onclick = () => {
+  if (!ready || paused || portraitBlocked) return;
+  const point = samplePath(world.path, 0.58).point;
+  const stop = streetLife.access(map.roads) || nearestRoad(point, map.roads);
+  car.x = stop.point[0];
+  car.z = stop.point[1];
+  car.heading = Math.PI / 2;
+  car.speed = 0;
+  routeElapsed = 1;
+  notify("Riverside access · food carts are beside the water");
+};
+$("camera").onclick = () => {
+  highCamera = !highCamera;
+};
+$("vendor").onclick = talkToVendor;
+function talkToVendor() {
+  if (!ready || paused || portraitBlocked || !started) return;
+  const vendor = streetLife.nearest(car);
+  if (vendor && vendor.distance < 18 && Math.abs(car.speed) < 1.5)
+    notify(`${vendor.food} vendor: “Fresh and ready! Enjoy the riverside.”`, 6);
+}
 function togglePause() {
   if (!started) return;
   paused = !paused;
   keys.clear();
+  clearTouch();
   $("pause-overlay").hidden = !paused;
   $("pause").textContent = paused ? "Resume · P" : "Pause · P";
 }
@@ -143,7 +189,7 @@ function updateMission() {
     (stage === "pickup" ? "Pick up at " : "Take your passenger to ") + t.name;
   $("mission-description").textContent =
     stage === "pickup"
-      ? "Follow the lime road route. Stop within 15 m and press E to pick up your passenger."
+      ? "Follow the lime route. Stop within 15 m, then use Pick up or E."
       : "Enjoy the drive. Stop by the destination marker and press E to complete the fare.";
   marker.position.set(t.point[0], 0.6, t.point[1]);
   routeElapsed = 1;
@@ -153,7 +199,7 @@ function updateMission() {
     stage === "pickup" ? "TAXI / FOR HIRE" : "TAXI / ON TRIP";
 }
 function interact() {
-  if (!ready || !started || paused) return;
+  if (!ready || !started || paused || portraitBlocked) return;
   const result = mission.interact(car);
   if (!result) return;
   stage = mission.stage;
@@ -200,6 +246,14 @@ function drawMap() {
   c.fillStyle = "#1e443c";
   c.fillRect(0, 0, 280, 280);
   c.lineCap = "round";
+  c.fillStyle = "#507b87";
+  for (const w of map.water) {
+    c.beginPath();
+    w.points.forEach((p, i) =>
+      i ? c.lineTo(px(p[0]), pz(p[1])) : c.moveTo(px(p[0]), pz(p[1])),
+    );
+    c.fill();
+  }
   for (const r of map.roads) {
     c.strokeStyle = "#7c9680";
     c.lineWidth = Math.max(1, r.width * s);
@@ -242,6 +296,7 @@ async function loadCity() {
     if (!response.ok) throw new Error(`Map load failed (${response.status})`);
     map = prepare(await response.json(), city);
     world = makeWorld(scene, map, city);
+    streetLife = createStreetLife(scene, world.path, map);
     graph = buildGraph(map.roads);
     stops = city.landmarks.map((l) => ({
       ...l,
@@ -286,9 +341,20 @@ function animate(now) {
   }
   accumulator += dt;
   while (accumulator >= 1 / 60) {
-    if (started && !paused) stepVehicle(car, keys, 1 / 60, world.collides);
+    if (started && !paused && !portraitBlocked)
+      stepVehicle(
+        car,
+        keys,
+        1 / 60,
+        (x, z) => world.collides(x, z) || streetLife.collides(x, z),
+      );
     accumulator -= 1 / 60;
   }
+  const active = started && !paused && !portraitBlocked;
+  clock.tick(active ? dt : 0);
+  const cityTime = clock.read();
+  streetLife.update(active ? dt : 0, cityTime);
+  setLighting(cityTime);
   model.position.set(car.x, 0, car.z);
   model.rotation.y = car.heading;
   const offset = started
@@ -301,6 +367,10 @@ function animate(now) {
         )
     : new T.Vector3(65, 90, 95);
   const desired = new T.Vector3(car.x, 0, car.z).add(offset);
+  // A nearby building can occupy the space behind a narrow riverside road.
+  // Rise above the taxi instead of leaving the chase camera inside a wall.
+  if (started && world.collides(desired.x, desired.z))
+    desired.set(car.x, 24, car.z + 0.5);
   camera.position.lerp(desired, 1 - Math.exp(-dt * 4));
   camera.lookAt(car.x, 1.4, car.z);
   ring.rotation.z += dt * 0.2;
@@ -318,6 +388,17 @@ function animate(now) {
   hud += dt;
   if (hud > 0.1) {
     hud = 0;
+    $("clock").textContent =
+      `${cityTime.label} · Phnom Penh${clock.mode === "now" ? "" : " · preview"}`;
+    $("activity").textContent =
+      `${streetLife.activity.label} · ${streetLife.activity.people} pedestrians · ${streetLife.activity.vendors} vendors`;
+    const vendor = streetLife.nearest(car);
+    $("vendor").disabled =
+      !active || !vendor || vendor.distance >= 18 || Math.abs(car.speed) >= 1.5;
+    $("vendor").textContent =
+      vendor && vendor.distance < 18
+        ? `Talk · ${vendor.food}`
+        : "Talk to vendor · V";
     $("speed").textContent = String(
       Math.round(Math.abs(car.speed) * 3.6),
     ).padStart(2, "0");
@@ -330,7 +411,11 @@ function animate(now) {
     $("distance").textContent =
       `${Math.round(route?.distance ?? distance)} m · ${route ? "by road" : "direct / no route"}`;
     $("interact").disabled =
-      !started || paused || distance > 15 || Math.abs(car.speed) > 1.5;
+      !started ||
+      paused ||
+      portraitBlocked ||
+      distance > 15 ||
+      Math.abs(car.speed) > 1.5;
     $("interact").textContent =
       distance > 15
         ? "Drive to the marker"

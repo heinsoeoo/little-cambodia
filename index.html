@@ -13,7 +13,7 @@
         >◈ PHNOM <b>DRIVE</b><small>CAMBODIA / EARLY EXPLORER</small></a
       >
       <div class="city">PHNOM PENH <span>01</span></div>
-      <button id="time">☀ Daylight</button
+      <button id="camera" aria-label="Switch camera view">Camera · C</button
       ><button id="pause" disabled>Pause · P</button
       ><button id="reset">Reset car <kbd>R</kbd></button>
     </header>
@@ -27,8 +27,23 @@
       </div>
       <button id="interact" disabled>Drive to the pickup</button>
     </aside>
+    <aside class="city-life panel" aria-label="City life and time">
+      <div class="eyebrow">LIFE ALONG THE TONLÉ SAP</div>
+      <strong id="clock">Phnom Penh time</strong>
+      <p id="activity">Preparing the riverside…</p>
+      <label for="time-mode">City time</label
+      ><select id="time-mode">
+        <option value="now">Live · Phnom Penh</option>
+        <option value="day">Preview · weekday noon</option>
+        <option value="market">Preview · weekend market</option>
+      </select>
+      <div class="life-actions">
+        <button id="visit-riverside">Visit riverside ↗</button
+        ><button id="vendor" disabled>Talk to vendor · V</button>
+      </div>
+    </aside>
     <aside class="map panel">
-      <div class="map-heading">CENTRAL DISTRICT <span>N ↑</span></div>
+      <div class="map-heading">CITY + RIVERSIDE <span>N ↑</span></div>
       <canvas
         id="map"
         width="280"
@@ -63,8 +78,8 @@
       <div class="eyebrow">A LITTLE CITY. A NEW PERSPECTIVE.</div>
       <h1>Take the<br /><em>scenic route.</em></h1>
       <p>
-        Discover central Phnom Penh, one fare at a time.<br />Real streets. Your
-        own pace.
+        Discover central Phnom Penh, one fare at a time.<br />Real streets.
+        Homes, food carts and weekend nights.
       </p>
       <button id="start">Start your shift <span>↗</span></button
       ><small>Single player prototype · Stylized city · Keyboard + touch</small>
@@ -78,12 +93,35 @@
       </div>
     </section>
     <div id="toast" role="status">Loading OpenStreetMap district…</div>
-    <div class="touch">
-      <button data-key="arrowleft" aria-label="Steer left">←</button
-      ><button data-key="arrowright" aria-label="Steer right">→</button
-      ><button data-key="arrowdown" aria-label="Brake and reverse">↓</button
-      ><button data-key="arrowup" aria-label="Accelerate">↑</button>
+    <div class="touch" aria-label="Mobile driving controls">
+      <div class="steering">
+        <button data-key="arrowleft" aria-label="Steer left">←</button
+        ><button data-key="arrowright" aria-label="Steer right">→</button>
+      </div>
+      <div class="pedals">
+        <button data-key=" " class="brake" aria-label="Hold brake">BRAKE</button
+        ><button data-key="arrowdown" aria-label="Reverse">R ↓</button
+        ><button data-key="arrowup" class="accelerate" aria-label="Accelerate">
+          GO ↑
+        </button>
+      </div>
     </div>
+    <section
+      id="rotate-overlay"
+      class="rotate-overlay"
+      hidden
+      aria-label="Rotate your phone"
+    >
+      <div class="rotate-card">
+        <div class="phone-icon">↻</div>
+        <h2>Rotate your phone</h2>
+        <p>
+          Phnom Drive plays in landscape.<br />Turn your phone sideways to
+          drive.
+        </p>
+        <small>If the screen stays vertical, turn off rotation lock.</small>
+      </div>
+    </section>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

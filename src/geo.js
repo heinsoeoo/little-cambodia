@@ -1,3 +1,4 @@
+import { describeBuilding, insidePolygon } from "./buildings.js";
 export function project(lon, lat, origin) {
   return [
     (lon - origin[0]) * 111320 * Math.cos((origin[1] * Math.PI) / 180),
@@ -34,10 +35,24 @@ export function nearestRoad(point, roads) {
 }
 export function prepare(data, city) {
   const roads = [],
-    buildings = [];
+    buildings = [],
+    water = [],
+    landuse = [],
+    walkways = [];
+  for (const e of data.elements) {
+    if (e.tags?.landuse && e.geometry?.length > 3)
+      landuse.push({
+        kind: e.tags.landuse,
+        points: e.geometry.map((p) => project(p.lon, p.lat, city.origin)),
+      });
+  }
   for (const e of data.elements) {
     if (!e.geometry || e.geometry.length < 2) continue;
     const points = e.geometry.map((p) => project(p.lon, p.lat, city.origin));
+    if (e.tags?.natural === "water" && points.length > 3)
+      water.push({ id: e.id, points, river: e.tags.water === "river" });
+    if (["footway", "pedestrian"].includes(e.tags?.highway))
+      walkways.push({ id: e.id, points });
     if (
       e.tags?.highway &&
       ![
@@ -71,18 +86,25 @@ export function prepare(data, city) {
             ? 11
             : 8,
       });
-    else if (e.tags?.building && points.length > 3)
+    else if (
+      e.tags?.building &&
+      !["no", "construction", "roof"].includes(e.tags.building) &&
+      points.length > 3
+    ) {
+      const center = points.reduce(
+        (a, p) => [a[0] + p[0] / points.length, a[1] + p[1] / points.length],
+        [0, 0],
+      );
+      const use = landuse.find((area) =>
+        insidePolygon(...center, area.points),
+      )?.kind;
       buildings.push({
         id: e.id,
         points,
-        height: Math.min(
-          70,
-          parseFloat(e.tags.height) ||
-            parseFloat(e.tags["building:levels"]) * 3.2 ||
-            7 + (e.id % 5) * 3,
-        ),
+        ...describeBuilding(e.tags, points, e.id, use),
       });
+    }
   }
   if (!roads.length) throw new Error("Map contains no driveable roads");
-  return { roads, buildings };
+  return { roads, buildings, water, landuse, walkways };
 }
