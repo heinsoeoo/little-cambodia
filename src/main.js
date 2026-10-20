@@ -1,7 +1,7 @@
-import { VEHICLES, vehicleSpec } from "./vehicle-catalog.js";
+import { VEHICLES, vehicleSpec, vehiclePhysics } from "./vehicle-catalog.js";
 import * as T from "three";
-import { townCity, createTownMap } from "./town-map.js";
-import { makeCozyWorld } from "./cozy-world.js";
+import { city, phnomMap, spawn, promenade } from "./phnom-map.js";
+import { makeWorld } from "./world.js";
 import { palette } from "./pixel-art.js";
 import { CityClock, activityAt } from "./schedule.js";
 import { createStreetLife } from "./street-life.js";
@@ -11,8 +11,7 @@ import { stepGuest, nickname } from "./open-world.js";
 import { Multiplayer } from "./network.js";
 import { createActor, playerColor } from "./actors.js";
 const $ = (id) => document.getElementById(id),
-  city = townCity,
-  map = { ...createTownMap(), style: "cozy" },
+  map = phnomMap,
   keys = new Set(),
   actors = new Map();
 let self = null,
@@ -48,15 +47,22 @@ sun.shadow.camera.right = 150;
 sun.shadow.camera.top = 180;
 sun.shadow.camera.bottom = -180;
 sun.shadow.bias = -0.001;
-const world = makeCozyWorld(scene, map, city),
+const world = makeWorld(scene, map, city),
   streetLife = createStreetLife(scene, world.path, map);
-camera.position.set(128, 58, 102);
+camera.position.set(spawn[0] + 40, 58, spawn[1] + 90);
 for (const spec of VEHICLES) {
   const option = document.createElement("option");
   option.value = spec.id;
   option.textContent = spec.name;
   $("vehicle-type").append(option);
 }
+function vehicleStats() {
+  const spec = vehiclePhysics($("vehicle-type").value);
+  $("vehicle-stats").textContent =
+    `${spec.power >= 11 ? "Lively" : spec.power >= 8 ? "Balanced" : "Gentle"} power · ${spec.braking >= 27 ? "Strong" : spec.braking >= 20 ? "Firm" : "Gentle"} brakes`;
+}
+$("vehicle-type").addEventListener("change", vehicleStats);
+vehicleStats();
 function resize() {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
   renderer.setSize(innerWidth, innerHeight, false);
@@ -264,12 +270,18 @@ const ctx = $("map").getContext("2d"),
   east = project(city.bounds[2], city.bounds[1], city.origin),
   scale = 260 / Math.max(east[0] - west[0], east[1] - west[1]);
 function minimap() {
-  const px = (x) => 140 + x * scale,
-    pz = (z) => 140 + z * scale;
+  const px = (x) => 10 + (x - west[0]) * scale,
+    pz = (z) => 10 + (z - west[1]) * scale;
   ctx.fillStyle = "#d3c294";
   ctx.fillRect(0, 0, 280, 280);
   ctx.fillStyle = "#75a5ae";
-  ctx.fillRect(px(96), 0, 280 - px(96), 280);
+  for (const water of map.water) {
+    ctx.beginPath();
+    water.points.forEach((p, i) =>
+      i ? ctx.lineTo(px(p[0]), pz(p[1])) : ctx.moveTo(px(p[0]), pz(p[1])),
+    );
+    ctx.fill();
+  }
   for (const road of map.roads) {
     ctx.strokeStyle = "#8d7656";
     ctx.lineWidth = Math.max(1, road.width * scale);
@@ -341,7 +353,7 @@ function frame(now) {
       player.id === network.id,
     );
   }
-  const focus = self || { x: 88, z: 12 };
+  const focus = self || { x: spawn[0], z: spawn[1] };
   camera.position.lerp(
     new T.Vector3(focus.x + 40, 58, focus.z + 90),
     1 - Math.exp(-dt * 7),
@@ -384,16 +396,26 @@ function frame(now) {
       Math.round(Math.abs(self?.speed || 0) * 3.6),
     ).padStart(2, "0");
     $("gear").textContent =
-      self?.mode === "drive" ? (self.speed < -0.2 ? "R" : "DRIVE") : "ON FOOT";
+      self?.mode === "drive"
+        ? self.speed < -0.2
+          ? "R"
+          : self.vehicle?.drifting
+            ? "DRIFT"
+            : "DRIVE"
+        : "ON FOOT";
     $("touch-up").textContent = self?.mode === "drive" ? "GO ↑" : "↑";
     $("touch-down").textContent = self?.mode === "drive" ? "R ↓" : "↓";
     $("road-name").textContent =
-      self && self.x > 79
+      self &&
+      nearestRoad([self.x, self.z], [{ points: promenade }]).distance < 10
         ? "Riverside promenade"
         : nearestRoad([focus.x, focus.z], map.roads).road.name;
     minimap();
   }
   if (now > noticeUntil) $("toast").style.opacity = 0;
+  sun.position.set(focus.x - 120, 180, focus.z - 80);
+  sun.target.position.set(focus.x, 0, focus.z);
+  sun.target.updateMatrixWorld();
   camera.updateMatrixWorld();
   for (const actor of actors.values())
     actor.projectLabel(camera, innerWidth, innerHeight);

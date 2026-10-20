@@ -7,7 +7,7 @@ import { addFacades } from "./facades.js";
 import { riversidePath } from "./riverside.js";
 export function makeWorld(scene, map, city) {
   const textures =
-    typeof document === "undefined"
+    typeof document === "undefined" || map.style === "cozy"
       ? {}
       : {
           grass: tileTexture("grass"),
@@ -25,7 +25,11 @@ export function makeWorld(scene, map, city) {
       eastSouth[1] - westNorth[1] + 1200,
     ),
     new T.MeshLambertMaterial({
-      color: textures.grass ? 0xffffff : palette.grass,
+      color: textures.grass
+        ? 0xffffff
+        : map.style === "cozy"
+          ? 0x96ad7d
+          : palette.grass,
       map: textures.grass || null,
     }),
   );
@@ -37,7 +41,11 @@ export function makeWorld(scene, map, city) {
   );
   scene.add(ground);
   const roadMaterial = new T.MeshLambertMaterial({
-      color: textures.road ? 0xffffff : palette.road,
+      color: textures.road
+        ? 0xffffff
+        : map.style === "cozy"
+          ? 0xd9c4a5
+          : palette.road,
       map: textures.road || null,
     }),
     curbMaterial = new T.MeshLambertMaterial({ color: palette.curb });
@@ -173,13 +181,15 @@ export function makeWorld(scene, map, city) {
     batch(
       geo,
       buildingMaterials[
-        b.kind === "home"
-          ? b.id % 3
-          : b.kind === "shop"
-            ? 3
-            : b.kind === "hotel"
-              ? 4
-              : 5
+        map.style === "cozy"
+          ? b.id % colors.length
+          : b.kind === "home"
+            ? b.id % 3
+            : b.kind === "shop"
+              ? 3
+              : b.kind === "hotel"
+                ? 4
+                : 5
       ],
     );
     const xs = b.points.map((p) => p[0]),
@@ -193,12 +203,15 @@ export function makeWorld(scene, map, city) {
     });
   }
 
-  const facades = addFacades(scene, map.buildings, batch);
+  const facades = addFacades(scene, map.buildings, batch, map.style === "cozy");
 
   // Merge static geometry by material instead of issuing one draw per building.
   for (const [material, geometries] of batches) {
     const merged = mergeGeometries(geometries);
-    scene.add(new T.Mesh(merged, material));
+    const mesh = new T.Mesh(merged, material);
+    mesh.castShadow = map.style === "cozy";
+    mesh.receiveShadow = true;
+    scene.add(mesh);
     geometries.forEach((geometry) => geometry.dispose());
   }
 
@@ -229,12 +242,14 @@ export function makeWorld(scene, map, city) {
   const trunk = new T.InstancedMesh(
     new T.CylinderGeometry(0.4, 0.55, 5, 5),
     new T.MeshLambertMaterial({ color: 0x7d7050 }),
-    160,
+    220,
   );
   const crown = new T.InstancedMesh(
-    new T.IcosahedronGeometry(3.6, 0),
+    map.style === "cozy"
+      ? new T.SphereGeometry(3.6, 12, 9)
+      : new T.IcosahedronGeometry(3.6, 0),
     new T.MeshLambertMaterial({ color: 0x547d5a }),
-    160,
+    220,
   );
   const dummy = new T.Object3D();
   let count = 0;
@@ -258,7 +273,26 @@ export function makeWorld(scene, map, city) {
     dummy.updateMatrix();
     crown.setMatrixAt(count++, dummy.matrix);
   }
+  if (map.style === "cozy")
+    for (let i = 0; i < path.length && count < 220; i += 2) {
+      const [px, pz] = path[i],
+        x = px - 13,
+        z = pz;
+      const road = nearestRoad([x, z], map.roads);
+      if (
+        road.distance < road.road.width / 2 + 2 ||
+        obstacles.some((b) => insidePolygon(x, z, b.points))
+      )
+        continue;
+      dummy.position.set(x, 2.5, z);
+      dummy.updateMatrix();
+      trunk.setMatrixAt(count, dummy.matrix);
+      dummy.position.y = 6.5;
+      dummy.updateMatrix();
+      crown.setMatrixAt(count++, dummy.matrix);
+    }
   trunk.count = crown.count = count;
+  crown.castShadow = true;
   scene.add(trunk, crown);
 
   // Simple spatial hash keeps collision queries local even with thousands of footprints.

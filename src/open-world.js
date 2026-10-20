@@ -1,10 +1,29 @@
-import { createTownMap } from "./town-map.js";
+import { phnomMap, bounds, spawn, promenade } from "./phnom-map.js";
 import { insidePolygon } from "./buildings.js";
 import { nearestRoad } from "./geo.js";
 import { stepVehicle } from "./vehicle.js";
 import { VEHICLE_TYPES } from "./vehicle-catalog.js";
 export { VEHICLE_TYPES };
-export const town = createTownMap();
+export const town = phnomMap;
+const grid = new Map();
+for (const b of town.buildings) {
+  const xs = b.points.map((p) => p[0]),
+    zs = b.points.map((p) => p[1]);
+  for (
+    let x = Math.floor((Math.min(...xs) - 2) / 40);
+    x <= Math.floor((Math.max(...xs) + 2) / 40);
+    x++
+  )
+    for (
+      let z = Math.floor((Math.min(...zs) - 2) / 40);
+      z <= Math.floor((Math.max(...zs) + 2) / 40);
+      z++
+    ) {
+      const key = `${x},${z}`;
+      if (!grid.has(key)) grid.set(key, []);
+      grid.get(key).push(b);
+    }
+}
 export function nickname(value) {
   if (typeof value !== "string") return "";
   return [
@@ -21,36 +40,44 @@ export function blocked(x, z, mode = "walk") {
   if (
     !Number.isFinite(x) ||
     !Number.isFinite(z) ||
-    x < -123 ||
-    x > (mode === "drive" ? 78 : 94) ||
-    z < -153 ||
-    z > 153
+    x < bounds.min[0] + 3 ||
+    x > bounds.max[0] - 3 ||
+    z < bounds.min[1] + 3 ||
+    z > bounds.max[1] - 3
+  )
+    return true;
+  if (town.water.some((w) => insidePolygon(x, z, w.points))) return true;
+  if (
+    mode === "drive" &&
+    nearestRoad([x, z], [{ points: promenade }]).distance < 4.2
   )
     return true;
   const radius = mode === "drive" ? 1.1 : 0.35;
-  return town.buildings.some((b) => {
-    if (insidePolygon(x, z, b.points)) return true;
-    return b.points.some((a, i) => {
-      const c = b.points[(i + 1) % b.points.length],
-        dx = c[0] - a[0],
-        dz = c[1] - a[1],
-        t = Math.max(
-          0,
-          Math.min(
-            1,
-            ((x - a[0]) * dx + (z - a[1]) * dz) / (dx * dx + dz * dz || 1),
-          ),
-        );
-      return Math.hypot(x - a[0] - dx * t, z - a[1] - dz * t) < radius;
-    });
-  });
+  return (grid.get(`${Math.floor(x / 40)},${Math.floor(z / 40)}`) || []).some(
+    (b) => {
+      if (insidePolygon(x, z, b.points)) return true;
+      return b.points.some((a, i) => {
+        const c = b.points[(i + 1) % b.points.length],
+          dx = c[0] - a[0],
+          dz = c[1] - a[1],
+          t = Math.max(
+            0,
+            Math.min(
+              1,
+              ((x - a[0]) * dx + (z - a[1]) * dz) / (dx * dx + dz * dz || 1),
+            ),
+          );
+        return Math.hypot(x - a[0] - dx * t, z - a[1] - dz * t) < radius;
+      });
+    },
+  );
 }
 export function createGuest(id, name, index = 0) {
   return {
     id,
     nickname: name,
-    x: 88,
-    z: 12 + (index % 12) * 3,
+    x: spawn[0],
+    z: spawn[1] + (index % 12) * 0.4,
     heading: Math.PI,
     mode: "walk",
     speed: 0,
@@ -106,7 +133,13 @@ export function guestAction(player, action, type = "car", occupied = []) {
         !blocked(x, z, "drive") &&
         occupied.every((v) => Math.hypot(v.x - x, v.z - z) > 4)
       ) {
-        player.vehicle = { type, x, z, heading: road.heading, speed: 0 };
+        player.vehicle = {
+          type,
+          x,
+          z,
+          heading: road.heading + (road.t > 0.5 ? Math.PI : 0),
+          speed: 0,
+        };
         return null;
       }
     }
@@ -144,7 +177,8 @@ export function guestAction(player, action, type = "car", occupied = []) {
         player.x = v.x + dx;
         player.z = v.z + dz;
         player.speed = 0;
-        v.speed = 0;
+        v.speed = v.vx = v.vz = 0;
+        v.drifting = false;
         return null;
       }
     return "Park in an open spot before getting out.";

@@ -32,9 +32,54 @@ export function vehicleModel(type) {
     hub.position.copy(tire.position);
     group.add(hub);
   }
-  const car = ["sedan", "coupe", "hatch"].includes(spec.kind),
+  const car = ["sedan", "coupe", "hatch", "suv", "pickup"].includes(spec.kind),
     length = spec.length;
-  if (car) {
+  if (spec.kind === "suv" || spec.kind === "pickup") {
+    const pickup = spec.kind === "pickup",
+      ride = 0.22;
+    box(2.1, 0.75, length, 0, 1 + ride, 0, body);
+    box(
+      1.85,
+      0.7,
+      pickup ? 1.8 : 3,
+      0,
+      1.7 + ride,
+      pickup ? 0.45 : -0.2,
+      glass,
+    );
+    box(
+      1.95,
+      0.15,
+      pickup ? 1.9 : 3.1,
+      0,
+      2.12 + ride,
+      pickup ? 0.45 : -0.2,
+      body,
+    );
+    if (pickup) {
+      box(1.7, 0.05, 1.7, 0, 1.4, -1.5, dark);
+      for (const x of [-0.95, 0.95]) box(0.18, 0.4, 1.8, x, 1.5, -1.5, body);
+      box(1.9, 0.4, 0.14, 0, 1.5, -length / 2, body);
+    } else
+      for (const x of [-0.8, 0.8])
+        box(0.09, 0.12, 2.8, x, 2.3 + ride, -0.2, dark);
+    for (const x of [-0.74, 0.74]) {
+      box(0.45, 0.28, 0.08, x, 1.25, length / 2 + 0.04, lamp);
+      box(0.3, 0.45, 0.08, x, 1.2, -length / 2 - 0.04, tail);
+    }
+    box(0.9, 0.28, 0.08, 0, 1.18, length / 2 + 0.05, dark);
+    for (const x of [-1.06, 1.06])
+      for (const z of [-length * 0.31, length * 0.31]) wheel(x, z, 0.49);
+    if (spec.spare) {
+      const spare = new T.Mesh(
+        new T.CylinderGeometry(0.46, 0.46, 0.25, 12),
+        dark,
+      );
+      spare.rotation.x = Math.PI / 2;
+      spare.position.set(0, 1.25, -length / 2 - 0.1);
+      group.add(spare);
+    }
+  } else if (car) {
     const coupe = spec.kind === "coupe",
       hatch = spec.kind === "hatch";
     box(1.95, 0.65, length, 0, 0.83, 0, body);

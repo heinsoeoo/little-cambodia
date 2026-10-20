@@ -1,6 +1,35 @@
 // Shared identifiers keep the picker, renderer and multiplayer validation aligned.
 export const VEHICLES = [
   {
+    id: "cedric",
+    name: "Nissan Cedric",
+    kind: "sedan",
+    color: 0x8c9d99,
+    length: 4.8,
+  },
+  {
+    id: "land-cruiser",
+    name: "Land Cruiser",
+    kind: "suv",
+    color: 0xc9baa0,
+    length: 4.8,
+  },
+  {
+    id: "pajero",
+    name: "Pajero",
+    kind: "suv",
+    color: 0x9cae91,
+    length: 4.5,
+    spare: true,
+  },
+  {
+    id: "hilux",
+    name: "Hilux pickup",
+    kind: "pickup",
+    color: 0xc49b7a,
+    length: 5,
+  },
+  {
     id: "moto",
     name: "Motorcycle",
     kind: "bike",
@@ -61,3 +90,23 @@ export function vehicleSpec(id) {
   );
 }
 export const VEHICLE_TYPES = ["car", ...VEHICLES.map((v) => v.id)];
+
+// Arcade tuning, not manufacturer specifications. Modest differences stay easy to drive.
+const tuning = {
+  moto: [10, 26, 22, 13],
+  tuktuk: [6, 18, 18, 10],
+  rickshaw: [2.2, 7, 12, 12],
+  corolla: [9, 27, 24, 12],
+  celica: [11.5, 30, 28, 11],
+  prius: [8.5, 25, 27, 13],
+  "skyline-r34": [13, 33, 30, 10],
+  "mark-ii-1999": [10.5, 29, 23, 11],
+  cedric: [9.5, 28, 22, 12],
+  "land-cruiser": [9, 26, 21, 13],
+  pajero: [8.5, 25, 22, 13],
+  hilux: [8, 25, 21, 12],
+};
+export function vehiclePhysics(id) {
+  const [power, maxSpeed, braking, grip] = tuning[id] || tuning.corolla;
+  return { power, maxSpeed, braking, grip };
+}

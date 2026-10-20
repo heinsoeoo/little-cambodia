@@ -123,9 +123,11 @@ export function createMultiplayer(httpServer) {
           "arrowleft",
           "arrowright",
           " ",
+          "shift",
+          "b",
         ]);
         client.keys = new Set(
-          message.keys.filter((k) => allowed.has(k)).slice(0, 9),
+          message.keys.filter((k) => allowed.has(k)).slice(0, 11),
         );
         client.lastInput = now;
       } else if (message.type === "action" && now - client.lastAction > 250) {

@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Little Riverside · Phnom Life</title>
+    <title>Phnom Penh · Phnom Life</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
     <canvas id="world" aria-label="Cozy 3D open world"></canvas>
     <header>
       <a class="brand" href="#"
-        >◈ PHNOM <b>LIFE</b><small>LITTLE RIVERSIDE / OPEN WORLD</small></a
+        >◈ PHNOM <b>LIFE</b><small>PHNOM PENH / OPEN WORLD</small></a
       >
       <div class="city" id="connection">Not connected</div>
       <button id="camera" aria-label="Switch camera view">Zoom · C</button
@@ -23,6 +23,7 @@
       <p id="player-mode">Join the town to explore on foot.</p>
       <label for="vehicle-type">Personal vehicle</label
       ><select id="vehicle-type"></select
+      ><small id="vehicle-stats"></small
       ><small class="vehicle-hint"
         >Front: cream headlights · Rear: red lights</small
       ><button id="summon" disabled>Summon vehicle · F</button
@@ -51,7 +52,7 @@
       <ul id="roster" aria-label="Guests in town"></ul>
     </aside>
     <aside class="map panel">
-      <div class="map-heading">LITTLE RIVERSIDE <span>N ↑</span></div>
+      <div class="map-heading">PHNOM PENH <span>N ↑</span></div>
       <canvas
         id="map"
         width="280"
@@ -71,12 +72,21 @@
     <footer>
       <span
         >WASD / ARROWS <em>move</em> &nbsp; F <em>summon</em> &nbsp; E
-        <em>enter / exit</em> &nbsp; SPACE <em>brake</em></span
-      ><span>Little Riverside · handcrafted world</span>
+        <em>enter / exit</em> &nbsp; SPACE <em>brake</em> &nbsp; SHIFT
+        <em>handbrake / drift</em></span
+      ><span
+        ><a
+          href="https://www.openstreetmap.org/copyright"
+          target="_blank"
+          rel="noopener"
+          >© OpenStreetMap contributors</a
+        >
+        · Central Phnom Penh</span
+      >
     </footer>
     <section id="welcome" class="welcome">
       <div class="eyebrow">COME AS YOU ARE. STAY A LITTLE.</div>
-      <h1>Your town.<br /><em>Your adventure.</em></h1>
+      <h1>Your city.<br /><em>Your adventure.</em></h1>
       <p>
         Walk the city, meet other guests, and spend an evening by the river.
         Bring a vehicle when you feel like a drive.
@@ -113,7 +123,14 @@
         </button>
       </div>
       <div class="pedals">
-        <button data-key=" " class="brake" aria-label="Hold brake">BRAKE</button
+        <button
+          data-key="shift"
+          class="brake"
+          aria-label="Hold handbrake to drift"
+        >
+          DRIFT</button
+        ><button data-key=" " class="brake" aria-label="Hold brake">
+          BRAKE</button
         ><button
           data-key="arrowdown"
           id="touch-down"

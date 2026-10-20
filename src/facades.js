@@ -1,16 +1,23 @@
 import * as T from "three";
 import { tileTexture } from "./pixel-art.js";
 
-export function addFacades(scene, buildings, batch) {
+export function addFacades(scene, buildings, batch, cozy = false) {
   const roofMaterial = new T.MeshLambertMaterial({
       color: 0xb96343,
-      map: typeof document !== "undefined" ? tileTexture("roof") : null,
+      map:
+        !cozy && typeof document !== "undefined" ? tileTexture("roof") : null,
       side: T.DoubleSide,
     }),
     flatRoof = new T.MeshLambertMaterial({
       color: 0xd3aa76,
-      map: typeof document !== "undefined" ? tileTexture("roof") : null,
+      map:
+        !cozy && typeof document !== "undefined" ? tileTexture("roof") : null,
     });
+  const cozyRoofs = cozy
+    ? [0xc3947b, 0xad8b7e, 0x829e98, 0xc5af8d].map(
+        (color) => new T.MeshLambertMaterial({ color }),
+      )
+    : [];
   const glass = new T.MeshBasicMaterial({ color: 0x47616a }),
     frames = new T.MeshLambertMaterial({ color: 0xeee1c3 });
   const panes = [],
@@ -57,7 +64,7 @@ export function addFacades(scene, buildings, batch) {
       roof.rotateX(-Math.PI / 2);
       roof.translate(0, b.height + 0.13, 0);
       const triangles = roof.index ? roof.toNonIndexed() : roof;
-      batch(triangles, flatRoof);
+      batch(triangles, cozy ? cozyRoofs[b.id % cozyRoofs.length] : flatRoof);
       if (triangles !== roof) roof.dispose();
     }
     const winding =
