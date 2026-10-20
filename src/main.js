@@ -1,4 +1,5 @@
 import * as T from "three";
+import { palette } from "./pixel-art.js";
 import { CityClock, activityAt } from "./schedule.js";
 import { createStreetLife } from "./street-life.js";
 import { samplePath } from "./riverside.js";
@@ -60,29 +61,41 @@ const notify = (text, seconds = 4) => {
 };
 let renderer;
 try {
-  renderer = new T.WebGLRenderer({ canvas: $("world"), antialias: true });
+  renderer = new T.WebGLRenderer({ canvas: $("world"), antialias: false });
 } catch (e) {
   $("mission-description").textContent =
     "WebGL is unavailable. Enable hardware acceleration and reload.";
   $("toast").textContent = "Your browser could not start the 3D renderer.";
   throw e;
 }
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.6));
-renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(1);
+function resizePixelView() {
+  const scale = Math.max(2, Math.ceil(innerHeight / 270));
+  renderer.setSize(
+    Math.ceil(innerWidth / scale),
+    Math.ceil(innerHeight / scale),
+    false,
+  );
+  const half = highCamera ? 49 : 30;
+  camera.left = (-half * innerWidth) / innerHeight;
+  camera.right = (half * innerWidth) / innerHeight;
+  camera.top = half;
+  camera.bottom = -half;
+  camera.updateProjectionMatrix();
+}
 renderer.outputColorSpace = T.SRGBColorSpace;
-renderer.setClearColor(0xc7d6ca);
+renderer.setClearColor(palette.sky);
 const scene = new T.Scene();
-scene.fog = new T.Fog(0xc7d6ca, 160, 1100);
-const camera = new T.PerspectiveCamera(55, innerWidth / innerHeight, 0.2, 2200);
+scene.fog = new T.Fog(palette.sky, 350, 1400);
+const camera = new T.OrthographicCamera(-50, 50, 30, -30, 0.1, 2200);
+resizePixelView();
 const ambient = new T.HemisphereLight(0xf8f3d9, 0x45645b, 2.4);
 scene.add(ambient, routeLine);
 const sun = new T.DirectionalLight(0xffe2ac, 2.5);
 sun.position.set(-200, 300, -100);
 scene.add(sun);
 addEventListener("resize", () => {
-  renderer.setSize(innerWidth, innerHeight);
-  camera.aspect = innerWidth / innerHeight;
-  camera.updateProjectionMatrix();
+  resizePixelView();
 });
 addEventListener("keydown", (e) => {
   if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key))
@@ -91,7 +104,10 @@ addEventListener("keydown", (e) => {
   if (!e.repeat) {
     if (e.key.toLowerCase() === "e") interact();
     if (e.key.toLowerCase() === "r") reset();
-    if (e.key.toLowerCase() === "c") highCamera = !highCamera;
+    if (e.key.toLowerCase() === "c") {
+      highCamera = !highCamera;
+      resizePixelView();
+    }
     if (e.key.toLowerCase() === "p") togglePause();
     if (e.key.toLowerCase() === "v") talkToVendor();
   }
@@ -109,11 +125,11 @@ document.addEventListener("visibilitychange", () => {
 function setLighting(time) {
   const activity = activityAt(time);
   night = activity.night;
-  const color = night ? 0x182e42 : 0xc7d6ca;
+  const color = night ? palette.night : palette.sky;
   renderer.setClearColor(color);
   scene.fog.color.setHex(color);
-  ambient.intensity = night ? 0.9 : 2.4;
-  sun.intensity = night ? 0.4 : 2.5;
+  ambient.intensity = night ? 1.25 : 2.6;
+  sun.intensity = night ? 0.3 : 1.4;
   world?.facades.setNight(night);
 }
 $("time-mode").onchange = () => {
@@ -128,11 +144,13 @@ $("visit-riverside").onclick = () => {
   car.z = stop.point[1];
   car.heading = Math.PI / 2;
   car.speed = 0;
+  camera.position.set(car.x + 36, 72, car.z + 48);
   routeElapsed = 1;
   notify("Riverside access · food carts are beside the water");
 };
 $("camera").onclick = () => {
   highCamera = !highCamera;
+  resizePixelView();
 };
 $("vendor").onclick = talkToVendor;
 function talkToVendor() {
@@ -243,10 +261,10 @@ function drawMap() {
     s = mapScale,
     px = (x) => 140 + (x - mapCenter[0]) * s,
     pz = (z) => 140 + (z - mapCenter[1]) * s;
-  c.fillStyle = "#1e443c";
+  c.fillStyle = "#d3c294";
   c.fillRect(0, 0, 280, 280);
   c.lineCap = "round";
-  c.fillStyle = "#507b87";
+  c.fillStyle = "#75a5ae";
   for (const w of map.water) {
     c.beginPath();
     w.points.forEach((p, i) =>
@@ -255,7 +273,7 @@ function drawMap() {
     c.fill();
   }
   for (const r of map.roads) {
-    c.strokeStyle = "#7c9680";
+    c.strokeStyle = "#8d7656";
     c.lineWidth = Math.max(1, r.width * s);
     c.beginPath();
     r.points.forEach((p, i) =>
@@ -264,7 +282,7 @@ function drawMap() {
     c.stroke();
   }
   const t = target();
-  c.strokeStyle = "#e2efa7";
+  c.strokeStyle = "#b45940";
   c.lineWidth = 2;
   c.setLineDash(route ? [] : [3, 5]);
   c.beginPath();
@@ -319,7 +337,7 @@ async function loadCity() {
       `City ready · ${map.roads.length} roads · ${map.buildings.length} buildings`,
       5,
     );
-    camera.position.set(car.x + 60, 90, car.z + 100);
+    camera.position.set(car.x + 36, 72, car.z + 48);
   } catch (e) {
     $("mission-description").textContent = e.message;
     $("start").textContent = "City unavailable — reload to retry";
@@ -357,22 +375,12 @@ function animate(now) {
   setLighting(cityTime);
   model.position.set(car.x, 0, car.z);
   model.rotation.y = car.heading;
-  const offset = started
-    ? highCamera
-      ? new T.Vector3(0, 65, -25)
-      : new T.Vector3(
-          -Math.sin(car.heading) * 15,
-          9,
-          -Math.cos(car.heading) * 15,
-        )
-    : new T.Vector3(65, 90, 95);
-  const desired = new T.Vector3(car.x, 0, car.z).add(offset);
-  // A nearby building can occupy the space behind a narrow riverside road.
-  // Rise above the taxi instead of leaving the chase camera inside a wall.
-  if (started && world.collides(desired.x, desired.z))
-    desired.set(car.x, 24, car.z + 0.5);
-  camera.position.lerp(desired, 1 - Math.exp(-dt * 4));
-  camera.lookAt(car.x, 1.4, car.z);
+  // Fixed diagonal view keeps the map readable like a small pixel-art town.
+  const desired = new T.Vector3(car.x + 36, 72, car.z + 48);
+  camera.position.lerp(desired, 1 - Math.exp(-dt * 7));
+  camera.position.x = Math.round(camera.position.x * 4) / 4;
+  camera.position.z = Math.round(camera.position.z * 4) / 4;
+  camera.lookAt(camera.position.x - 36, 0, camera.position.z - 48);
   ring.rotation.z += dt * 0.2;
   if (!paused) {
     routeElapsed += dt;

@@ -1,10 +1,21 @@
 import * as T from "three";
+import { palette, tileTexture } from "./pixel-art.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { project, nearestRoad } from "./geo.js";
 import { insidePolygon } from "./buildings.js";
 import { addFacades } from "./facades.js";
 import { riversidePath } from "./riverside.js";
 export function makeWorld(scene, map, city) {
+  const textures =
+    typeof document === "undefined"
+      ? {}
+      : {
+          grass: tileTexture("grass"),
+          road: tileTexture("road"),
+          water: tileTexture("water"),
+          wall: tileTexture("wall"),
+        };
+  if (textures.grass) textures.grass.repeat.set(200, 200);
   const path = riversidePath(map, city);
   const westNorth = project(city.bounds[0], city.bounds[3], city.origin),
     eastSouth = project(city.bounds[2], city.bounds[1], city.origin);
@@ -13,7 +24,10 @@ export function makeWorld(scene, map, city) {
       eastSouth[0] - westNorth[0] + 1200,
       eastSouth[1] - westNorth[1] + 1200,
     ),
-    new T.MeshLambertMaterial({ color: 0xa6b58c }),
+    new T.MeshLambertMaterial({
+      color: textures.grass ? 0xffffff : palette.grass,
+      map: textures.grass || null,
+    }),
   );
   ground.rotation.x = -Math.PI / 2;
   ground.position.set(
@@ -22,15 +36,21 @@ export function makeWorld(scene, map, city) {
     (westNorth[1] + eastSouth[1]) / 2,
   );
   scene.add(ground);
-  const roadMaterial = new T.MeshLambertMaterial({ color: 0x596362 }),
-    curbMaterial = new T.MeshLambertMaterial({ color: 0xc9c6ac });
+  const roadMaterial = new T.MeshLambertMaterial({
+      color: textures.road ? 0xffffff : palette.road,
+      map: textures.road || null,
+    }),
+    curbMaterial = new T.MeshLambertMaterial({ color: palette.curb });
   const markingMaterial = new T.MeshBasicMaterial({ color: 0xe7dfb2 });
   const batches = new Map();
   const batch = (geometry, material) => {
     if (!batches.has(material)) batches.set(material, []);
     batches.get(material).push(geometry);
   };
-  const waterMaterial = new T.MeshLambertMaterial({ color: 0x568b96 });
+  const waterMaterial = new T.MeshLambertMaterial({
+    color: textures.water ? 0xffffff : palette.water,
+    map: textures.water || null,
+  });
   for (const water of map.water || []) {
     const shape = new T.Shape();
     water.points.forEach((p, i) =>
@@ -135,9 +155,9 @@ export function makeWorld(scene, map, city) {
     scene.add(mesh);
   }
   const obstacles = [];
-  const colors = [0xe0c5a2, 0xe9dbc1, 0xb9c6ba, 0xc4a58c, 0xd4c5af, 0xc9d2c1];
+  const colors = [0xf0d19b, 0xe9bd8a, 0xd4dfba, 0xcba382, 0xe9d7ac, 0xbdcbb0];
   const buildingMaterials = colors.map(
-    (color) => new T.MeshLambertMaterial({ color }),
+    (color) => new T.MeshLambertMaterial({ color, map: textures.wall || null }),
   );
   for (const b of map.buildings) {
     const shape = new T.Shape();

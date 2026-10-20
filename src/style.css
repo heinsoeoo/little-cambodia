@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
 :root {
   font-family: "DM Sans", sans-serif;
   color: #f8f7e9;
@@ -793,5 +792,268 @@ body {
   }
   .pause-card {
     padding: 20px;
+  }
+}
+
+/* Original cozy pixel-town presentation. No assets from the reference games. */
+:root {
+  font-family: "Courier New", monospace;
+  color: #513e36;
+  background: #7c9d50;
+}
+#world {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+button,
+select,
+h1,
+h2,
+.brand,
+.wallet b,
+.dash #speed {
+  font-family: "Courier New", monospace !important;
+  font-weight: 700;
+}
+.panel,
+.welcome,
+.pause-card {
+  background: #f1dbab;
+  border: 3px solid #765444;
+  border-radius: 0;
+  backdrop-filter: none;
+  box-shadow:
+    4px 4px 0 #493c3766,
+    inset 0 0 0 3px #fff0c4;
+  color: #513e36;
+}
+button {
+  border-radius: 0;
+  border: 2px solid #755340;
+  background: #d7b66e;
+  color: #4c3a33;
+  box-shadow:
+    inset 2px 2px 0 #f8e4a9,
+    inset -2px -2px 0 #ad8656;
+  transition: none;
+}
+button:hover {
+  filter: brightness(1.06);
+}
+button:active {
+  transform: translate(1px, 1px);
+}
+button:disabled {
+  opacity: 0.65;
+}
+button:focus-visible,
+select:focus-visible {
+  outline: 3px solid #bc5c3d;
+  outline-offset: 3px;
+}
+header button,
+.city {
+  border: 2px solid #74513e;
+  border-radius: 0;
+  background: #f1dbab;
+  color: #513e36;
+  box-shadow: 3px 3px 0 #493c3740;
+}
+.brand {
+  font-size: 21px;
+  color: #fff0c4;
+  text-shadow: 2px 2px 0 #594839;
+  letter-spacing: 1px;
+}
+.brand b {
+  color: #edbf6b;
+}
+.brand small {
+  color: #fff0c4;
+  letter-spacing: 1px;
+}
+.eyebrow,
+.wallet small,
+.city-life .eyebrow {
+  color: #8e5743;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+h2 {
+  font-size: 22px;
+  line-height: 1.15;
+  letter-spacing: -0.6px;
+}
+p,
+.city-life p {
+  color: #705a48;
+}
+.fare {
+  color: #8f4d39;
+}
+.mission-bottom {
+  border-color: #b99969;
+}
+.map-heading,
+.map-footer,
+.city-life label,
+.wallet > span,
+.welcome small {
+  color: #7a5f47;
+}
+.wallet b,
+.gear b {
+  color: #9c543e;
+}
+.dash small {
+  color: #80664d;
+}
+.gear {
+  border-color: #bca273;
+}
+#map {
+  image-rendering: pixelated;
+  border: 2px solid #ad8c5e;
+  border-radius: 0;
+  background: #d3c294;
+}
+.city-life strong {
+  color: #654536;
+}
+.city-life select {
+  background: #e5cb91;
+  color: #533c32;
+  border: 2px solid #a48054;
+  border-radius: 0;
+  font-size: 11px;
+}
+.welcome {
+  background: #f1dbab;
+}
+.welcome h1 {
+  font-size: 57px;
+  line-height: 1.05;
+  letter-spacing: -3px;
+  color: #604330;
+}
+.welcome h1 em {
+  color: #a95e41;
+}
+.welcome p {
+  color: #766044;
+}
+.welcome button {
+  background: #9ab071;
+  color: #344d37;
+}
+#toast {
+  border: 3px solid #79503d;
+  border-radius: 0;
+  background: #f7e5b5;
+  color: #5a4033;
+  box-shadow: 3px 3px 0 #493c3755;
+  font-weight: 700;
+}
+.pause-overlay {
+  backdrop-filter: none;
+  background: #253b395e;
+}
+.rotate-overlay {
+  background: #536f4e;
+}
+.phone-icon {
+  color: #f2d79a;
+  border-color: #f2d79a;
+  border-radius: 4px;
+}
+.rotate-card h2,
+.rotate-card p,
+.rotate-card small {
+  color: #f8e5b6;
+}
+.touch button {
+  border: 3px solid #75513f;
+  border-radius: 0;
+  background: #e8cf96;
+  color: #5b4535;
+  box-shadow:
+    inset 2px 2px 0 #fff0c4,
+    inset -2px -2px 0 #bb9868;
+}
+.touch .accelerate {
+  background: #a3ba7d;
+  color: #3d593c;
+}
+.touch .brake {
+  background: #ca9378;
+  color: #653d32;
+}
+.touch button.pressed {
+  background: #f7e7b9;
+  color: #523e33;
+  box-shadow: inset 3px 3px 0 #ad875e;
+}
+footer {
+  font-family: monospace;
+  text-shadow: 1px 1px 0 #493c37;
+}
+footer a {
+  color: #fff0c4;
+}
+@media (max-width: 950px) {
+  .brand {
+    font-size: 15px;
+  }
+  .mission h2 {
+    font-size: 16px;
+  }
+  .welcome h1 {
+    font-size: 35px;
+  }
+  .city-life select {
+    font-size: 10px;
+  }
+  .mission,
+  .city-life,
+  .map,
+  .dash {
+    border-width: 2px;
+  }
+}
+
+@media (min-width: 951px) {
+  .mission {
+    width: 244px;
+    padding: 17px;
+  }
+  .mission h2 {
+    font-size: 19px;
+  }
+  .mission p {
+    font-size: 11px;
+  }
+  .city-life {
+    width: 250px;
+    padding: 15px;
+  }
+  .map {
+    width: 210px;
+    padding: 12px;
+  }
+  #map {
+    width: 180px;
+    height: 180px;
+  }
+  .wallet {
+    left: 290px;
+  }
+  .mission-bottom {
+    padding: 13px 0;
+  }
+  .city-life strong {
+    font-size: 11px;
+  }
+  .city-life p {
+    font-size: 10px;
   }
 }

@@ -15,7 +15,7 @@ Open the address printed by Vite (normally http://127.0.0.1:5173). Click **Start
 
 - WASD / arrow keys: accelerate, reverse and steer.
 - Space: brake. E: pick up/drop off when stopped within 15 m.
-- R: return to the nearest road. C: chase/overhead camera. P: pause/resume.
+- R: return to the nearest road. C: near/wide pixel-town view. P: pause/resume.
 - Camera button: switch view. Mobile steering, accelerator, reverse and brake buttons support simultaneous fingers; pickup/drop-off uses the mission button. Portrait phones show a rotate prompt and suspend driving.
 
 Follow the lime route on the road and minimap. Navigation recalculates every second through connected OSM nodes and respects mapped one-way streets. Restricted and pedestrian-only roads are excluded. If a road connection cannot be found, the map clearly falls back to dotted direct guidance. Pause also activates when you switch away from the game. Each completed fare earns 6,000 fictional riel, saved locally in your browser. No login or backend is needed.
@@ -46,11 +46,11 @@ npm run format:check
 npm run build
 ```
 
-Serve `dist/` using any static HTTP server. Do not open index.html directly from the filesystem. Building from the lockfile with `npm ci` gives reproducible dependency versions. Runtime map data is local; optional Google Fonts fall back to installed fonts if unavailable.
+Serve `dist/` using any static HTTP server. Do not open index.html directly from the filesystem. Building from the lockfile with `npm ci` gives reproducible dependency versions. Runtime map data and all procedural pixel textures are local. The interface uses installed monospace fonts.
 
 ## Prototype limits
 
-Desktop browser smoke-tested; touch controls implemented but not verified on a physical phone. No traffic AI, walking, multiplayer, turn-by-turn navigation, sound or realistic suspension. Buildings use OSM footprints with mostly generated heights; this is stylized scenery, not an accurate architectural reconstruction. The expanded district includes the Tonlé Sap riverside and night-market access. The map edge is bounded; there is no city streaming. Collision uses a point plus 1.5 m footprint clearance, not rigid-body physics. Static geometry is merged by material into 29 mesh draws (excluding NPCs and stalls); actual frame-rate gains depend on the device. The chase camera rises above the taxi when its intended position intersects an obstacle. Broader camera handling and device performance profiling remain future work. Routing does not yet account for turn restrictions, road closures or traffic.
+Desktop browser smoke-tested; touch controls implemented but not verified on a physical phone. No traffic AI, walking, multiplayer, turn-by-turn navigation, sound or realistic suspension. Buildings use OSM footprints with mostly generated heights; this is stylized scenery, not an accurate architectural reconstruction. The expanded district includes the Tonlé Sap riverside and night-market access. The map edge is bounded; there is no city streaming. Collision uses a point plus 1.5 m footprint clearance, not rigid-body physics. Static geometry is merged by material into 29 mesh draws (excluding NPCs and stalls); actual frame-rate gains depend on the device. The fixed orthographic camera provides a diagonal town view. Tall map buildings can still occlude the taxi; broader camera handling and device performance profiling remain future work. Routing does not yet account for turn restrictions, road closures or traffic.
 
 ## Data and credits
 
@@ -71,3 +71,10 @@ Weekend market activity runs Saturday/Sunday 18:00–23:00: 240 walking NPCs plu
 The river polygon and footprints come from OSM. Building classification uses building/shop/tourism and land-use tags. Available height and level tags are honored; 4,680 buildings lack those tags and use explicitly estimated heights. Roofs, doors, windows, stall positions and NPCs are procedural representations, not street-view reconstructions. The shoreline promenade follows an offset of the mapped river bank. Whole-building geometry is supported; multipolygon courtyards and detailed roof forms remain simplified.
 
 Additional modules: `buildings.js` and `facades.js` for building metadata and detail; `schedule.js` for clock/activity; `riverside.js` for shore geometry; `street-life.js` for vendors/crowds; `mobile.js` for input and rotation logic. `scripts/convert-osm.py` prepares the official map API XML response. See `SOURCES.md` for geographic and schedule references.
+
+
+## Pixel-town art direction (v0.4)
+
+The game now uses a warm, limited-color retro presentation inspired by classic cozy farming RPGs: low-resolution WebGL enlarged with nearest-neighbor pixels, a fixed diagonal orthographic camera with two zoom levels (C), original animated pixel NPC sprites, repeated grass/roof/road/water textures, and parchment-and-wood interface panels. The physics and geographic map remain shared with the prior prototype. It is a 2.5D pixel-art treatment, not a complete conversion to a hand-authored 2D tile world or a literal 8-bit engine.
+
+All sprite frames and textures are generated locally by `src/pixel-art.js`. No artwork, sprites or fonts from Harvest Moon or Stardew Valley are used. The output resolution is based on viewport size (roughly 270 vertical game pixels or fewer), while the HTML interface remains full resolution for readability. C changes the visible world area without changing driving controls.

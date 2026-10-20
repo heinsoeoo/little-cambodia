@@ -1,4 +1,5 @@
 import * as T from "three";
+import { personTexture } from "./pixel-art.js";
 import { samplePath } from "./riverside.js";
 import { activityAt } from "./schedule.js";
 import { nearestRoad } from "./geo.js";
@@ -93,6 +94,24 @@ export function createStreetLife(scene, path, map) {
     524,
   );
   group.add(bodies, heads, legs);
+  const spriteMap = typeof document === "undefined" ? null : personTexture();
+  const pixelPeople = spriteMap
+    ? new T.InstancedMesh(
+        new T.PlaneGeometry(1.9, 2.85),
+        new T.MeshBasicMaterial({
+          map: spriteMap,
+          alphaTest: 0.5,
+          side: T.DoubleSide,
+        }),
+        262,
+      )
+    : null;
+  if (pixelPeople) {
+    group.add(pixelPeople);
+    bodies.visible = heads.visible = legs.visible = false;
+    pixelPeople.instanceMatrix.setUsage(T.DynamicDrawUsage);
+  }
+
   bodies.instanceMatrix.setUsage(T.DynamicDrawUsage);
   heads.instanceMatrix.setUsage(T.DynamicDrawUsage);
   legs.instanceMatrix.setUsage(T.DynamicDrawUsage);
@@ -103,6 +122,11 @@ export function createStreetLife(scene, path, map) {
       [0xe1b36b, 0x719caa, 0xd97869, 0x8ba77b, 0xf0d6a8, 0x927aa4][i % 6],
     );
     bodies.setColorAt(i, color);
+    if (pixelPeople)
+      pixelPeople.setColorAt(
+        i,
+        new T.Color([0xffffff, 0xffe1b3, 0xd2e8da, 0xe1d5ee][i % 4]),
+      );
   }
   const walkingSeeds = Array.from({ length: 240 }, (_, k) => {
     const sample = samplePath(path, (k * 0.61803398875) % 1);
@@ -162,6 +186,18 @@ export function createStreetLife(scene, path, map) {
         dummy.updateMatrix();
         legs.setMatrixAt(i * 2 + side, dummy.matrix);
       }
+      if (pixelPeople) {
+        dummy.position.set(point[0], 1.43, point[1]);
+        dummy.rotation.set(0, Math.atan2(36, 48), 0);
+        dummy.updateMatrix();
+        pixelPeople.setMatrixAt(i, dummy.matrix);
+      }
+    }
+    if (pixelPeople) {
+      pixelPeople.count = count;
+      pixelPeople.instanceMatrix.needsUpdate = true;
+      pixelPeople.computeBoundingSphere();
+      spriteMap.offset.x = (Math.floor(elapsed * 3) % 2) * 0.5;
     }
     bodies.count = heads.count = count;
     legs.count = count * 2;

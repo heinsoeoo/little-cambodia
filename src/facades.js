@@ -1,11 +1,16 @@
 import * as T from "three";
+import { tileTexture } from "./pixel-art.js";
 
 export function addFacades(scene, buildings, batch) {
   const roofMaterial = new T.MeshLambertMaterial({
       color: 0xb96343,
+      map: typeof document !== "undefined" ? tileTexture("roof") : null,
       side: T.DoubleSide,
     }),
-    flatRoof = new T.MeshLambertMaterial({ color: 0xa9a69a });
+    flatRoof = new T.MeshLambertMaterial({
+      color: 0xd3aa76,
+      map: typeof document !== "undefined" ? tileTexture("roof") : null,
+    });
   const glass = new T.MeshBasicMaterial({ color: 0x47616a }),
     frames = new T.MeshLambertMaterial({ color: 0xeee1c3 });
   const panes = [],
