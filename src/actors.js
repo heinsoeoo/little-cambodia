@@ -36,6 +36,71 @@ export function createActor(scene, player) {
     legs.push(leg);
     avatar.add(leg);
   }
+  const ridingLimbs = new T.Group(),
+    walkingArms = new T.Group();
+  const sleeve = new T.MeshLambertMaterial({ color: playerColor(player.id) });
+  const trousers = legs[0].material;
+  const skin = head.material;
+  function limb(parent, from, to, radius, material) {
+    const a = new T.Vector3(...from),
+      b = new T.Vector3(...to);
+    const mesh = new T.Mesh(
+      new T.CylinderGeometry(radius, radius, a.distanceTo(b), 8),
+      material,
+    );
+    mesh.position.copy(a).add(b).multiplyScalar(0.5);
+    mesh.quaternion.setFromUnitVectors(
+      new T.Vector3(0, 1, 0),
+      b.sub(a).normalize(),
+    );
+    parent.add(mesh);
+  }
+  for (const side of [-1, 1]) {
+    limb(
+      walkingArms,
+      [side * 0.28, 1.3, 0],
+      [side * 0.36, 0.65, 0],
+      0.09,
+      sleeve,
+    );
+    limb(
+      ridingLimbs,
+      [side * 0.24, 1.3, 0.04],
+      [side * 0.38, 1, 0.35],
+      0.1,
+      sleeve,
+    );
+    limb(
+      ridingLimbs,
+      [side * 0.38, 1, 0.35],
+      [side * 0.4, 0.78, 0.85],
+      0.075,
+      skin,
+    );
+    limb(
+      ridingLimbs,
+      [side * 0.22, 0.62, 0],
+      [side * 0.43, 0.3, 0.38],
+      0.11,
+      trousers,
+    );
+    limb(
+      ridingLimbs,
+      [side * 0.43, 0.3, 0.38],
+      [side * 0.43, 0.02, 0.15],
+      0.09,
+      trousers,
+    );
+    limb(
+      ridingLimbs,
+      [side * 0.43, 0.02, 0.15],
+      [side * 0.43, 0.02, 0.4],
+      0.11,
+      trousers,
+    );
+  }
+  ridingLimbs.visible = false;
+  avatar.add(ridingLimbs, walkingArms);
   avatar.traverse((o) => {
     if (o.isMesh) o.castShadow = true;
   });
@@ -58,8 +123,17 @@ export function createActor(scene, player) {
       const factor = local || distance > 15 ? 1 : 1 - Math.exp(-dt * 12);
       group.position.x += (state.x - group.position.x) * factor;
       group.position.z += (state.z - group.position.z) * factor;
-      avatar.visible = state.mode === "walk";
-      avatar.rotation.y = state.heading;
+      const riding = state.mode === "drive" && state.vehicle?.type === "moto";
+      avatar.visible = state.mode === "walk" || riding;
+      avatar.position.set(
+        riding ? -Math.sin(state.vehicle.heading) * 0.15 : 0,
+        riding ? 0.52 : 0,
+        riding ? -Math.cos(state.vehicle.heading) * 0.15 : 0,
+      );
+      avatar.rotation.y = riding ? state.vehicle.heading : state.heading;
+      ridingLimbs.visible = riding;
+      walkingArms.visible = !riding;
+      legs.forEach((leg) => (leg.visible = !riding));
       legs.forEach(
         (leg, i) =>
           (leg.rotation.x =

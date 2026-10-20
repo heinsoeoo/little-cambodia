@@ -89,20 +89,6 @@ export function vehicleModel(type) {
     box(0.32, 0.25, 0.12, 0, 1.12, front + 0.1, lamp);
     if (!tuk && !rickshaw) box(0.32, 0.15, 0.1, 0, 0.85, -0.95, tail);
   }
-  // A small cream chevron on every hood/nose makes forward direction readable from above.
-  const arrow = new T.Shape();
-  arrow.moveTo(0, 0.32);
-  arrow.lineTo(-0.24, -0.12);
-  arrow.lineTo(0, -0.02);
-  arrow.lineTo(0.24, -0.12);
-  arrow.closePath();
-  const marker = new T.Mesh(
-    new T.ShapeGeometry(arrow),
-    new T.MeshBasicMaterial({ color: 0xfff3cd, side: T.DoubleSide }),
-  );
-  marker.rotation.x = Math.PI / 2;
-  marker.position.set(0, car ? 1.23 : 1.43, car ? length / 2 - 0.5 : 0.65);
-  group.add(marker);
   group.userData.vehicleType = spec.id;
   return group;
 }

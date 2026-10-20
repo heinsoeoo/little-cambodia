@@ -77,4 +77,6 @@ The local Git repository uses `main`; no remote is configured. The procedural 3D
 
 ### Vehicle garage
 
-The shared vehicle catalog includes Motorcycle, Tuk-tuk, Cycle rickshaw, Corolla, Celica, Prius, Skyline R34 and Mark II (1999). These are simplified original models inspired by the listed vehicles. Headlights and a cream hood chevron mark the front (+Z); red tail lights mark the rear. The old `car` identifier remains supported for compatibility. All guests see the selected model through multiplayer.
+The shared vehicle catalog includes Motorcycle, Tuk-tuk, Cycle rickshaw, Corolla, Celica, Prius, Skyline R34 and Mark II (1999). These are simplified original models inspired by the listed vehicles. Cream headlights mark the front (+Z); red tail lights mark the rear. The old `car` identifier remains supported for compatibility. All guests see the selected model through multiplayer.
+
+Motorcycle drivers remain visible in a seated riding pose with hands on the handlebars and bent legs beside the bike. Dismounting restores the walking pose.
