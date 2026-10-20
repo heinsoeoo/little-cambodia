@@ -24,6 +24,7 @@ mkdir "$release"
 tar -xzf "$archive" --no-same-owner --no-same-permissions -C "$release"
 cd "$release"
 npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+chgrp -R littlecambodia "$release"
 chmod -R g+rX,o-rwx "$release"
 previous=$(readlink /opt/littlecambodia/current || true)
 ln -s "$release" /opt/littlecambodia/next
