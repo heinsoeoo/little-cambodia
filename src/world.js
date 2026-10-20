@@ -1,4 +1,6 @@
 import * as T from "three";
+import { buildingPlace } from "./places.js";
+import { addPlaceDetails } from "./place-details.js";
 import { palette, tileTexture } from "./pixel-art.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { project, nearestRoad } from "./geo.js";
@@ -182,15 +184,17 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
     batch(
       geo,
       buildingMaterials[
-        map.style === "cozy"
-          ? b.id % colors.length
-          : b.kind === "home"
-            ? b.id % 3
-            : b.kind === "shop"
-              ? 3
-              : b.kind === "hotel"
-                ? 4
-                : 5
+        buildingPlace(b)?.kind === "palace"
+          ? 0
+          : map.style === "cozy"
+            ? b.id % colors.length
+            : b.kind === "home"
+              ? b.id % 3
+              : b.kind === "shop"
+                ? 3
+                : b.kind === "hotel"
+                  ? 4
+                  : 5
       ],
     );
     const xs = b.points.map((p) => p[0]),
@@ -211,6 +215,8 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
     map.style === "cozy",
     visibility,
   );
+
+  addPlaceDetails(map.buildings, batch, visibility, map.roads);
 
   // Merge static geometry by material instead of issuing one draw per building.
   for (const [material, geometries] of batches) {

@@ -1,3 +1,4 @@
+import { places, nearestPlace } from "./places.js";
 import { createAudio } from "./audio.js";
 import { createIntro } from "./intro.js";
 import { createMobileHUD, mobileViewport } from "./mobile-hud.js";
@@ -443,6 +444,12 @@ function minimap() {
     );
     ctx.fill();
   }
+  for (const place of places.filter(
+    (p) => p.kind !== "restaurant" && p.kind !== "cafe",
+  )) {
+    ctx.fillStyle = place.kind === "palace" ? "#a26438" : "#65856a";
+    ctx.fillRect(px(place.center[0]) - 2, pz(place.center[1]) - 2, 4, 4);
+  }
   for (const p of network.players) {
     const actual = p.id === network.id && self ? self : p;
     if (p.vehicle) {
@@ -557,6 +564,9 @@ function frame(now) {
             ? "DRIFT"
             : "DRIVE"
         : "ON FOOT";
+    const place = self ? nearestPlace(self.x, self.z) : null;
+    $("place-label").textContent = place?.name || "";
+    $("place-label").hidden = !place || !joined;
     $("touch-up").textContent = self?.mode === "drive" ? "GO ↑" : "↑";
     $("touch-down").textContent = self?.mode === "drive" ? "R ↓" : "↓";
     $("road-name").textContent =

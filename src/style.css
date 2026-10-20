@@ -3114,3 +3114,32 @@ header > .feedback-link,
   background: #f3ebd8;
   text-align: center;
 }
+
+.place-label {
+  position: fixed;
+  top: 82px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 45vw;
+  padding: 8px 16px;
+  border: 1px solid #fff7;
+  border-radius: 20px;
+  background: #f8efd9e8;
+  color: #63553e;
+  font:
+    600 13px/1.3 system-ui,
+    sans-serif;
+  text-align: center;
+  pointer-events: none;
+}
+.mobile-ui .place-label {
+  top: 16px;
+  max-width: 38vw;
+  font-size: 11px;
+  padding: 6px 12px;
+}
+.ui-creating .place-label,
+.intro-active .place-label,
+.mobile-menu-open .place-label {
+  display: none;
+}

@@ -1,4 +1,5 @@
 import * as T from "three";
+import { buildingPlace } from "./places.js";
 import { tileTexture } from "./pixel-art.js";
 
 export function addFacades(scene, buildings, batch, cozy = false, visibility) {
@@ -27,14 +28,17 @@ export function addFacades(scene, buildings, batch, cozy = false, visibility) {
     doors = [];
   const object = new T.Object3D();
   for (const b of buildings) {
+    const placeKind = buildingPlace(b)?.kind;
+    const palace = placeKind === "palace";
     const points = b.points,
       center = points.reduce(
         (a, p) => [a[0] + p[0] / points.length, a[1] + p[1] / points.length],
         [0, 0],
       );
     const pitched =
-      ["gabled", "hipped", "pyramidal", "half-hipped"].includes(b.roof) &&
-      b.height < 30;
+      palace ||
+      (["gabled", "hipped", "pyramidal", "half-hipped"].includes(b.roof) &&
+        b.height < 30);
     if (pitched) {
       const vertices = [];
       for (let i = 1; i < points.length; i++) {
@@ -67,7 +71,14 @@ export function addFacades(scene, buildings, batch, cozy = false, visibility) {
       roof.rotateX(-Math.PI / 2);
       roof.translate(0, b.height + 0.13, 0);
       const triangles = roof.index ? roof.toNonIndexed() : roof;
-      batch(triangles, cozy ? cozyRoofs[b.id % cozyRoofs.length] : flatRoof);
+      batch(
+        triangles,
+        placeKind?.includes("market")
+          ? flatRoof
+          : cozy
+            ? cozyRoofs[b.id % cozyRoofs.length]
+            : flatRoof,
+      );
       if (triangles !== roof) roof.dispose();
     }
     const winding =
@@ -87,14 +98,33 @@ export function addFacades(scene, buildings, batch, cozy = false, visibility) {
       const nx = (dz / length) * winding,
         nz = (-dx / length) * winding,
         columns = Math.min(6, Math.floor(length / 3));
-      const floors = Math.min(10, Math.max(1, Math.floor(b.height / 3.2)));
+      const floors = palace
+        ? 1
+        : Math.min(10, Math.max(1, Math.floor(b.height / 3.2)));
+      if (palace) {
+        for (let col = 0; col < Math.min(14, Math.floor(length / 4)); col++) {
+          const n = Math.min(14, Math.floor(length / 4)),
+            t = (col + 0.5) / n;
+          const column = new T.BoxGeometry(
+            0.8,
+            b.height * 0.58,
+            0.8,
+          ).toNonIndexed();
+          column.translate(
+            a[0] + dx * t + nx * 0.25,
+            b.height * 0.4,
+            a[1] + dz * t + nz * 0.25,
+          );
+          batch(column, frames);
+        }
+      }
       for (let floor = 0; floor < floors; floor++)
         for (let col = 0; col < columns; col++) {
           if (panes.length >= 160000) break;
           const t = (col + 0.5) / columns;
           object.position.set(
             a[0] + dx * t + nx * 0.05,
-            1.8 + floor * 3.2,
+            palace ? b.height * 0.6 : 1.8 + floor * 3.2,
             a[1] + dz * t + nz * 0.05,
           );
           object.rotation.set(0, Math.atan2(nx, nz), 0);
