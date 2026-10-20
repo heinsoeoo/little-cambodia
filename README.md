@@ -1,4 +1,4 @@
-# Phnom Life — Central Phnom Penh (v0.9)
+# Phnom Life — Central Phnom Penh (v0.10)
 
 A guest-based multiplayer open world inspired by Phnom Penh. Enter a nickname, arrive on foot, explore the city and riverside, and summon a personal car, tuk-tuk or moto when you want to drive. Taxi missions and earnings are no longer part of the active game; jobs will be a separate later feature.
 
@@ -111,3 +111,9 @@ npm run start:lan
 The LAN launcher selects the Mac's private IPv4 address (preferring the Wi-Fi adapter), binds only that interface and prints a phone-ready URL on port 5175. Connect the phone to the same Wi-Fi, open that URL, and rotate to landscape. Use the same URL on the computer to share the same multiplayer server with the phone. Keep the process running while testing. This is local network access; no public deployment, port forwarding or firewall changes are made. The usual development server on 127.0.0.1:5173 remains separate.
 
 Male characters have lean athletic shoulders and a tapered waist; female characters have a softly fitted waist and hips. Prefer not to say uses a neutral silhouette. All are fully clothed stylized characters; every collection and hairstyle remains available to every choice.
+
+### Phone HUD and outfit cuts
+
+On touch devices (including wider landscape phones), walking shows a directional pad and contextual Summon/Enter/Get out action. Driving shows steering and pedals plus a compact speed badge. Map is optional; Menu contains vehicle selection, guest/time settings, camera, wardrobe, pause and leave actions. Menu content scrolls when needed, and movement input clears while it is open. Touch controls are hidden while choosing an outfit. The layout respects device safe areas and the visual viewport as Safari's bars change height; mobile form fields use 16px text to avoid automatic input zoom.
+
+Outfit cut defaults to **Match gender**: Male has athletic/tapered tailoring, Female has fitted waist/hem and tapered trouser/shoe proportions, and Prefer not to say uses a relaxed Unisex fit. Customize can explicitly choose Male, Female or Unisex without changing gender, collection or independently selected pieces. Clothing cuts are validated and shared by the multiplayer server.

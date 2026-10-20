@@ -1706,3 +1706,462 @@ footer {
     gap: 6px;
   }
 }
+
+/* Phone HUD: safe-area layout, one optional menu, and mode-specific thumb controls. */
+:root {
+  --game-width: 100vw;
+  --game-height: 100dvh;
+}
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overscroll-behavior: none;
+}
+#world {
+  width: var(--game-width);
+  height: var(--game-height);
+}
+.mobile-only,
+.walk-pad {
+  display: none;
+}
+.game-menu {
+  display: contents;
+}
+.mobile-menu-actions {
+  display: none;
+}
+.mobile-ui {
+  --hud-left: max(10px, env(safe-area-inset-left));
+  --hud-right: max(10px, env(safe-area-inset-right));
+  --hud-top: max(8px, env(safe-area-inset-top));
+  --hud-bottom: max(10px, env(safe-area-inset-bottom));
+}
+.mobile-ui .mobile-only {
+  display: flex;
+}
+.mobile-ui header {
+  position: fixed;
+  left: var(--hud-left);
+  right: var(--hud-right);
+  top: var(--hud-top);
+  height: 42px;
+  gap: 8px;
+  z-index: 25;
+}
+.mobile-ui header .brand {
+  font-size: 14px;
+  letter-spacing: 1px;
+  margin-right: auto;
+  text-shadow: none;
+  background: #f8efdbde;
+  border-radius: 12px;
+  padding: 7px 10px;
+}
+.mobile-ui header .brand small,
+.mobile-ui header .city {
+  display: none;
+}
+.mobile-ui header > button {
+  min-width: 48px;
+  min-height: 42px;
+  padding: 8px 12px;
+  font-size: 12px;
+  border-radius: 12px;
+}
+.mobile-ui .mobile-status {
+  position: fixed;
+  left: calc(var(--hud-left) + 10px);
+  top: calc(var(--hud-top) + 46px);
+  font:
+    11px "Trebuchet MS",
+    sans-serif;
+  color: #504838;
+  background: #f8efdbdf;
+  border-radius: 9px;
+  padding: 5px 8px;
+  max-width: 45%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 3;
+}
+.mobile-ui #game-menu {
+  display: none;
+  position: fixed;
+  left: max(var(--hud-left), calc((var(--game-width) - 680px) / 2));
+  right: max(var(--hud-right), calc((var(--game-width) - 680px) / 2));
+  top: calc(var(--hud-top) + 50px);
+  max-height: calc(
+    var(--game-height) - var(--hud-top) - var(--hud-bottom) - 60px
+  );
+  padding: 14px;
+  border-radius: 18px;
+  background: #f8f1e3fa;
+  overflow: auto;
+  overscroll-behavior: contain;
+  z-index: 24;
+  box-shadow: 0 12px 70px #3d342949;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.mobile-ui.mobile-menu-open #game-menu {
+  display: grid;
+}
+.mobile-ui .mobile-menu-heading {
+  grid-column: 1/-1;
+  align-items: center;
+  justify-content: space-between;
+  color: #5a503f;
+  font-size: 15px;
+}
+.mobile-ui #mobile-menu-close {
+  width: 42px;
+  height: 42px;
+  padding: 5px;
+}
+.mobile-ui .mobile-menu-actions {
+  grid-column: 1/-1;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.mobile-ui .mobile-menu-actions button {
+  flex: 1;
+  min-height: 42px;
+  padding: 7px;
+  font-size: 12px;
+}
+.mobile-ui #game-menu .mission,
+.mobile-ui #game-menu .city-life {
+  display: block;
+  position: static;
+  width: auto;
+  max-width: none;
+  padding: 12px;
+  margin: 0;
+  border: 1px solid #dbd0bb;
+  box-shadow: none;
+  border-radius: 12px;
+}
+.mobile-ui #game-menu .mission .eyebrow,
+.mobile-ui #game-menu .mission .job-note,
+.mobile-ui #game-menu .mission #player-mode,
+.mobile-ui #game-menu .vehicle-hint {
+  display: none;
+}
+.mobile-ui #game-menu h2 {
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+.mobile-ui #game-menu label,
+.mobile-ui #game-menu small,
+.mobile-ui #game-menu p {
+  display: block;
+  font-size: 11px;
+}
+.mobile-ui #game-menu select {
+  display: block;
+  width: 100%;
+  font-size: 16px;
+  min-height: 42px;
+  margin: 6px 0;
+}
+.mobile-ui #game-menu .mission > button,
+.mobile-ui #game-menu .life-actions button {
+  width: 100%;
+  display: block;
+  min-height: 44px;
+  margin-top: 8px;
+  font-size: 12px;
+}
+.mobile-ui #game-menu #roster {
+  max-height: 80px;
+  overflow: auto;
+  font-size: 12px;
+}
+.mobile-ui .map {
+  display: none;
+  position: fixed;
+  left: auto;
+  right: var(--hud-right);
+  top: calc(var(--hud-top) + 52px);
+  bottom: auto;
+  width: 150px;
+  padding: 8px;
+  z-index: 5;
+}
+.mobile-ui.mobile-map-open .map {
+  display: block;
+}
+.mobile-ui .map #map {
+  width: 132px;
+  height: 132px;
+  display: block;
+}
+.mobile-ui .map .map-heading {
+  font-size: 8px;
+  margin-bottom: 5px;
+}
+.mobile-ui .map .map-footer {
+  display: none;
+}
+.mobile-ui .dash {
+  display: none;
+  position: fixed;
+  left: var(--hud-left);
+  top: calc(var(--hud-top) + 77px);
+  bottom: auto;
+  width: auto;
+  min-width: 0;
+  padding: 6px 10px;
+  gap: 9px;
+  border-radius: 12px;
+  z-index: 3;
+}
+.mobile-ui[data-play-mode="drive"] .dash {
+  display: flex;
+}
+.mobile-ui .dash #speed {
+  font-size: 22px;
+  line-height: 1;
+}
+.mobile-ui .dash small {
+  font-size: 8px;
+  letter-spacing: 0;
+}
+.mobile-ui .dash .gear {
+  display: block;
+  padding-left: 8px;
+  border-left: 1px solid #c5b699;
+}
+.mobile-ui .dash .gear b {
+  font-size: 10px;
+}
+.mobile-ui .dash .gear small {
+  display: none;
+}
+.mobile-ui footer {
+  position: fixed;
+  bottom: calc(var(--hud-bottom) + 1px);
+  left: calc(50% - 95px);
+  right: auto;
+  font-size: 8px;
+  z-index: 2;
+}
+.mobile-ui footer > span:first-child {
+  display: none;
+}
+.mobile-ui footer > span:last-child {
+  display: block;
+  font-size: 8px;
+  max-width: 190px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.mobile-ui .touch {
+  display: block;
+  position: fixed;
+  inset: 0;
+  width: var(--game-width);
+  height: var(--game-height);
+  pointer-events: none;
+  z-index: 8;
+}
+.mobile-ui .touch > div {
+  position: absolute;
+  bottom: var(--hud-bottom);
+  pointer-events: auto;
+}
+.mobile-ui .touch button {
+  width: 52px;
+  height: 52px;
+  min-width: 48px;
+  min-height: 48px;
+  margin: 0;
+  padding: 5px;
+  border: 1px solid #ad9a7f80;
+  border-radius: 15px;
+  font-size: 23px;
+  touch-action: none;
+  background: #f3e5c9df;
+  box-shadow: 0 3px 0 #735e4330;
+}
+.mobile-ui .touch .walk-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 48px);
+  grid-template-rows: repeat(2, 48px);
+  gap: 5px;
+  left: var(--hud-left);
+}
+.mobile-ui .walk-pad button {
+  width: 48px;
+  height: 48px;
+}
+.mobile-ui .walk-pad button:first-child {
+  grid-column: 2;
+  grid-row: 1;
+}
+.mobile-ui .walk-pad button:nth-child(2) {
+  grid-column: 1;
+  grid-row: 2;
+}
+.mobile-ui .walk-pad button:nth-child(3) {
+  grid-column: 2;
+  grid-row: 2;
+}
+.mobile-ui .walk-pad button:nth-child(4) {
+  grid-column: 3;
+  grid-row: 2;
+}
+.mobile-ui .touch .steering,
+.mobile-ui .touch .pedals {
+  display: none;
+  gap: 8px;
+}
+.mobile-ui .touch .steering {
+  left: var(--hud-left);
+}
+.mobile-ui .touch .pedals {
+  right: var(--hud-right);
+}
+.mobile-ui[data-play-mode="drive"] .touch .walk-pad {
+  display: none;
+}
+.mobile-ui[data-play-mode="drive"] .touch .steering,
+.mobile-ui[data-play-mode="drive"] .touch .pedals {
+  display: flex;
+}
+.mobile-ui .touch .pedals button {
+  font-size: 11px;
+  width: 52px;
+  height: 56px;
+}
+.mobile-ui .touch .pedals .accelerate {
+  background: #a6ba8be8;
+  font-size: 15px;
+}
+.mobile-ui .touch .pedals .brake {
+  background: #dbad98e8;
+}
+.mobile-ui .touch button.pressed {
+  background: #b6c99b;
+  transform: translateY(2px);
+}
+.mobile-ui .mobile-context {
+  position: fixed;
+  right: var(--hud-right);
+  bottom: var(--hud-bottom);
+  gap: 8px;
+  align-items: end;
+  flex-direction: column;
+  z-index: 9;
+}
+.mobile-ui .mobile-context button {
+  min-width: 128px;
+  min-height: 50px;
+  padding: 10px 15px;
+  font-size: 13px;
+  border-radius: 15px;
+  background: #eadebfea;
+}
+.mobile-ui[data-play-mode="drive"] .mobile-context {
+  bottom: calc(var(--hud-bottom) + 70px);
+}
+.mobile-ui.mobile-menu-open .touch,
+.mobile-ui.mobile-menu-open .mobile-context,
+.mobile-ui.mobile-menu-open .map,
+.mobile-ui.mobile-menu-open .dash {
+  display: none;
+}
+.mobile-ui.ui-creating header,
+.mobile-ui.ui-creating .mobile-status,
+.mobile-ui.ui-creating .mobile-context,
+.mobile-ui.ui-creating .dash,
+.mobile-ui.ui-creating .map,
+.mobile-ui.ui-creating .touch,
+.mobile-ui.ui-creating #game-menu,
+.mobile-ui:not(.in-town) .touch,
+.mobile-ui:not(.in-town) .mobile-context {
+  display: none;
+}
+.mobile-ui #toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--hud-bottom) + 70px);
+  max-width: 46%;
+  padding: 8px 12px;
+  font-size: 11px;
+  pointer-events: none;
+  z-index: 4;
+}
+.mobile-ui .welcome.character-creator {
+  max-height: calc(var(--game-height) - 16px);
+  top: calc(var(--game-height) / 2);
+}
+@media (max-height: 350px) {
+  .mobile-ui .map {
+    width: 118px;
+  }
+  .mobile-ui .map #map {
+    width: 100px;
+    height: 100px;
+  }
+}
+/* Safari's visible height changes as its browser bars expand and collapse. */
+.mobile-ui .mobile-context {
+  bottom: calc(100% - var(--game-height) + var(--hud-bottom));
+}
+.mobile-ui[data-play-mode="drive"] .mobile-context {
+  bottom: calc(100% - var(--game-height) + var(--hud-bottom) + 70px);
+}
+.mobile-ui footer {
+  bottom: calc(100% - var(--game-height) + var(--hud-bottom) + 1px);
+}
+.mobile-ui #toast {
+  bottom: calc(100% - var(--game-height) + var(--hud-bottom) + 70px);
+}
+.mobile-ui .character-creator input,
+.mobile-ui .character-creator select {
+  font-size: 16px;
+}
+.mobile-ui #game-menu .mission > button {
+  display: none;
+}
+.mobile-ui #game-menu .mission #vehicle-stats,
+.mobile-ui #game-menu .city-life > p {
+  display: none;
+}
+.mobile-ui #game-menu .mission > small {
+  margin: 4px 0;
+  font-size: 10px;
+}
+.mobile-ui #game-menu .city-life .eyebrow {
+  display: none;
+}
+.mobile-ui #game-menu .city-life #clock {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.mobile-ui #game-menu .city-life #roster {
+  max-height: 38px;
+}
+.mobile-ui #mobile-menu-close {
+  width: 64px;
+  font-size: 12px;
+}
+@media (max-height: 320px) {
+  .mobile-ui .map {
+    width: 84px;
+    padding: 6px;
+  }
+  .mobile-ui .map #map {
+    width: 70px;
+    height: 70px;
+  }
+  .mobile-ui .map .map-heading {
+    display: none;
+  }
+}

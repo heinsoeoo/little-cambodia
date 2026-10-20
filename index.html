@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
     <title>Phnom Penh · Phnom Life</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
@@ -17,41 +20,70 @@
       ><button id="pause" disabled>Pause · P</button
       ><button id="wardrobe" disabled>Wardrobe</button
       ><button id="leave" disabled>Leave town</button>
-    </header>
-    <aside class="mission panel">
-      <div class="eyebrow">YOUR LITTLE ADVENTURE</div>
-      <h2 id="player-name">Welcome, guest</h2>
-      <p id="player-mode">Join the town to explore on foot.</p>
-      <label for="vehicle-type">Personal vehicle</label
-      ><select id="vehicle-type"></select
-      ><small id="vehicle-stats"></small
-      ><small class="vehicle-hint"
-        >Front: cream headlights · Rear: red lights</small
-      ><button id="summon" disabled>Summon vehicle · F</button
-      ><button id="interact" disabled>Enter vehicle · E</button
-      ><small id="vehicle-distance"
-        >Cream headlights face forward. Red lights mark the rear.</small
+      <button
+        id="mobile-map-toggle"
+        class="mobile-only"
+        aria-label="Show map"
+        aria-pressed="false"
       >
-      <div class="job-note">
-        Jobs are coming later.<br />For now, make the town your own.
+        Map</button
+      ><button
+        id="mobile-menu-toggle"
+        class="mobile-only"
+        aria-controls="game-menu"
+        aria-expanded="false"
+      >
+        Menu
+      </button>
+    </header>
+    <section id="game-menu" class="game-menu" aria-label="Game menu">
+      <div class="mobile-menu-heading mobile-only">
+        <strong>Take a moment</strong
+        ><button id="mobile-menu-close" aria-label="Close game menu">
+          Done
+        </button>
       </div>
-    </aside>
-    <aside class="city-life panel" aria-label="City life and time">
-      <div class="eyebrow">LIFE ALONG THE TONLÉ SAP</div>
-      <strong id="clock">Phnom Penh time</strong>
-      <p id="activity">Preparing the riverside…</p>
-      <label for="time-mode">Scenery on your screen</label
-      ><select id="time-mode">
-        <option value="now">Live · Phnom Penh</option>
-        <option value="day">Preview · weekday noon</option>
-        <option value="market">Preview · weekend market</option>
-      </select>
-      <div class="life-actions">
-        <button id="vendor" disabled>Talk to vendor · V</button>
-      </div>
-      <div class="online-heading" id="online">0 guests online</div>
-      <ul id="roster" aria-label="Guests in town"></ul>
-    </aside>
+      <div id="mobile-menu-actions" class="mobile-menu-actions"></div>
+      <aside class="mission panel">
+        <div class="eyebrow">YOUR LITTLE ADVENTURE</div>
+        <h2 id="player-name">Welcome, guest</h2>
+        <p id="player-mode">Join the town to explore on foot.</p>
+        <label for="vehicle-type">Personal vehicle</label
+        ><select id="vehicle-type"></select
+        ><small id="vehicle-stats"></small
+        ><small class="vehicle-hint"
+          >Front: cream headlights · Rear: red lights</small
+        ><button id="summon" disabled>Summon vehicle · F</button
+        ><button id="interact" disabled>Enter vehicle · E</button
+        ><small id="vehicle-distance"
+          >Cream headlights face forward. Red lights mark the rear.</small
+        >
+        <div class="job-note">
+          Jobs are coming later.<br />For now, make the town your own.
+        </div>
+      </aside>
+      <aside class="city-life panel" aria-label="City life and time">
+        <div class="eyebrow">LIFE ALONG THE TONLÉ SAP</div>
+        <strong id="clock">Phnom Penh time</strong>
+        <p id="activity">Preparing the riverside…</p>
+        <label for="time-mode">Scenery on your screen</label
+        ><select id="time-mode">
+          <option value="now">Live · Phnom Penh</option>
+          <option value="day">Preview · weekday noon</option>
+          <option value="market">Preview · weekend market</option>
+        </select>
+        <div class="life-actions">
+          <button id="vendor" disabled>Talk to vendor · V</button>
+        </div>
+        <div class="online-heading" id="online">0 guests online</div>
+        <ul id="roster" aria-label="Guests in town"></ul>
+      </aside>
+    </section>
+    <div class="mobile-status mobile-only" id="mobile-status"></div>
+    <div class="mobile-context mobile-only">
+      <button id="mobile-talk" hidden>Talk</button
+      ><button id="mobile-primary" disabled>Summon vehicle</button>
+    </div>
     <aside class="map panel">
       <div class="map-heading">PHNOM PENH <span>N ↑</span></div>
       <canvas
@@ -136,6 +168,10 @@
           </div>
           <div id="outfit-custom-fields" class="creator-fields" hidden>
             <div class="creator-field creator-wide">
+              <label for="look-cut">Outfit cut</label
+              ><select id="look-cut"></select>
+            </div>
+            <div class="creator-field creator-wide">
               <label for="look-skin">Skin tone</label
               ><select id="look-skin"></select>
             </div>
@@ -185,6 +221,12 @@
     </section>
     <div id="toast" role="status">Welcome to Little Riverside</div>
     <div class="touch" aria-label="Mobile movement controls">
+      <div class="walk-pad" aria-label="Walking directions">
+        <button data-key="arrowup" aria-label="Walk forward">↑</button
+        ><button data-key="arrowleft" aria-label="Walk left">←</button
+        ><button data-key="arrowdown" aria-label="Walk backward">↓</button
+        ><button data-key="arrowright" aria-label="Walk right">→</button>
+      </div>
       <div class="steering">
         <button data-key="arrowleft" aria-label="Move or steer left">←</button
         ><button data-key="arrowright" aria-label="Move or steer right">

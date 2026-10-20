@@ -4,6 +4,21 @@ export const GENDERS = [
   { id: "female", name: "Female" },
   { id: "unspecified", name: "Prefer not to say" },
 ];
+export const OUTFIT_CUTS = [
+  { id: "auto", name: "Match gender" },
+  { id: "male", name: "Male" },
+  { id: "female", name: "Female" },
+  { id: "unisex", name: "Unisex" },
+];
+export function outfitCut(look) {
+  return look.cut && look.cut !== "auto"
+    ? look.cut
+    : look.gender === "male"
+      ? "male"
+      : look.gender === "female"
+        ? "female"
+        : "unisex";
+}
 export const SKIN_TONES = [
   { id: "warm", name: "Warm", color: 0xd6ae8b },
   { id: "light", name: "Light", color: 0xf0cdb0 },
@@ -141,6 +156,7 @@ export function appearance(value = {}) {
     list.some((v) => v.id === id) ? id : fallback;
   return {
     gender: allowed(GENDERS, value.gender, "unspecified"),
+    cut: allowed(OUTFIT_CUTS, value.cut, "auto"),
     skin: allowed(SKIN_TONES, value.skin, "warm"),
     hair: style(value.hair).id,
     top: style(value.top).id,

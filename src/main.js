@@ -1,3 +1,4 @@
+import { createMobileHUD, mobileViewport } from "./mobile-hud.js";
 import { createWardrobe } from "./wardrobe-ui.js";
 import { createPlayerVisibility } from "./player-visibility.js";
 import { VEHICLES, vehicleSpec, vehiclePhysics } from "./vehicle-catalog.js";
@@ -16,6 +17,8 @@ const $ = (id) => document.getElementById(id),
   map = phnomMap,
   keys = new Set(),
   actors = new Map();
+let viewportWidth = innerWidth,
+  viewportHeight = innerHeight;
 let self = null,
   joined = false,
   paused = false,
@@ -68,17 +71,37 @@ function vehicleStats() {
 $("vehicle-type").addEventListener("change", vehicleStats);
 vehicleStats();
 function resize() {
+  const visual = window.visualViewport;
+  viewportWidth = Math.round(
+    visual && visual.scale <= 1.05 ? visual.width : innerWidth,
+  );
+  viewportHeight = Math.round(
+    visual && visual.scale <= 1.05 ? visual.height : innerHeight,
+  );
+  document.documentElement.style.setProperty(
+    "--game-width",
+    `${viewportWidth}px`,
+  );
+  document.documentElement.style.setProperty(
+    "--game-height",
+    `${viewportHeight}px`,
+  );
+  const coarse =
+    matchMedia("(pointer:coarse)").matches || navigator.maxTouchPoints > 0;
+  mobileHUD.resize(
+    mobileViewport({ width: viewportWidth, height: viewportHeight, coarse }),
+  );
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
-  renderer.setSize(innerWidth, innerHeight, false);
+  renderer.setSize(viewportWidth, viewportHeight, false);
   const half = highCamera ? 50 : 25;
-  camera.left = (-half * innerWidth) / innerHeight;
-  camera.right = (half * innerWidth) / innerHeight;
+  camera.left = (-half * viewportWidth) / viewportHeight;
+  camera.right = (half * viewportWidth) / viewportHeight;
   camera.top = half;
   camera.bottom = -half;
   camera.updateProjectionMatrix();
   portraitBlocked = needsRotation({
-    width: innerWidth,
-    height: innerHeight,
+    width: viewportWidth,
+    height: viewportHeight,
     coarse:
       matchMedia("(pointer:coarse)").matches ||
       navigator.maxTouchPoints > 0 ||
@@ -94,6 +117,7 @@ function stopInput() {
 }
 function pause() {
   if (!joined) return;
+  mobileHUD.closeMenu();
   paused = !paused;
   stopInput();
   $("pause-overlay").hidden = !paused;
@@ -105,6 +129,7 @@ function zoom() {
 }
 function action(name) {
   if (!self || paused || portraitBlocked || !network.id) return;
+  mobileHUD.closeMenu();
   stopInput();
   network.action(name, $("vehicle-type").value);
 }
@@ -215,9 +240,13 @@ const network = new Multiplayer((event) => {
     self = structuredClone(event.player);
     notify(
       event.action === "summon"
-        ? "Your vehicle is parked nearby. Walk over and press E to enter."
+        ? document.body.classList.contains("mobile-ui")
+          ? "Your vehicle is nearby. Walk over and tap Enter vehicle."
+          : "Your vehicle is parked nearby. Walk over and press E to enter."
         : event.action === "enter"
-          ? "Ready to drive. Press E to get out."
+          ? document.body.classList.contains("mobile-ui")
+            ? "Ready to drive. Tap Get out when parked."
+            : "Ready to drive. Press E to get out."
           : "Back on foot. Explore anywhere on land.",
     );
   }
@@ -228,7 +257,22 @@ const network = new Multiplayer((event) => {
     $("start").textContent = joined ? "Save look" : "Start game ↗";
   }
 });
+const mobileHUD = createMobileHUD({
+  clearInput: stopInput,
+  onTalk: talk,
+  onPrimary: () => {
+    if (!self) return;
+    if (self.mode === "drive") action("exit");
+    else if (
+      self.vehicle &&
+      Math.hypot(self.x - self.vehicle.x, self.z - self.vehicle.z) <= 4
+    )
+      action("enter");
+    else action("summon");
+  },
+});
 resize();
+window.visualViewport?.addEventListener("resize", resize);
 addEventListener("resize", resize);
 addEventListener("orientationchange", resize);
 $("guest-form").onsubmit = (event) => {
@@ -262,6 +306,7 @@ try {
 } catch {}
 $("wardrobe").onclick = () => {
   if (!self) return;
+  mobileHUD.closeMenu();
   stopInput();
   paused = true;
   wardrobe.load({
@@ -398,7 +443,8 @@ function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min((now - previous) / 1000, 0.1);
   previous = now;
-  const active = joined && network.id && !paused && !portraitBlocked;
+  const ready = Boolean(joined && network.id && !paused && !portraitBlocked);
+  const active = ready && !mobileHUD.isOpen;
   accumulator += dt;
   while (accumulator >= 1 / 60) {
     if (active && self) stepGuest(self, keys, 1 / 60);
@@ -444,7 +490,7 @@ function frame(now) {
         ? "On foot · wander the streets, gardens and promenade."
         : "Driving · park anywhere clear and get out to explore."
       : "Join the town to explore on foot.";
-    const can = Boolean(active && self),
+    const can = Boolean(ready && self),
       distance = self?.vehicle
         ? Math.hypot(self.x - self.vehicle.x, self.z - self.vehicle.z)
         : null;
@@ -484,6 +530,7 @@ function frame(now) {
       nearestRoad([self.x, self.z], [{ points: promenade }]).distance < 10
         ? "Riverside promenade"
         : nearestRoad([focus.x, focus.z], map.roads).road.name;
+    mobileHUD.update(self, can, !$("welcome").hidden, vendor);
     minimap();
   }
   if (now > noticeUntil) $("toast").style.opacity = 0;
@@ -492,12 +539,12 @@ function frame(now) {
   sun.target.updateMatrixWorld();
   camera.updateMatrixWorld();
   for (const actor of actors.values())
-    actor.projectLabel(camera, innerWidth, innerHeight);
+    actor.projectLabel(camera, viewportWidth, viewportHeight);
   playerVisibility.update(
     camera,
     self,
-    innerWidth,
-    innerHeight,
+    viewportWidth,
+    viewportHeight,
     renderer.getPixelRatio(),
     Boolean(joined && self),
   );

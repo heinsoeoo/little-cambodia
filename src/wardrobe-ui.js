@@ -1,6 +1,8 @@
 import * as T from "three";
 import {
   GENDERS,
+  OUTFIT_CUTS,
+  outfitCut,
   SKIN_TONES,
   STYLES,
   appearance,
@@ -19,6 +21,7 @@ export function createWardrobe() {
   }
   fill("look-gender", GENDERS, "Choose your gender");
   fill("look-skin", SKIN_TONES);
+  fill("look-cut", OUTFIT_CUTS);
   fill("look-preset", [{ id: "mix", name: "My own mix" }, ...STYLES]);
   for (const part of ["hair", "top", "bottom", "shoes"])
     fill(
@@ -57,10 +60,9 @@ export function createWardrobe() {
     return {
       appearance: appearance(
         Object.fromEntries(
-          ["gender", "skin", "hair", "top", "bottom", "shoes"].map((part) => [
-            part,
-            $(`look-${part}`).value,
-          ]),
+          ["gender", "skin", "cut", "hair", "top", "bottom", "shoes"].map(
+            (part) => [part, $(`look-${part}`).value],
+          ),
         ),
       ),
       vehicleType: $("look-vehicle").value,
@@ -121,7 +123,7 @@ export function createWardrobe() {
       vehicle.visible = mode === "main";
     }
     $("look-summary").textContent =
-      `${style(look.top).name} top · ${style(look.bottom).name} bottom · ${style(look.hair).name} hair · ${style(look.shoes).name} shoes`;
+      `${outfitCut(look)} fit · ${style(look.top).name} top · ${style(look.bottom).name} bottom · ${style(look.hair).name} hair · ${style(look.shoes).name} shoes`;
     $("look-vehicle-name").textContent = vehicleSpec(profile.vehicleType).name;
     $("outfit-open").textContent =
       ($("look-preset").value === "mix"
@@ -167,6 +169,7 @@ export function createWardrobe() {
   for (const part of [
     "gender",
     "skin",
+    "cut",
     "hair",
     "top",
     "bottom",

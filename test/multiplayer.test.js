@@ -118,6 +118,7 @@ test("mixed appearance is validated on join and later wardrobe changes reach ano
   const look = {
     gender: "female",
     skin: "tan",
+    cut: "auto",
     top: "casual",
     bottom: "street",
     hair: "punk",
@@ -144,12 +145,13 @@ test("mixed appearance is validated on join and later wardrobe changes reach ano
   a.ws.send(
     JSON.stringify({
       type: "customize",
-      appearance: { ...look, top: "luxury", shoes: "workwear" },
+      appearance: { ...look, top: "luxury", shoes: "workwear", cut: "unisex" },
       vehicleType: "pajero",
       x: 99999,
     }),
   );
   const updated = (await changed).players.find((p) => p.id === a.id);
+  assert.equal(updated.appearance.cut, "unisex");
   assert.equal(updated.appearance.bottom, "street");
   assert.equal(updated.appearance.hair, "punk");
   assert.equal(updated.appearance.shoes, "workwear");

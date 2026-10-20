@@ -1,5 +1,5 @@
 import * as T from "three";
-import { appearance, style, SKIN_TONES } from "./wardrobe.js";
+import { appearance, style, SKIN_TONES, outfitCut } from "./wardrobe.js";
 export function createCharacter(initial) {
   const group = new T.Group();
   let key = "",
@@ -36,36 +36,40 @@ export function createCharacter(initial) {
       add(new T.SphereGeometry(r, 12, 9), material, x, y, z, parent);
     const male = look.gender === "male",
       female = look.gender === "female";
-    const broad = male ? 1.16 : female ? 0.92 : 1;
+    const cut = outfitCut(look),
+      maleCut = cut === "male",
+      femaleCut = cut === "female";
+    const broad = maleCut ? 1.16 : femaleCut ? 0.92 : 1;
     const oversized = ["oversized", "hoodie"].includes(top.topShape);
     // Fully clothed adult silhouettes: athletic shoulders versus a softer fitted waist/hips.
-    const profile = oversized
-      ? [
-          [0.34, 0.64],
-          [0.37, 0.85],
-          [0.35, 1.24],
-          [0.31, 1.4],
-        ]
-      : male
+    const profile =
+      oversized && !femaleCut
         ? [
-            [0.25, 0.64],
-            [0.23, 0.85],
-            [0.34, 1.23],
-            [0.3, 1.4],
+            [0.34, 0.64],
+            [0.37, 0.85],
+            [0.35, 1.24],
+            [0.31, 1.4],
           ]
-        : female
+        : maleCut
           ? [
-              [0.32, 0.64],
-              [0.22, 0.88],
-              [0.29, 1.17],
-              [0.24, 1.4],
+              [0.25, 0.64],
+              [0.23, 0.85],
+              [0.34, 1.23],
+              [0.3, 1.4],
             ]
-          : [
-              [0.29, 0.64],
-              [0.26, 0.88],
-              [0.28, 1.23],
-              [0.25, 1.4],
-            ];
+          : femaleCut
+            ? [
+                [0.32, 0.64],
+                [0.22, 0.88],
+                [0.29, 1.17],
+                [0.24, 1.4],
+              ]
+            : [
+                [0.29, 0.64],
+                [0.26, 0.88],
+                [0.28, 1.23],
+                [0.25, 1.4],
+              ];
     const torso = add(
       new T.LatheGeometry(
         profile.map(([r, y]) => new T.Vector2(r, y)),
@@ -76,9 +80,9 @@ export function createCharacter(initial) {
       0,
       0,
     );
-    torso.scale.z = female ? 0.8 : 0.85;
+    torso.scale.z = femaleCut ? 0.8 : 0.85;
     torso.name = "clothed-torso";
-    if (male && !oversized)
+    if (maleCut && !oversized)
       for (const x of [-0.23, 0.23]) {
         const shoulder = sphere(0.14, x, 1.24, 0, cloth);
         shoulder.scale.set(1.15, 1.15, 0.9);
@@ -154,6 +158,33 @@ export function createCharacter(initial) {
       const chain = sphere(0.12, 0, 1.21, 0.29, mat(0xd3b76d));
       chain.scale.set(1, 0.6, 0.25);
     }
+    if (
+      femaleCut &&
+      ["polo", "blouse", "jacket", "vest"].includes(top.topShape)
+    ) {
+      const belt = add(
+        new T.CylinderGeometry(0.235, 0.24, 0.055, 16),
+        trim,
+        0,
+        0.88,
+        0,
+      );
+      belt.scale.z = 0.8;
+      box(0.075, 0.06, 0.025, 0, 0.88, 0.2, mat(0xc3a36e));
+    }
+    if (maleCut && ["jacket", "vest", "tee"].includes(top.topShape)) {
+      for (const x of [-0.18, 0.18]) box(0.1, 0.09, 0.035, x, 1.14, 0.25, trim);
+    }
+    if (cut === "unisex") {
+      const hem = add(
+        new T.CylinderGeometry(0.31, 0.32, 0.065, 16),
+        cloth,
+        0,
+        0.66,
+        0,
+      );
+      hem.scale.z = 0.85;
+    }
     const standing = new T.Group(),
       riding = new T.Group();
     group.add(standing, riding);
@@ -173,9 +204,9 @@ export function createCharacter(initial) {
         wide = bottom.bottomShape === "wide";
       add(
         new T.CylinderGeometry(
-          wide ? 0.14 : 0.105,
-          wide ? 0.15 : 0.1,
-          shorts ? 0.3 : 0.55,
+          wide ? 0.14 : femaleCut ? 0.115 : maleCut ? 0.12 : 0.14,
+          wide ? 0.15 : femaleCut ? 0.085 : maleCut ? 0.1 : 0.125,
+          shorts ? (femaleCut ? 0.27 : 0.33) : 0.55,
           8,
         ),
         pants,
@@ -188,13 +219,27 @@ export function createCharacter(initial) {
         add(new T.CylinderGeometry(0.08, 0.08, 0.28, 8), skin, 0, -0.4, 0, leg);
       if (bottom.bottomShape === "cargo")
         box(0.09, 0.15, 0.15, side * 0.11, -0.15, 0, pants, leg);
-      box(0.23, shoeSize, 0.36, 0, -0.57 + shoeSize / 2, 0.08, footwear, leg);
+      box(
+        femaleCut ? 0.21 : 0.25,
+        shoeSize,
+        femaleCut ? 0.33 : 0.37,
+        0,
+        -0.57 + shoeSize / 2,
+        0.08,
+        footwear,
+        leg,
+      );
       if (shoe.shoeShape === "sneakers" || shoe.shoeShape === "high-tops")
         box(0.24, 0.035, 0.37, 0, -0.58, 0.08, trim, leg);
     }
     if (bottom.bottomShape === "skirt")
       add(
-        new T.CylinderGeometry(0.3, 0.43, 0.5, 12),
+        new T.CylinderGeometry(
+          femaleCut ? 0.31 : 0.3,
+          femaleCut ? 0.46 : maleCut ? 0.35 : 0.43,
+          femaleCut ? 0.46 : 0.53,
+          12,
+        ),
         pants,
         0,
         0.44,
@@ -236,6 +281,7 @@ export function createCharacter(initial) {
     riding.visible = false;
     rig = { standing, riding, legs };
     group.userData.appearance = look;
+    group.userData.outfitCut = cut;
     group.userData.silhouette = male
       ? "lean-athletic"
       : female
