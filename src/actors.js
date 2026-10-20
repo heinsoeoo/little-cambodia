@@ -1,5 +1,5 @@
 import { createCharacter } from "./character.js";
-import { vehicleModel } from "./vehicle-model.js";
+import { vehicleModel, repaintVehicle } from "./vehicle-model.js";
 import * as T from "three";
 export function playerColor(id) {
   let hash = 0;
@@ -40,10 +40,11 @@ export function createActor(scene, player) {
           });
         }
         type = state.vehicle?.type || null;
-        vehicle = type ? vehicleModel(type) : null;
+        vehicle = type ? vehicleModel(type, state.vehicle.paint) : null;
         if (vehicle) scene.add(vehicle);
       }
       if (vehicle) {
+        repaintVehicle(vehicle, state.vehicle.paint);
         vehicle.position.set(
           state.mode === "drive" ? group.position.x : state.vehicle.x,
           0,

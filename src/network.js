@@ -70,8 +70,8 @@ export class Multiplayer {
   input(keys) {
     this.send({ type: "input", keys: [...keys] });
   }
-  action(action, vehicleType) {
-    this.send({ type: "action", action, vehicleType });
+  action(action, vehicleType, vehiclePaint) {
+    this.send({ type: "action", action, vehicleType, vehiclePaint });
   }
   disconnect() {
     this.id = null;

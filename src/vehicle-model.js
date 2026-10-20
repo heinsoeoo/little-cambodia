@@ -1,11 +1,11 @@
 import * as T from "three";
-import { vehicleSpec } from "./vehicle-catalog.js";
+import { vehicleSpec, paintColor } from "./vehicle-catalog.js";
 // All models face local +Z, matching stepVehicle's forward movement.
-export function vehicleModel(type) {
+export function vehicleModel(type, paint = "factory") {
   const spec = vehicleSpec(type),
     group = new T.Group();
   const material = (color) => new T.MeshLambertMaterial({ color });
-  const body = material(spec.color),
+  const body = material(paintColor(type, paint)),
     dark = material(0x42474c),
     glass = material(0x668e9b),
     cream = material(0xf1dfbc);
@@ -107,6 +107,35 @@ export function vehicleModel(type) {
         box(0.1, 0.4, 0.12, x, 1.35, -length / 2 + 0.25, dark);
       box(1.95, 0.12, 0.38, 0, 1.6, -length / 2 + 0.25, body);
     }
+  } else if (spec.scooter) {
+    const classic = spec.scooter === "classic";
+    wheel(0, -0.72, 0.31);
+    wheel(0, 0.76, 0.31);
+    box(0.64, 0.15, 1.25, 0, 0.47, 0, body);
+    box(0.62, 0.22, 0.92, 0, 0.96, -0.34, dark);
+    const rounded = (w, h, d, x, y, z, mat) => {
+      const mesh = new T.Mesh(new T.SphereGeometry(1, 12, 8), mat);
+      mesh.scale.set(w / 2, h / 2, d / 2);
+      mesh.position.set(x, y, z);
+      mesh.castShadow = true;
+      group.add(mesh);
+    };
+    rounded(classic ? 0.78 : 0.72, 0.72, 1.05, 0, 0.64, -0.49, body);
+    rounded(classic ? 0.72 : 0.66, 0.92, 0.32, 0, 0.85, 0.5, body);
+    box(0.12, 0.7, 0.12, 0, 1.05, 0.69, dark);
+    box(0.96, 0.09, 0.12, 0, 1.34, 0.64, dark);
+    rounded(0.34, 0.3, 0.18, 0, 1.32, 0.76, lamp);
+    rounded(0.5, 0.22, 0.48, 0, 0.57, 0.76, body);
+    box(0.3, 0.14, 0.08, 0, 0.77, -0.99, tail);
+    box(0.28, 0.12, 0.06, 0, 0.58, -1, cream);
+    if (classic)
+      for (const x of [-0.36, 0.36])
+        box(0.025, 0.055, 0.65, x, 0.68, -0.47, cream);
+    else rounded(0.44, 0.55, 0.12, 0, 0.87, 0.68, cream);
+    for (const x of [-0.47, 0.47]) {
+      box(0.035, 0.3, 0.035, x, 1.48, 0.64, dark);
+      rounded(0.18, 0.13, 0.06, x, 1.66, 0.66, cream);
+    }
   } else {
     const rickshaw = spec.kind === "rickshaw",
       tuk = spec.kind === "tuktuk";
@@ -151,5 +180,12 @@ export function vehicleModel(type) {
       box(0.035, 0.045, length * 0.7, x, 1.15, 0, chrome);
   }
   group.userData.vehicleType = spec.id;
+  group.userData.paintMaterial = body;
   return group;
+}
+
+export function repaintVehicle(model, paint) {
+  model.userData.paintMaterial.color.setHex(
+    paintColor(model.userData.vehicleType, paint),
+  );
 }

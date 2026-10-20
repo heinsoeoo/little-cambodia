@@ -3,7 +3,7 @@ export const DEFAULT_VEHICLE = "mercedes-c300";
 export const VEHICLES = [
   {
     id: DEFAULT_VEHICLE,
-    name: "Mercedes C 300 · Black",
+    name: "Mercedes C 300",
     kind: "sedan",
     color: 0x20242b,
     length: 4.7,
@@ -44,6 +44,22 @@ export const VEHICLES = [
     kind: "bike",
     color: 0xd5ad62,
     length: 2.2,
+  },
+  {
+    id: "vespa",
+    name: "Vespa",
+    kind: "bike",
+    scooter: "classic",
+    color: 0x8daea1,
+    length: 2.1,
+  },
+  {
+    id: "scoopy",
+    name: "Scoopy",
+    kind: "bike",
+    scooter: "rounded",
+    color: 0xf1dfbc,
+    length: 2,
   },
   {
     id: "tuktuk",
@@ -104,6 +120,8 @@ export const VEHICLE_TYPES = ["car", ...VEHICLES.map((v) => v.id)];
 const tuning = {
   "mercedes-c300": [11, 30, 28, 12],
   moto: [10, 26, 22, 13],
+  vespa: [7.5, 22, 24, 13],
+  scoopy: [7, 21, 25, 14],
   tuktuk: [6, 18, 18, 10],
   rickshaw: [2.2, 7, 12, 12],
   corolla: [9, 27, 24, 12],
@@ -119,4 +137,25 @@ const tuning = {
 export function vehiclePhysics(id) {
   const [power, maxSpeed, braking, grip] = tuning[id] || tuning.corolla;
   return { power, maxSpeed, braking, grip };
+}
+
+export const VEHICLE_PAINTS = [
+  { id: "factory", name: "Original paint" },
+  { id: "black", name: "Midnight black", color: 0x20242b },
+  { id: "ivory", name: "Pearl ivory", color: 0xeee4ce },
+  { id: "silver", name: "Soft silver", color: 0xaeb9bc },
+  { id: "red", name: "Terracotta red", color: 0xbc6459 },
+  { id: "blue", name: "River blue", color: 0x7097b0 },
+  { id: "green", name: "Sage green", color: 0x8eaa8c },
+  { id: "yellow", name: "Butter yellow", color: 0xe4bf74 },
+  { id: "pink", name: "Dusty rose", color: 0xd6a1ac },
+];
+export function vehiclePaint(id) {
+  return VEHICLE_PAINTS.find((p) => p.id === id)?.id || "factory";
+}
+export function paintColor(type, id) {
+  return (
+    VEHICLE_PAINTS.find((p) => p.id === vehiclePaint(id))?.color ??
+    vehicleSpec(type).color
+  );
 }

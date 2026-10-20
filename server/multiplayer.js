@@ -1,5 +1,9 @@
 import { appearance } from "../src/wardrobe.js";
-import { VEHICLE_TYPES, DEFAULT_VEHICLE } from "../src/vehicle-catalog.js";
+import {
+  VEHICLE_TYPES,
+  DEFAULT_VEHICLE,
+  vehiclePaint,
+} from "../src/vehicle-catalog.js";
 import { WebSocketServer, WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
 import {
@@ -114,6 +118,7 @@ export function createMultiplayer(httpServer) {
         )
           ? message.vehicleType
           : DEFAULT_VEHICLE;
+        client.player.preferredPaint = vehiclePaint(message.vehiclePaint);
         clearTimeout(joinTimeout);
         send(ws, {
           type: "welcome",
@@ -137,7 +142,17 @@ export function createMultiplayer(httpServer) {
         client.player.appearance = appearance(message.appearance);
         if (VEHICLE_TYPES.includes(message.vehicleType))
           client.player.preferredVehicle = message.vehicleType;
+        client.player.preferredPaint = vehiclePaint(message.vehiclePaint);
+        if (client.player.vehicle)
+          client.player.vehicle.paint = client.player.preferredPaint;
         send(ws, { type: "customized", player: client.player });
+        return;
+      }
+      if (message.type === "paint") {
+        client.player.preferredPaint = vehiclePaint(message.vehiclePaint);
+        if (client.player.vehicle)
+          client.player.vehicle.paint = client.player.preferredPaint;
+        send(ws, { type: "painted", player: client.player });
         return;
       }
       if (message.type === "input" && Array.isArray(message.keys)) {
@@ -171,6 +186,7 @@ export function createMultiplayer(httpServer) {
           message.action,
           message.vehicleType,
           occupied,
+          message.vehiclePaint ?? client.player.preferredPaint,
         );
         if (error) send(ws, { type: "error", message: error });
         else

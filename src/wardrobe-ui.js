@@ -9,9 +9,15 @@ import {
   preset,
   style,
 } from "./wardrobe.js";
-import { VEHICLES, vehicleSpec, DEFAULT_VEHICLE } from "./vehicle-catalog.js";
+import {
+  VEHICLES,
+  vehicleSpec,
+  DEFAULT_VEHICLE,
+  VEHICLE_PAINTS,
+  vehiclePaint,
+} from "./vehicle-catalog.js";
 import { createCharacter, disposeMeshes } from "./character.js";
-import { vehicleModel } from "./vehicle-model.js";
+import { vehicleModel, repaintVehicle } from "./vehicle-model.js";
 export function createWardrobe() {
   const $ = (id) => document.getElementById(id);
   function fill(id, items, placeholder) {
@@ -42,6 +48,7 @@ export function createWardrobe() {
   }
   hairOptions("unspecified");
   fill("look-vehicle", VEHICLES);
+  fill("look-paint", VEHICLE_PAINTS);
   const canvas = $("look-preview"),
     renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
@@ -76,6 +83,7 @@ export function createWardrobe() {
         ),
       ),
       vehicleType: $("look-vehicle").value,
+      vehiclePaint: vehiclePaint($("look-paint").value),
     };
   }
   function editorTab(value) {
@@ -132,6 +140,7 @@ export function createWardrobe() {
       scene.add(vehicle);
       vehicle.visible = mode === "main";
     }
+    repaintVehicle(vehicle, profile.vehiclePaint);
     $("look-summary").textContent =
       `${style(look.top).name} ${look.top === look.bottom && look.top === look.shoes ? "outfit" : "mix"} · ${hairstyle(look.hair, look.gender).name}`;
     $("look-vehicle-name").textContent = vehicleSpec(profile.vehicleType).name;
@@ -148,6 +157,7 @@ export function createWardrobe() {
     )
       ? profile.vehicleType
       : DEFAULT_VEHICLE;
+    $("look-paint").value = vehiclePaint(profile?.vehiclePaint);
     $("look-preset").value = ["top", "bottom", "hair", "shoes"].every(
       (part) => look[part] === look.top,
     )
@@ -195,6 +205,7 @@ export function createWardrobe() {
     "bottom",
     "shoes",
     "vehicle",
+    "paint",
   ])
     $(`look-${part}`).addEventListener("change", () => {
       if (part === "gender")

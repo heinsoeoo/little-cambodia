@@ -4,7 +4,13 @@ import { createIntro } from "./intro.js";
 import { createMobileHUD, mobileViewport } from "./mobile-hud.js";
 import { createWardrobe } from "./wardrobe-ui.js";
 import { createPlayerVisibility } from "./player-visibility.js";
-import { VEHICLES, vehicleSpec, vehiclePhysics } from "./vehicle-catalog.js";
+import {
+  VEHICLES,
+  vehicleSpec,
+  vehiclePhysics,
+  VEHICLE_PAINTS,
+  vehiclePaint,
+} from "./vehicle-catalog.js";
 import * as T from "three";
 import { city, phnomMap, spawn, promenade } from "./phnom-map.js";
 import { makeWorld } from "./world.js";
@@ -74,6 +80,12 @@ for (const spec of VEHICLES) {
   option.textContent = spec.name;
   $("vehicle-type").append(option);
 }
+for (const paint of VEHICLE_PAINTS)
+  $("vehicle-paint").add(new Option(paint.name, paint.id));
+$("vehicle-paint").addEventListener("change", () => {
+  if (self && network.id)
+    network.send({ type: "paint", vehiclePaint: $("vehicle-paint").value });
+});
 function vehicleStats() {
   const spec = vehiclePhysics($("vehicle-type").value);
   $("vehicle-stats").textContent =
@@ -146,7 +158,7 @@ function action(name) {
   if (!self || paused || portraitBlocked || !network.id) return;
   mobileHUD.closeMenu();
   stopInput();
-  network.action(name, $("vehicle-type").value);
+  network.action(name, $("vehicle-type").value, $("vehicle-paint").value);
 }
 function enterExit() {
   action(self?.mode === "drive" ? "exit" : "enter");
@@ -189,14 +201,30 @@ const network = new Multiplayer((event) => {
       actors.clear();
     }
   }
+  if (event.type === "painted") {
+    self.preferredPaint = event.player.preferredPaint;
+    if (self.vehicle) self.vehicle.paint = event.player.vehicle?.paint;
+    const profile = {
+      appearance: self.appearance,
+      vehicleType: $("vehicle-type").value,
+      vehiclePaint: self.preferredPaint,
+    };
+    wardrobe.save(profile);
+    network.joinOptions = profile;
+    $("vehicle-paint").value = self.preferredPaint;
+  }
   if (event.type === "customized") {
     self.appearance = event.player.appearance;
     self.preferredVehicle = event.player.preferredVehicle;
+    self.preferredPaint = event.player.preferredPaint;
+    if (self.vehicle) self.vehicle.paint = event.player.vehicle?.paint;
+    $("vehicle-paint").value = self.preferredPaint;
     $("vehicle-type").value = self.preferredVehicle;
     vehicleStats();
     const profile = {
       appearance: self.appearance,
       vehicleType: self.preferredVehicle,
+      vehiclePaint: self.preferredPaint,
     };
     wardrobe.save(profile);
     network.joinOptions = profile;
@@ -207,6 +235,7 @@ const network = new Multiplayer((event) => {
   }
   if (event.type === "welcome") {
     self = structuredClone(event.player);
+    $("vehicle-paint").value = vehiclePaint(self.preferredPaint);
     joined = true;
     paused = false;
     $("welcome").hidden = true;
@@ -255,6 +284,7 @@ const network = new Multiplayer((event) => {
   }
   if (event.type === "action") {
     self = structuredClone(event.player);
+    $("vehicle-paint").value = vehiclePaint(self.preferredPaint);
     audio.effect(event.action);
     notify(
       event.action === "summon"
@@ -324,6 +354,7 @@ $("guest-form").onsubmit = (event) => {
   } else {
     wardrobe.save(profile);
     $("vehicle-type").value = profile.vehicleType;
+    $("vehicle-paint").value = profile.vehiclePaint;
     network.connect(name, profile);
   }
 };
@@ -338,6 +369,7 @@ $("wardrobe").onclick = () => {
   wardrobe.load({
     appearance: self.appearance,
     vehicleType: $("vehicle-type").value,
+    vehiclePaint: $("vehicle-paint").value,
   });
   $("nickname").value = self.nickname;
   $("nickname").disabled = true;

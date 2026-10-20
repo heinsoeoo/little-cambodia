@@ -158,3 +158,59 @@ test("mixed appearance is validated on join and later wardrobe changes reach ano
   assert.equal(updated.preferredVehicle, "pajero");
   assert.equal(updated.x, player.x);
 });
+
+test("scooter paint is validated, shared with peers, and can change after summoning", async (t) => {
+  const server = createServer(),
+    hub = createMultiplayer(server);
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  const url = `ws://127.0.0.1:${server.address().port}/multiplayer`;
+  const a = await client(url, "Paint rider", {
+    vehicleType: "vespa",
+    vehiclePaint: "green",
+  });
+  const b = await client(url, "Paint observer");
+  t.after(async () => {
+    a.ws.terminate();
+    b.ws.terminate();
+    hub.close();
+    await new Promise((resolve) => server.close(resolve));
+  });
+  const state = await waitMessage(
+    b.ws,
+    (m) => m.type === "state" && m.players.some((p) => p.id === a.id),
+  );
+  assert.equal(
+    state.players.find((p) => p.id === a.id).preferredPaint,
+    "green",
+  );
+  const summoned = waitMessage(a.ws, (m) => m.type === "action");
+  a.ws.send(
+    JSON.stringify({
+      type: "action",
+      action: "summon",
+      vehicleType: "vespa",
+      vehiclePaint: "blue",
+    }),
+  );
+  assert.equal((await summoned).player.vehicle.paint, "blue");
+  const seen = await waitMessage(
+    b.ws,
+    (m) =>
+      m.type === "state" &&
+      m.players.some((p) => p.id === a.id && p.vehicle?.paint === "blue"),
+  );
+  assert.equal(seen.players.find((p) => p.id === a.id).vehicle.type, "vespa");
+  const painted = waitMessage(a.ws, (m) => m.type === "painted");
+  a.ws.send(JSON.stringify({ type: "paint", vehiclePaint: "pink" }));
+  assert.equal((await painted).player.vehicle.paint, "pink");
+  await waitMessage(
+    b.ws,
+    (m) =>
+      m.type === "state" &&
+      m.players.some((p) => p.id === a.id && p.vehicle?.paint === "pink"),
+  );
+  const invalid = waitMessage(a.ws, (m) => m.type === "painted");
+  a.ws.send(JSON.stringify({ type: "paint", vehiclePaint: { color: "bad" } }));
+  assert.equal((await invalid).player.vehicle.paint, "factory");
+});

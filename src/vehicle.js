@@ -7,7 +7,8 @@ export function stepVehicle(car, input, dt, collides) {
     Number(input.has("s") || input.has("arrowdown"));
   const brake = input.has(" ") || input.has("b");
   const handbrake =
-    input.has("shift") && !["moto", "rickshaw", "tuktuk"].includes(car.type);
+    input.has("shift") &&
+    !["moto", "vespa", "scoopy", "rickshaw", "tuktuk"].includes(car.type);
   car.vx ??= Math.sin(car.heading) * car.speed;
   car.vz ??= Math.cos(car.heading) * car.speed;
   const opposite =

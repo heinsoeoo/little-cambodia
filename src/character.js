@@ -322,7 +322,9 @@ export function createCharacter(initial) {
         : "neutral";
   }
   function pose(state) {
-    const riding = state.mode === "drive" && state.vehicle?.type === "moto";
+    const riding =
+      state.mode === "drive" &&
+      ["moto", "vespa", "scoopy"].includes(state.vehicle?.type);
     group.visible = state.mode === "walk" || riding;
     const heading = riding ? state.vehicle.heading : state.heading || 0;
     group.position.set(

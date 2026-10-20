@@ -3,7 +3,7 @@ import { phnomMap, bounds, spawn, promenade } from "./phnom-map.js";
 import { insidePolygon } from "./buildings.js";
 import { nearestRoad } from "./geo.js";
 import { stepVehicle } from "./vehicle.js";
-import { VEHICLE_TYPES } from "./vehicle-catalog.js";
+import { VEHICLE_TYPES, vehiclePaint } from "./vehicle-catalog.js";
 export { VEHICLE_TYPES };
 export const town = phnomMap;
 const grid = new Map();
@@ -112,7 +112,13 @@ export function stepGuest(player, keys, dt) {
   if (!blocked(player.x, player.z + dz)) player.z += dz;
   player.heading = Math.atan2(dx, dz);
 }
-export function guestAction(player, action, type = "car", occupied = []) {
+export function guestAction(
+  player,
+  action,
+  type = "car",
+  occupied = [],
+  paint = player.preferredPaint,
+) {
   if (action === "summon") {
     if (player.mode === "drive")
       return "Exit your vehicle before summoning another.";
@@ -137,6 +143,7 @@ export function guestAction(player, action, type = "car", occupied = []) {
       ) {
         player.vehicle = {
           type,
+          paint: vehiclePaint(paint),
           x,
           z,
           heading: road.heading + (road.t > 0.5 ? Math.PI : 0),
