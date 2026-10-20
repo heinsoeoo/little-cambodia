@@ -1,0 +1,40 @@
+name: Test and deploy
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: little-cambodia-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm test
+      - run: npm run build
+      - name: Deploy main to production
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$DEPLOY_SSH_KEY" || { echo 'Configure DEPLOY_SSH_KEY before deploying.' >&2; exit 1; }
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$HOME/.ssh/littlecambodia"
+          chmod 600 "$HOME/.ssh/littlecambodia"
+          trap 'rm -f "$HOME/.ssh/littlecambodia"' EXIT
+          tar -czf /tmp/littlecambodia-release.tar.gz dist server src package.json package-lock.json
+          ssh -i "$HOME/.ssh/littlecambodia" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=deploy/known_hosts -o ConnectTimeout=15 littlecambodia-deploy@149.28.153.104 "deploy $GITHUB_SHA" < /tmp/littlecambodia-release.tar.gz
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS https://little-cambodia.hexdock.dev/healthz

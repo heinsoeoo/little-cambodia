@@ -16,14 +16,20 @@ const mime = {
 };
 const server = createServer(async (req, res) => {
   try {
-    const url = new URL(req.url, "http://localhost"),
-      path = resolve(
-        root,
-        "." +
-          decodeURIComponent(
-            url.pathname === "/" ? "/index.html" : url.pathname,
-          ),
-      );
+    const url = new URL(req.url, "http://localhost");
+    if (url.pathname === "/healthz") {
+      res.writeHead(200, {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store",
+      });
+      res.end(JSON.stringify({ ok: true, game: "little-cambodia" }));
+      return;
+    }
+    const path = resolve(
+      root,
+      "." +
+        decodeURIComponent(url.pathname === "/" ? "/index.html" : url.pathname),
+    );
     if (!path.startsWith(root)) {
       res.writeHead(403);
       res.end();

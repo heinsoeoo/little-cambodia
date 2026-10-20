@@ -129,3 +129,7 @@ Gender-specific hair labels and shapes preserve existing saved hair IDs. The bla
 The intro now restarts on every reload and every replay. Use Play sound to enable the original synthesized intro melody; browsers need a user gesture to start audio. A persistent sound toggle controls music and game effects, and remembers mute preference. Game sounds include footsteps, speed-responsive engine hum, braking, summon chimes, entering/exiting, and vendor interaction. Audio pauses when the page is hidden; tap again when returning if the browser requires it. No external music files or licenses are required. The tab icon is an original Angkor Wat silhouette.
 
 With macOS Reduce Motion enabled, choose **Animate intro anyway** in the upper-right corner to enable the cinematic fades, portrait zoom and automatic transitions. The choice is saved locally. Choose **Use reduced motion** to return to manual Continue screens. This preference applies only to the game intro.
+
+## Live deployment
+
+Play at https://little-cambodia.hexdock.dev. See deploy/README.md for server operation and GitHub Actions deployment.

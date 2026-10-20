@@ -10,7 +10,7 @@ WorkingDirectory=/opt/littlecambodia/current
 Environment=NODE_ENV=production
 Environment=HOST=127.0.0.1
 Environment=PORT=5173
-ExecStart=/usr/bin/node server/index.js
+ExecStart=/usr/local/bin/node server/index.js
 Restart=on-failure
 RestartSec=3
 TimeoutStopSec=15

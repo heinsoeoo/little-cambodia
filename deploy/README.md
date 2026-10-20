@@ -1,21 +1,29 @@
-# Little Cambodia deployment
+# Production deployment
 
-Target: root@149.28.153.104
-Domain: littlecambodia.hexdock.dev
-Local SSH key: ~/.ssh/littlecambodia_deploy (private; never upload)
+Live: https://little-cambodia.hexdock.dev
+Repository: https://github.com/heinsoeoo/little-cambodia (private)
+Server: 149.28.153.104, Ubuntu 24.04, 1 GB RAM
+Initial guest cap: 16 simultaneous guests; this is a configured cap, not a load-tested capacity guarantee.
 
-## Pending access
+## Runtime
 
-Authorize ~/.ssh/littlecambodia_deploy.pub in /root/.ssh/authorized_keys through the Vultr web console or an existing trusted root session. Add a DNS A record for littlecambodia.hexdock.dev pointing to 149.28.153.104. As checked during preparation, DNS returns NXDOMAIN and the server rejects the new key.
+Node 22 from official nodejs.org binary distribution, checksum verified. nginx serves HTTPS and proxies to Node at 127.0.0.1:5173. systemd runs the game as unprivileged littlecambodia and restarts failures. Certbot handles certificate renewal. UFW permits SSH, HTTP and HTTPS; Node is not public.
 
-## Deployment plan after access
+Game sessions are in memory and reset on restart/deployment. No database is used. Releases live in /opt/littlecambodia/releases and /opt/littlecambodia/current is an atomic symlink. Deployment rolls back the symlink if the local health check fails. Old releases are kept for manual rollback; monitor disk use.
 
-1. Inspect OS, existing services, disk, memory, Node and firewall before making changes.
-2. Install a supported Node.js 22+ runtime if absent. Build locally and upload the release archive; install production dependencies on the server.
-3. Create an unprivileged littlecambodia service user and /opt/littlecambodia/releases/<release>. Point /opt/littlecambodia/current to the verified release. Keep the previous release for rollback.
-4. Install littlecambodia.service with the correct Node executable path. Keep Node bound to 127.0.0.1:5173. Restart automatically with systemd.
-5. Add the nginx site config without disturbing other sites. Validate nginx configuration before reloading.
-6. Issue an HTTPS certificate after DNS resolves. The .dev domain requires HTTPS in browsers. Verify renewal and HTTPS redirects. Allow public HTTP/HTTPS in the provider firewall if needed; preserve SSH access and all unrelated firewall rules.
-7. Verify the game loads and a same-origin secure WebSocket guest can join, summon and disconnect. Confirm the existing 16-guest cap. Do not promise higher capacity without load testing.
+## GitHub Actions
 
-The archive contains the production build, server, shared source modules and dependency lockfile. It excludes private SSH material, node_modules and Git history. No database is currently required. Restarting the service resets active guest sessions.
+The workflow tests pull requests and main, checks formatting, builds with Node 22, and deploys only successful main builds. Main deployments are serialized. Official actions are pinned to commit SHAs. GitHub needs one Actions secret, DEPLOY_SSH_KEY, containing the dedicated littlecambodia_actions private key. Never commit it. SSH host key is pinned in deploy/known_hosts.
+
+The CI key connects as littlecambodia-deploy, with a forced receiver command and no forwarding or PTY. The user may upload game releases and restart only littlecambodia.service through a specific sudoers rule; it has no root SSH access. The receiver validates commit IDs, serializes deploys and limits uploads to 50 MB. Source maintainers who can change production workflows/code can deploy game code; protect main appropriately as collaborators are added.
+
+Local administration uses ~/.ssh/littlecambodia_deploy as root. CI uses a separate ~/.ssh/littlecambodia_actions key. Keys are outside the repository.
+
+## Checks and operations
+
+curl -fsS https://little-cambodia.hexdock.dev/healthz
+systemctl status littlecambodia
+journalctl -u littlecambodia -n 100
+certbot renew --dry-run
+
+To roll back manually, replace current with a symlink to a known healthy release then restart littlecambodia.service. Use root to manage service/proxy configuration; CI intentionally cannot change those files. Bootstrap/install-release scripts document the initial server setup; do not blindly rerun them over existing production configuration.
