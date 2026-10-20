@@ -2469,7 +2469,7 @@ body {
 }
 
 .intro-playing .intro-progress {
-  animation: intro-progress 15.6s linear forwards;
+  animation: intro-progress var(--intro-duration, 50s) linear forwards;
 }
 .intro-audio {
   position: absolute;
@@ -2998,5 +2998,41 @@ body.ui-creating header {
   }
   .character-creator.creator-detail #outfit-editor {
     max-height: calc(var(--game-height, 100dvh) - 155px);
+  }
+}
+
+.intro-khmer {
+  font-family: "Khmer Sangam MN", "Khmer MN", "Noto Sans Khmer", sans-serif;
+}
+.intro-card.intro-khmer h1 {
+  font-family: inherit;
+  font-size: clamp(24px, 3.5vw, 42px);
+  line-height: 1.75;
+  letter-spacing: 0;
+}
+.intro-card.intro-khmer h1 em {
+  font-style: normal;
+}
+.intro-card.intro-khmer .intro-kicker {
+  font-family: inherit;
+  letter-spacing: 0;
+  line-height: 1.8;
+}
+.intro-card.intro-khmer > p:last-child:not(.intro-kicker) {
+  font-family: inherit;
+  font-size: clamp(13px, 1.6vw, 17px);
+  line-height: 1.9;
+}
+@media (max-height: 500px) {
+  .intro-card.intro-khmer h1 {
+    font-size: clamp(20px, 2.6vw, 29px);
+    line-height: 1.7;
+  }
+  .intro-card.intro-khmer > p:last-child:not(.intro-kicker) {
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  .intro-card.intro-khmer .intro-kicker {
+    margin-bottom: 8px;
   }
 }

@@ -1,11 +1,16 @@
-// Original synthesized score and effects: no downloads or external audio assets.
+// User-provided intro song plus original synthesized game effects.
 export function createAudio() {
   let ctx,
     master,
     music,
     engine,
     engineGain,
-    timer,
+    songBuffer,
+    songLoading,
+    songSource,
+    songOffset = 0,
+    songStarted = 0,
+    introMusic = false,
     intro = false,
     muted = false;
   let step = 0,
@@ -52,34 +57,51 @@ export function createAudio() {
       envelope.disconnect();
     };
   }
-  function phrase() {
-    if (!ctx || !intro || muted || document.hidden || ctx.state !== "running")
-      return;
-    const now = ctx.currentTime + 0.03;
-    const melody = [
-      261.63, 329.63, 392, 329.63, 293.66, 349.23, 440, 392, 329.63, 392,
-      523.25, 440, 349.23, 329.63, 293.66, 261.63,
-    ];
-    melody.forEach((note, i) =>
-      tone(note, now + i * 0.45, 1.5, 0.13, music, "sine"),
-    );
-    [130.81, 146.83, 164.81, 130.81].forEach((note, i) => {
-      tone(note, now + i * 1.8, 2.2, 0.09, music);
-      tone(note * 1.5, now + i * 1.8, 2.1, 0.035, music);
-    });
+  function stopSong(reset = false) {
+    if (songSource) {
+      songOffset = reset
+        ? 0
+        : (songOffset + ctx.currentTime - songStarted) % songBuffer.duration;
+      songSource.stop();
+      songSource.disconnect();
+      songSource = null;
+    }
+    if (reset) songOffset = 0;
   }
   function score() {
-    clearInterval(timer);
     if (!ctx) return;
-    music.gain.cancelScheduledValues(ctx.currentTime);
-    music.gain.setTargetAtTime(
-      intro && !muted && !document.hidden ? 0.65 : 0,
-      ctx.currentTime,
-      0.25,
-    );
-    if (intro && !muted && !document.hidden) {
-      phrase();
-      timer = setInterval(phrase, 7200);
+    const playing =
+      intro &&
+      introMusic &&
+      !muted &&
+      !document.hidden &&
+      ctx.state === "running";
+    music.gain.setTargetAtTime(playing ? 0.8 : 0, ctx.currentTime, 0.12);
+    if (!playing) {
+      stopSong();
+      return;
+    }
+    if (songBuffer && !songSource) {
+      songSource = ctx.createBufferSource();
+      songSource.buffer = songBuffer;
+      songSource.loop = true;
+      songSource.connect(music);
+      songStarted = ctx.currentTime;
+      songSource.start(0, songOffset);
+    }
+  }
+  async function loadSong() {
+    if (songBuffer || songLoading) return;
+    songLoading = true;
+    try {
+      const response = await fetch("/audio/intro-song.mp3");
+      if (!response.ok) throw new Error("Song unavailable");
+      songBuffer = await ctx.decodeAudioData(await response.arrayBuffer());
+      score();
+    } catch {
+      /* Audio loading must never block the cinematic or gameplay. */
+    } finally {
+      songLoading = false;
     }
   }
   async function unlock() {
@@ -103,9 +125,9 @@ export function createAudio() {
         engine.connect(engineGain);
         engine.start();
       }
-      const wasRunning = ctx.state === "running";
       await ctx.resume();
-      if (!wasRunning || !timer) score();
+      void loadSong();
+      score();
       labels();
     } catch {
       /* A blocked audio device must never stop the game. */
@@ -131,14 +153,21 @@ export function createAudio() {
   document.addEventListener("keydown", () => void unlock());
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
-      clearInterval(timer);
+      stopSong();
       void ctx?.suspend();
     } else labels();
   });
   labels();
   return {
     setIntro(value) {
+      stopSong(true);
       intro = value;
+      introMusic = false;
+      score();
+    },
+    setIntroCard(index) {
+      introMusic = index >= 1;
+      if (!introMusic) stopSong(true);
       score();
     },
     effect(name) {

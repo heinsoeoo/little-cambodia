@@ -126,10 +126,14 @@ Gender-specific hair labels and shapes preserve existing saved hair IDs. The bla
 
 ## Intro playback and sound
 
-The intro now restarts on every reload and every replay. Use Play sound to enable the original synthesized intro melody; browsers need a user gesture to start audio. A persistent sound toggle controls music and game effects, and remembers mute preference. Game sounds include footsteps, speed-responsive engine hum, braking, summon chimes, entering/exiting, and vendor interaction. Audio pauses when the page is hidden; tap again when returning if the browser requires it. No external music files or licenses are required. The tab icon is an original Angkor Wat silhouette.
+The intro now restarts on every reload and every replay. Use Play sound to enable the user-provided intro song; browsers need a user gesture to start audio. A persistent sound toggle controls music and game effects, and remembers mute preference. Game sounds include footsteps, speed-responsive engine hum, braking, summon chimes, entering/exiting, and vendor interaction. Audio pauses when the page is hidden; tap again when returning if the browser requires it. The intro song is the user-provided MP3 in public/audio; game effects remain synthesized. The tab icon is an original Angkor Wat silhouette.
 
 With macOS Reduce Motion enabled, choose **Animate intro anyway** in the upper-right corner to enable the cinematic fades, portrait zoom and automatic transitions. The choice is saved locally. Choose **Use reduced motion** to return to manual Continue screens. This preference applies only to the game intro.
 
 ## Live deployment
 
 Play at https://little-cambodia.hexdock.dev. See deploy/README.md for server operation and GitHub Actions deployment.
+
+## English and Khmer cinematic
+
+The opening lasts 50 seconds with paired English/Khmer story, love-note and credit slides. Reading times are 5s portrait, 9s English story, 12s Khmer story, 6s English love note, 7s Khmer love note, 5s English credit and 6s Khmer credit. The user-provided song starts at the portrait-to-first-text transition, from the beginning of the song. Audio still requires a tap to unlock in browsers. Skip/finish stops it; replay resets it; mute pauses/resumes it. Reduced-motion mode uses Continue on the same slides.

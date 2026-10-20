@@ -283,6 +283,7 @@ const intro = createIntro({
     audio.setIntro(true);
   },
   onClose: () => audio.setIntro(false),
+  onCard: (index) => audio.setIntroCard(index),
 });
 resize();
 window.visualViewport?.addEventListener("resize", resize);

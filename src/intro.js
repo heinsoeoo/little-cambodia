@@ -1,4 +1,8 @@
-export function createIntro({ onOpen = () => {}, onClose = () => {} } = {}) {
+export function createIntro({
+  onOpen = () => {},
+  onClose = () => {},
+  onCard = () => {},
+} = {}) {
   const overlay = document.getElementById("intro"),
     button = document.getElementById("intro-skip"),
     motionButton = document.getElementById("intro-motion"),
@@ -27,6 +31,7 @@ export function createIntro({ onOpen = () => {}, onClose = () => {} } = {}) {
   }
   function card(index) {
     current = index;
+    onCard(index);
     cards.forEach((element, i) => {
       element.classList.toggle("is-active", i === index);
       element.setAttribute("aria-hidden", String(i !== index));
@@ -56,12 +61,17 @@ export function createIntro({ onOpen = () => {}, onClose = () => {} } = {}) {
     if (isStatic()) {
       return;
     }
-    timers.push(
-      setTimeout(() => card(1), 4400),
-      setTimeout(() => card(2), 9100),
-      setTimeout(() => card(3), 12400),
-      setTimeout(finish, 15600),
-    );
+    let elapsed = 0;
+    cards.forEach((element, index) => {
+      elapsed += Number(element.dataset?.duration) || 5000;
+      timers.push(
+        setTimeout(
+          index === cards.length - 1 ? finish : () => card(index + 1),
+          elapsed,
+        ),
+      );
+    });
+    overlay.style?.setProperty("--intro-duration", `${elapsed}ms`);
   }
   button.onclick = () => {
     if (isStatic() && current < cards.length - 1) card(current + 1);

@@ -96,3 +96,7 @@ Restricted CI receiver was tested with its dedicated SSH key; a group-permission
 ## Cozy mobile setup redesign
 
 Warm cream/sage welcome with clearer field hierarchy, full-width vehicle selection, shorter preview summary, landscape-specific canvas framing, and a footer with sound/dedication controls. Sound moves into the in-game menu/header after joining. Corrected intrinsic canvas flex growth that pushed the primary action off screen. Short landscape controls and independently scrolling outfit choices preserve navigation access. Verified browser layouts at 1024×420, 1024×348, and 932×300; main setup at 1024×348 has equal scroll/client height. Physical iPhone not available in automation. Build and all 44 tests pass.
+
+## Bilingual intro soundtrack
+
+User MP3 copied unchanged (50.8s, stereo 44.1kHz). Seven cards total 50s; Khmer story receives 12s. New audio regression test verifies portrait silence, first-text start, continuous music across language changes, mute, finish and replay reset. Intro test verifies all seven scheduled boundaries. Local browser verified manual English-to-Khmer progression and Khmer glyphs/line spacing at 1024×348. Audio perception requires listening on the actual device; browser automation has no audible monitoring.

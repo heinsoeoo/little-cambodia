@@ -22,7 +22,10 @@ test("reload and replay always restart the portrait and cancel old scene timers"
     addEventListener() {},
     offsetWidth: 1,
   });
-  const cards = Array.from({ length: 4 }, element),
+  const cards = Array.from({ length: 7 }, (_, index) => ({
+      ...element(),
+      dataset: { duration: [5000, 9000, 12000, 6000, 7000, 5000, 6000][index] },
+    })),
     overlay = element(),
     skip = element(),
     replay = element(),
@@ -49,18 +52,26 @@ test("reload and replay always restart the portrait and cancel old scene timers"
   };
   globalThis.clearTimeout = (id) => pending.delete(id);
   try {
+    const stages = [];
     const intro = createIntro({
+      onCard: (index) => stages.push(index),
       onOpen: () => opens++,
       onClose: () => closes++,
     });
     assert.equal(intro.active, true);
+    assert.deepEqual(
+      [...pending.values()].map((timer) => timer.delay),
+      [5000, 14000, 26000, 32000, 39000, 44000, 50000],
+    );
+    assert.deepEqual(stages, [0]);
     assert.equal(cards[0]["aria-hidden"], "false");
-    assert.equal(pending.size, 4);
+    assert.equal(pending.size, 7);
     pending.values().next().value.fn();
     assert.equal(cards[1]["aria-hidden"], "false");
+    assert.deepEqual(stages, [0, 1]);
     replay.onclick();
     assert.equal(cards[0]["aria-hidden"], "false");
-    assert.equal(pending.size, 4);
+    assert.equal(pending.size, 7);
     skip.onclick();
     assert.equal(pending.size, 0);
     assert.equal(intro.active, false);
@@ -82,14 +93,14 @@ test("reload and replay always restart the portrait and cancel old scene timers"
     assert.equal(skip.textContent, "Continue →");
     assert.equal(motion.hidden, false);
     motion.onclick();
-    assert.equal(pending.size, 4);
+    assert.equal(pending.size, 7);
     assert.equal(skip.textContent, "Skip intro →");
     assert.equal(preferences.get("phnom-intro-animate"), "1");
     pending.clear();
     createIntro();
     assert.equal(
       pending.size,
-      4,
+      7,
       "reload retains the explicit animation choice",
     );
     motion.onclick();
