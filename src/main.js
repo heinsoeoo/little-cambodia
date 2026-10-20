@@ -1,4 +1,5 @@
 import { places, nearestPlace } from "./places.js";
+import { createBrowserNotice, needsBrowserNotice } from "./browser-notice.js";
 import { createAudio } from "./audio.js";
 import { createIntro } from "./intro.js";
 import { createMobileHUD, mobileViewport } from "./mobile-hud.js";
@@ -319,7 +320,14 @@ const mobileHUD = createMobileHUD({
     else action("summon");
   },
 });
+let tipStorage;
+try {
+  tipStorage = sessionStorage;
+} catch {
+  tipStorage = { getItem: () => null };
+}
 const intro = createIntro({
+  autoplay: !needsBrowserNotice(navigator.userAgent, tipStorage),
   onOpen: () => {
     stopInput();
     audio.setIntro(true);
@@ -358,6 +366,7 @@ $("guest-form").onsubmit = (event) => {
     network.connect(name, profile);
   }
 };
+createBrowserNotice({ onContinue: () => intro.play() });
 try {
   $("nickname").value = localStorage.getItem("riverside-nickname") || "";
 } catch {}

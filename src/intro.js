@@ -2,6 +2,7 @@ export function createIntro({
   onOpen = () => {},
   onClose = () => {},
   onCard = () => {},
+  autoplay = true,
 } = {}) {
   const overlay = document.getElementById("intro"),
     button = document.getElementById("intro-skip"),
@@ -99,8 +100,12 @@ export function createIntro({
       ]?.focus();
     }
   });
-  /* Always begin at the portrait, including reloads and replay. */
-  play();
+  /* Begin after the external-browser tip when Facebook embeds the game. */
+  if (autoplay) play();
+  else {
+    overlay.hidden = true;
+    document.body.classList.remove("intro-active");
+  }
   return {
     play,
     get active() {

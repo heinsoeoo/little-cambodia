@@ -11,6 +11,40 @@
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body class="intro-active">
+    <section
+      id="browser-notice"
+      class="browser-notice"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="browser-title"
+    >
+      <div class="browser-notice-card">
+        <span class="eyebrow">A LITTLE TIP BEFORE YOU EXPLORE</span>
+        <h1 id="browser-title">A better view of your little world.</h1>
+        <p>
+          Facebook’s built-in browser may keep the game upright. Open Little
+          Cambodia in Safari or Chrome for landscape play.
+        </p>
+        <ol>
+          <li>Tap <b>⋯</b> or <b>Share</b> in Facebook’s browser.</li>
+          <li>
+            Choose <b>Open in browser</b>, <b>Safari</b>, or <b>Chrome</b>.
+          </li>
+          <li>Turn your phone sideways. If needed, turn off rotation lock.</li>
+        </ol>
+        <button id="browser-copy" type="button">Copy game link ↗</button>
+        <input
+          id="browser-link"
+          aria-label="Game link to copy"
+          readonly
+          hidden
+          value="https://little-cambodia.hexdock.dev/"
+        />
+        <p id="browser-copy-status" role="status"></p>
+        <button id="browser-continue" type="button">Continue here</button>
+      </div>
+    </section>
     <canvas id="world" aria-label="Cozy 3D open world"></canvas>
     <header>
       <a class="brand" href="#"
@@ -308,7 +342,11 @@
           Little Riverside plays in landscape.<br />Turn your phone sideways to
           explore.
         </p>
-        <small>If the screen stays vertical, turn off rotation lock.</small>
+        <small
+          >If the screen stays vertical, turn off rotation lock. Opened from
+          Facebook? Use its ⋯ or Share menu to open this link in Safari or
+          Chrome.</small
+        >
       </div>
     </section>
     <section
