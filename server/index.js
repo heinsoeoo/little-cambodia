@@ -11,6 +11,8 @@ const mime = {
   ".json": "application/json",
   ".jpg": "image/jpeg",
   ".png": "image/png",
+  ".svg": "image/svg+xml",
+  ".ico": "image/x-icon",
 };
 const server = createServer(async (req, res) => {
   try {

@@ -1,0 +1,25 @@
+[Unit]
+Description=Little Cambodia multiplayer game
+After=network.target
+
+[Service]
+Type=simple
+User=littlecambodia
+Group=littlecambodia
+WorkingDirectory=/opt/littlecambodia/current
+Environment=NODE_ENV=production
+Environment=HOST=127.0.0.1
+Environment=PORT=5173
+ExecStart=/usr/bin/node server/index.js
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=15
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
