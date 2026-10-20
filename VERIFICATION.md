@@ -86,3 +86,9 @@ Production build passes. Existing 42 tests pass; the added gender-specific hairs
 ## Intro motion override
 
 Build and intro regression test pass. Tested reduced-motion default, animation opt-in, saved preference on reload, and switching back with timers cancelled. Browser confirmed Animate intro anyway becomes Use reduced motion and Continue becomes Skip intro; preference survives reload while macOS reduced motion remains enabled.
+
+## Vultr launch, 20 October 2026
+
+Public HTTPS game at https://little-cambodia.hexdock.dev. HTTP redirects to HTTPS. Certificate renewal timer enabled. App runs as unprivileged systemd service. Production health check, secure WebSocket guest join and Mercedes summoning pass. Browser joined as Launch check. 44 local tests pass. Repository created private at heinsoeoo/little-cambodia and all commits pushed. CI tests/format/build ran; deployment awaits repository DEPLOY_SSH_KEY approval/configuration.
+
+Restricted CI receiver was tested with its dedicated SSH key; a group-permission failure triggered rollback, was corrected with chgrp, and the fresh release then passed. Arbitrary shell command rejected. Server idle process memory approximately 43 MB; no concurrent-player load test performed.
