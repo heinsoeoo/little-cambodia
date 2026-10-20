@@ -87,3 +87,9 @@ Motorcycle drivers remain visible in a seated riding pose with hands on the hand
 Vehicle power, maximum speed, braking and grip are modest arcade values, not real manufacturer specs. Regular brakes reduce velocity to zero without reversing or creeping under throttle. The car handbrake reduces lateral grip, lets momentum slide through a turn and regains grip when released. Two/three-wheel vehicles keep stable handling. Shared velocity state is authoritative on the multiplayer server. Collision substeps prevent high-speed tunnelling.
 
 Run `npm run map:build` to regenerate `src/phnom-map-data.json` from the retained OSM extract. Coordinates are rounded to centimetres. The source extract and derivative are distributed under ODbL with attribution.
+
+### Road clearance and player visibility
+
+The runtime omits 836 source footprints that intersect the widened driveable road corridors, leaving 4,006 buildings. Rendering, minimap and multiplayer collisions share this filtered map. Original OSM records and generated source coordinates remain intact; these omissions are a gameplay adjustment, not an assertion about real buildings.
+
+A feathered screen-space cutaway opens through walls, roofs, windows and doors directly between the camera and your character/vehicle. The center is clear so the player stays visible; the edge softens the opening. Buildings outside that area keep their usual appearance and shadows. It follows the local player while walking or driving and switches off when you leave.

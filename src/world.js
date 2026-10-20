@@ -5,7 +5,7 @@ import { project, nearestRoad } from "./geo.js";
 import { insidePolygon } from "./buildings.js";
 import { addFacades } from "./facades.js";
 import { riversidePath } from "./riverside.js";
-export function makeWorld(scene, map, city) {
+export function makeWorld(scene, map, city, { visibility } = {}) {
   const textures =
     typeof document === "undefined" || map.style === "cozy"
       ? {}
@@ -167,6 +167,7 @@ export function makeWorld(scene, map, city) {
   const buildingMaterials = colors.map(
     (color) => new T.MeshLambertMaterial({ color, map: textures.wall || null }),
   );
+  buildingMaterials.forEach((material) => visibility?.apply(material));
   for (const b of map.buildings) {
     const shape = new T.Shape();
     b.points.forEach((p, i) =>
@@ -203,7 +204,13 @@ export function makeWorld(scene, map, city) {
     });
   }
 
-  const facades = addFacades(scene, map.buildings, batch, map.style === "cozy");
+  const facades = addFacades(
+    scene,
+    map.buildings,
+    batch,
+    map.style === "cozy",
+    visibility,
+  );
 
   // Merge static geometry by material instead of issuing one draw per building.
   for (const [material, geometries] of batches) {

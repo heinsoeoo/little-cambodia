@@ -9,7 +9,8 @@ import {
 } from "../src/open-world.js";
 test("expanded geographic world covers central Phnom Penh with real source way IDs", () => {
   assert.equal(phnomMap.roads.length, 961);
-  assert.equal(phnomMap.buildings.length, 4842);
+  assert.equal(phnomMap.roadClearance.sourceBuildings, 4842);
+  assert.equal(phnomMap.buildings.length, 4006);
   assert.ok(bounds.max[0] - bounds.min[0] > 2700);
   assert.ok(bounds.max[1] - bounds.min[1] > 3000);
   assert.ok(phnomMap.roads.some((r) => r.id === 29544442));

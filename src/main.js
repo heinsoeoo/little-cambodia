@@ -1,3 +1,4 @@
+import { createPlayerVisibility } from "./player-visibility.js";
 import { VEHICLES, vehicleSpec, vehiclePhysics } from "./vehicle-catalog.js";
 import * as T from "three";
 import { city, phnomMap, spawn, promenade } from "./phnom-map.js";
@@ -47,7 +48,8 @@ sun.shadow.camera.right = 150;
 sun.shadow.camera.top = 180;
 sun.shadow.camera.bottom = -180;
 sun.shadow.bias = -0.001;
-const world = makeWorld(scene, map, city),
+const playerVisibility = createPlayerVisibility();
+const world = makeWorld(scene, map, city, { visibility: playerVisibility }),
   streetLife = createStreetLife(scene, world.path, map);
 camera.position.set(spawn[0] + 40, 58, spawn[1] + 90);
 for (const spec of VEHICLES) {
@@ -419,6 +421,14 @@ function frame(now) {
   camera.updateMatrixWorld();
   for (const actor of actors.values())
     actor.projectLabel(camera, innerWidth, innerHeight);
+  playerVisibility.update(
+    camera,
+    self,
+    innerWidth,
+    innerHeight,
+    renderer.getPixelRatio(),
+    Boolean(joined && self),
+  );
   renderer.render(scene, camera);
 }
 requestAnimationFrame(frame);

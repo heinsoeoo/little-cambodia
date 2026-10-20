@@ -1,9 +1,10 @@
+import { clearRoadBuildings } from "./road-clearance.js";
 import data from "./phnom-map-data.json" with { type: "json" };
 import { cities } from "./cities.js";
 import { project, nearestRoad } from "./geo.js";
 import { riversidePath } from "./riverside.js";
 export const city = cities.phnomPenh;
-export const phnomMap = { ...data, style: "cozy" };
+export const phnomMap = { ...clearRoadBuildings(data), style: "cozy" };
 export const bounds = {
   min: project(city.bounds[0], city.bounds[3], city.origin),
   max: project(city.bounds[2], city.bounds[1], city.origin),

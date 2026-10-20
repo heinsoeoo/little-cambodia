@@ -38,3 +38,11 @@
 - All 32 tests passed, including new acceleration/brake comparisons, full stopping under throttle, lateral handbrake slip/grip recovery, collision velocity reset and expanded-map arrival checks. Formatting and production build pass. Production HTTP and WebSocket guest join smoke test passed.
 - Browser: joined the geographic map, walked to Cedric and Land Cruiser, entered, drove, applied the brake/handbrake controls and confirmed stopped state. A second connected guest appeared in the roster. Landscape 844×390 displays separate DRIFT/BRAKE controls; portrait 390×844 displays rotation protection. This checks phone-sized layout, not physical phone GPU performance.
 - The district is geographically based, not an exact architectural reconstruction or all of greater Phnom Penh. Most heights and all facades, colors and vegetation are illustrative. NPC schedules remain cosmetic local previews. The larger map increases the client bundle (about 472 kB gzip); broad mobile performance and latency/load testing remain future work.
+
+
+## Road clearance and building occlusion fix — 20 October 2026
+
+- Road-corridor intersection tests omit conflicting footprints from the active map; all 4,006 remaining buildings are tested clear of widened drivable lanes. Geometry, facade rendering, minimap and server collision use the same result. Raw/derived OSM source data is retained untouched.
+- Local-player visibility applies a depth-aware screen-space opening to batched walls and facade/roof materials. It follows the actual projected player, accounts for device pixel ratio, uses a larger opening while driving, and disables after leaving. It leaves opaque depth and shadow behavior intact outside the opening.
+- All 36 tests pass; production build passes. New tests cover enclosed/crossing/diagonal road conflicts, all active buildings, high-DPI projection, driving/walking radii and material shader integration.
+- Live browser verification could not be completed this turn: the browser URL security policy rejected reopening the preview. No browser workaround was attempted. Visual appearance of the new cutaway still needs an in-game check.

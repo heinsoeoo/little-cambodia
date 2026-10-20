@@ -1,7 +1,7 @@
 import * as T from "three";
 import { tileTexture } from "./pixel-art.js";
 
-export function addFacades(scene, buildings, batch, cozy = false) {
+export function addFacades(scene, buildings, batch, cozy = false, visibility) {
   const roofMaterial = new T.MeshLambertMaterial({
       color: 0xb96343,
       map:
@@ -20,6 +20,9 @@ export function addFacades(scene, buildings, batch, cozy = false) {
     : [];
   const glass = new T.MeshBasicMaterial({ color: 0x47616a }),
     frames = new T.MeshLambertMaterial({ color: 0xeee1c3 });
+  [roofMaterial, flatRoof, glass, frames, ...cozyRoofs].forEach((material) =>
+    visibility?.apply(material),
+  );
   const panes = [],
     doors = [];
   const object = new T.Object3D();
