@@ -3222,3 +3222,30 @@ header > .feedback-link,
     margin: 4px 0;
   }
 }
+
+.game-calendar {
+  position: fixed;
+  top: 78px;
+  left: 32px;
+  z-index: 3;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: #f7efdded;
+  color: #5e624c;
+  font:
+    600 12px/1.35 system-ui,
+    sans-serif;
+  pointer-events: none;
+  max-width: calc(100vw - 64px);
+}
+.mobile-ui .game-calendar {
+  top: 80px;
+  left: var(--hud-left);
+  font-size: 10px;
+  padding: 5px 8px;
+}
+.ui-creating .game-calendar,
+.intro-active .game-calendar,
+.mobile-menu-open .game-calendar {
+  display: none;
+}

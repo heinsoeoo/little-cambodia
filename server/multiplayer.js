@@ -1,3 +1,4 @@
+import { sharedGameTime } from "../src/schedule.js";
 import { appearance } from "../src/wardrobe.js";
 import {
   VEHICLE_TYPES,
@@ -28,6 +29,7 @@ export function createMultiplayer(httpServer) {
   const snapshot = () => ({
     type: "state",
     time: Date.now(),
+    gameTime: sharedGameTime(),
     players: [...clients.values()].filter((c) => c.player).map((c) => c.player),
   });
   function upgrade(request, socket, head) {
@@ -122,6 +124,7 @@ export function createMultiplayer(httpServer) {
         clearTimeout(joinTimeout);
         send(ws, {
           type: "welcome",
+          gameTime: sharedGameTime(),
           id: client.player.id,
           player: client.player,
         });

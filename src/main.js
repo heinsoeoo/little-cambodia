@@ -16,7 +16,7 @@ import * as T from "three";
 import { city, phnomMap, spawn, promenade } from "./phnom-map.js";
 import { makeWorld } from "./world.js";
 import { palette } from "./pixel-art.js";
-import { CityClock, activityAt } from "./schedule.js";
+import { CityClock, activityAt, GAME_TIME_RATE } from "./schedule.js";
 import { createStreetLife } from "./street-life.js";
 import {
   bindHoldControls,
@@ -235,6 +235,7 @@ const network = new Multiplayer((event) => {
     notify("Your new look is ready. Everyone in town can see it.");
   }
   if (event.type === "welcome") {
+    clock.sync(event.gameTime);
     self = structuredClone(event.player);
     $("vehicle-paint").value = vehiclePaint(self.preferredPaint);
     joined = true;
@@ -256,6 +257,7 @@ const network = new Multiplayer((event) => {
     notify(`Welcome, ${self.nickname}. The riverside is yours to explore.`);
   }
   if (event.type === "state") {
+    clock.sync(event.gameTime);
     const mine = event.players.find((p) => p.id === network.id);
     if (mine) {
       if (
@@ -533,7 +535,7 @@ function frame(now) {
     sendElapsed = 0;
     if (network.id) network.input(active ? keys : new Set());
   }
-  clock.tick(active ? dt : 0);
+  clock.tick(dt);
   const time = clock.read(),
     activity = activityAt(time);
   ambient.intensity = activity.night ? 0.9 : 1.7;
@@ -572,7 +574,9 @@ function frame(now) {
   if (hud > 0.15) {
     hud = 0;
     $("clock").textContent =
-      `${time.label} · Phnom Penh${clock.mode === "now" ? "" : " · local preview"}`;
+      `${time.label} · ${clock.mode === "now" ? "Game time · 10×" : "local preview"}`;
+    $("game-calendar").textContent =
+      `${time.dateLabel} · ${time.timeLabel} · ${clock.mode === "now" ? `${GAME_TIME_RATE}×` : "Preview"}`;
     $("activity").textContent = `${activity.label} · ${activity.people} locals`;
     $("player-mode").textContent = self
       ? self.mode === "walk"

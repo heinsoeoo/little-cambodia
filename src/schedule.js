@@ -37,22 +37,69 @@ export function activityAt({ day, hour, minute = 0 }) {
         : "Quiet riverside",
   };
 }
+
+// A stable anchor keeps the shared calendar across reloads and deployments.
+// Calendar timestamps represent fictional local game time, formatted in UTC to
+// keep phone time zones from shifting the city's date or opening hours.
+export const GAME_TIME_RATE = 10;
+export const GAME_TIME_ANCHOR = Date.parse("2026-10-20T08:36:44Z");
+export const GAME_CALENDAR_START = Date.parse("2026-10-20T08:00:00Z");
+export function sharedGameTime(realTime = Date.now()) {
+  return (
+    GAME_CALENDAR_START +
+    Math.max(0, realTime - GAME_TIME_ANCHOR) * GAME_TIME_RATE
+  );
+}
+const calendarFormatter = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "UTC",
+  weekday: "short",
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+});
+export function gameCalendar(timestamp) {
+  const date = new Date(timestamp),
+    timeLabel = `${String(date.getUTCHours()).padStart(2, "0")}:${String(date.getUTCMinutes()).padStart(2, "0")}`;
+  const dateLabel = calendarFormatter.format(date);
+  return {
+    day: date.getUTCDay(),
+    hour: date.getUTCHours(),
+    minute: date.getUTCMinutes(),
+    year: date.getUTCFullYear(),
+    month: date.getUTCMonth() + 1,
+    date: date.getUTCDate(),
+    dateLabel,
+    timeLabel,
+    label: `${dateLabel} · ${timeLabel}`,
+  };
+}
 export class CityClock {
   mode = "now";
   elapsed = 0;
+  current = GAME_CALENDAR_START;
+  sync(timestamp) {
+    if (
+      Number.isFinite(timestamp) &&
+      timestamp >= GAME_CALENDAR_START &&
+      timestamp <= 8.64e15
+    )
+      this.current = timestamp;
+  }
   setMode(mode) {
-    this.mode = mode;
+    this.mode = ["now", "day", "market"].includes(mode) ? mode : "now";
     this.elapsed = 0;
   }
   tick(dt) {
+    if (!Number.isFinite(dt) || dt < 0) return;
+    this.current += dt * 1000 * GAME_TIME_RATE;
     if (this.mode !== "now") this.elapsed += dt;
   }
-  read(now = new Date()) {
-    if (this.mode === "now") return phnomPenhTime(now);
+  read() {
+    if (this.mode === "now") return gameCalendar(this.current);
     const base =
       this.mode === "market"
-        ? new Date("2026-10-17T12:30:00Z")
-        : new Date("2026-10-19T05:00:00Z");
-    return phnomPenhTime(new Date(base.getTime() + this.elapsed * 6000));
+        ? Date.parse("2026-10-24T19:30:00Z")
+        : Date.parse("2026-10-20T12:00:00Z");
+    return gameCalendar(base + this.elapsed * 1000 * GAME_TIME_RATE);
   }
 }

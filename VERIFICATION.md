@@ -104,3 +104,8 @@ User MP3 copied unchanged (50.8s, stereo 44.1kHz). Seven cards total 50s; Khmer 
 ## Touch viewport fix
 
 Game canvas and thumb controls own touch gestures. Buttons use manipulation; menus/forms retain one-finger scrolling with pan-y. Non-passive touch/gesture guards block multi-finger browser pinch, with a position/time-bounded double-tap fallback on game surfaces/buttons for Safari. Editable fields are exempt from the double-tap fallback. Mobile form controls use 16px text to avoid focus zoom. Gesture regression and existing independent multi-touch controls pass. Physical iPhone/iPad pinch behavior requires on-device confirmation.
+
+
+## Accelerated shared calendar
+
+60 tests pass, including tenfold clock advancement, midnight/month/year/leap-day rollover, weekend market timing, preview isolation, and real WebSocket welcome/state calendar synchronization. Browser verified a joined guest sees a compact date/time pill on a landscape mobile layout. Walking and driving tuning are unchanged. The shared timeline is server-authoritative and derived from a stable epoch so deployment and individual pause/menu state do not reset it.

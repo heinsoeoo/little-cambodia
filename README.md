@@ -34,7 +34,7 @@ Mobile controls support simultaneous steering/movement and accelerator/reverse b
 
 The server validates nicknames, actions, collision boundaries, message sizes/rates and WebSocket origins. Guest IDs are random and scoped to the connection. Guests are not authenticated accounts; nicknames are not unique or verified. Reloads, reconnects and server restarts create fresh guests; the last nickname and saved appearance/preferred vehicle are saved locally on that browser. Vehicles disappear on disconnect. There is no chat, persistent world database, account system, private rooms or cross-server synchronization yet.
 
-The current limit is 16 guests per server instance. Characters and vehicles can pass through other guests; this is a social exploration prototype, not competitive physics. NPC animation and scenery previews are cosmetic on each screen. Live Phnom Penh time is the default; the preview selector explicitly changes only your local scenery.
+The current limit is 16 guests per server instance. Characters and vehicles can pass through other guests; this is a social exploration prototype, not competitive physics. NPC animation and scenery previews are cosmetic on each screen. The default is a shared fictional game calendar at 10× speed: one real minute advances ten game minutes, and a full day lasts 144 real minutes. Server snapshots synchronize all guests. A fixed epoch preserves the calendar across reconnects and deployments; it continues while guests pause, open menus or leave. Market schedules and lighting use game time. Local scenery previews remain explicitly marked and do not change the shared calendar.
 
 ## Production server / playing from other devices
 
@@ -63,7 +63,7 @@ The old `missions.js` taxi loop and authored Little Riverside map remain as refe
 - `server/index.js`: production HTTP + WebSocket server.
 - `src/phnom-map.js`, `src/phnom-map-data.json`, `src/world.js`: shared geographic map, collision bounds and batched cozy 3D scenery.
 - `src/vehicle-catalog.js`, `src/vehicle-model.js`, `src/vehicle.js`: vehicle list, models and shared arcade driving physics.
-- `src/street-life.js`, `src/schedule.js`: cosmetic NPCs, vendors and local time previews.
+- `src/street-life.js`, `src/schedule.js`: cosmetic NPCs, vendors, shared game calendar and local scenery previews.
 
 ## Verify
 
@@ -114,7 +114,7 @@ Male characters have lean athletic shoulders and a tapered waist; female charact
 
 ### Phone HUD and outfit cuts
 
-On touch devices (including wider landscape phones), walking shows a directional pad and contextual Summon/Enter/Get out action. Driving shows steering and pedals plus a compact speed badge. Map is optional; Menu contains vehicle selection, guest/time settings, camera, wardrobe, pause and leave actions. Menu content scrolls when needed, and movement input clears while it is open. Touch controls are hidden while choosing an outfit. The layout respects device safe areas and the visual viewport as Safari's bars change height; mobile form fields use 16px text to avoid automatic input zoom.
+On touch devices (including wider landscape phones), walking shows a circular joystick and contextual Summon/Enter/Get out action. Driving shows steering and pedals plus a compact speed badge. Map is optional; Menu contains vehicle selection, guest/time settings, camera, wardrobe, pause and leave actions. Menu content scrolls when needed, and movement input clears while it is open. Touch controls are hidden while choosing an outfit. The layout respects device safe areas and the visual viewport as Safari's bars change height; mobile form fields use 16px text to avoid automatic input zoom.
 
 Outfit cut defaults to **Match gender**: Male has athletic/tapered tailoring, Female has fitted waist/hem and tapered trouser/shoe proportions, and Prefer not to say uses a relaxed Unisex fit. Customize can explicitly choose Male, Female or Unisex without changing gender, collection or independently selected pieces. Clothing cuts are validated and shared by the multiplayer server.
 

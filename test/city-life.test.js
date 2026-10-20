@@ -26,14 +26,15 @@ test("weekend market starts at 18:00 and closes at 23:00, with quieter weekdays"
       activityAt({ day: 1, hour: 12 }).people * 4,
   );
 });
-test("time preview crosses closing time and live mode returns to actual time", () => {
+test("time preview crosses closing time and returns to the shared game calendar", () => {
   const clock = new CityClock();
   clock.setMode("market");
   assert.equal(activityAt(clock.read()).market, true);
   clock.tick(2100);
   assert.equal(activityAt(clock.read()).market, false);
   clock.setMode("now");
-  assert.equal(clock.read(new Date("2026-10-19T05:00:00Z")).label, "Mon 12:00");
+  assert.equal(clock.read().hour, 13);
+  assert.equal(clock.read().minute, 50);
 });
 test("mapped building height, levels and residential type override visual estimates", () => {
   const polygon = [

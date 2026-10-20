@@ -31,7 +31,7 @@ async function client(url, name, options = {}) {
   const welcome = waitMessage(ws, (m) => m.type === "welcome");
   ws.send(JSON.stringify({ type: "join", nickname: name, ...options }));
   const joined = await welcome;
-  return { ws, id: joined.id };
+  return { ws, id: joined.id, gameTime: joined.gameTime };
 }
 
 test("real WebSocket guests share presence, movement and summoned vehicles, then leave cleanly", async (t) => {
@@ -53,6 +53,9 @@ test("real WebSocket guests share presence, movement and summoned vehicles, then
     a.ws,
     (m) => m.type === "state" && m.players.length === 2,
   );
+  assert.ok(Number.isFinite(a.gameTime));
+  assert.ok(Number.isFinite(b.gameTime));
+  assert.ok(both.gameTime >= a.gameTime && both.gameTime >= b.gameTime);
   assert.ok(
     both.players.some((p) => p.id === b.id && p.nickname === "Dara Guest"),
   );
