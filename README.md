@@ -74,3 +74,7 @@ npm run build
 Tests include real local WebSocket clients for presence, movement, summoned vehicles, disconnects and origin rejection, plus walking and vehicle state transitions. Network tests need permission to listen on loopback. See `VERIFICATION.md` for browser checks and remaining limits.
 
 The local Git repository uses `main`; no remote is configured. The procedural 3D scenery is original. Player nicknames use a crisp screen-space text overlay. OSM data is retained with attribution in `SOURCES.md` and `public/data/ATTRIBUTION.md`; the active town street layout is authored rather than geographically exact.
+
+### Vehicle garage
+
+The shared vehicle catalog includes Motorcycle, Tuk-tuk, Cycle rickshaw, Corolla, Celica, Prius, Skyline R34 and Mark II (1999). These are simplified original models inspired by the listed vehicles. Headlights and a cream hood chevron mark the front (+Z); red tail lights mark the rear. The old `car` identifier remains supported for compatibility. All guests see the selected model through multiplayer.

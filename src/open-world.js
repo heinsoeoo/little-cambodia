@@ -2,7 +2,8 @@ import { createTownMap } from "./town-map.js";
 import { insidePolygon } from "./buildings.js";
 import { nearestRoad } from "./geo.js";
 import { stepVehicle } from "./vehicle.js";
-export const VEHICLE_TYPES = ["car", "tuktuk", "moto"];
+import { VEHICLE_TYPES } from "./vehicle-catalog.js";
+export { VEHICLE_TYPES };
 export const town = createTownMap();
 export function nickname(value) {
   if (typeof value !== "string") return "";

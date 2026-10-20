@@ -1,3 +1,4 @@
+import { VEHICLES, vehicleSpec } from "./vehicle-catalog.js";
 import * as T from "three";
 import { townCity, createTownMap } from "./town-map.js";
 import { makeCozyWorld } from "./cozy-world.js";
@@ -50,6 +51,12 @@ sun.shadow.bias = -0.001;
 const world = makeCozyWorld(scene, map, city),
   streetLife = createStreetLife(scene, world.path, map);
 camera.position.set(128, 58, 102);
+for (const spec of VEHICLES) {
+  const option = document.createElement("option");
+  option.value = spec.id;
+  option.textContent = spec.name;
+  $("vehicle-type").append(option);
+}
 function resize() {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
   renderer.setSize(innerWidth, innerHeight, false);
@@ -365,7 +372,7 @@ function frame(now) {
         ? "No vehicle summoned. Walking is the default."
         : self.mode === "drive"
           ? "Your personal vehicle · not a taxi"
-          : `Your ${self.vehicle.type} · ${Math.round(distance)} m away`;
+          : `Your ${vehicleSpec(self.vehicle.type).name} · ${Math.round(distance)} m away`;
     const vendor = self ? streetLife.nearest(self) : null;
     $("vendor").disabled =
       !can || !vendor || vendor.distance >= 7 || Math.abs(self.speed) >= 1.5;
