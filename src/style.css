@@ -1417,3 +1417,144 @@ footer {
   text-shadow: 0 1px 2px #fff8;
   color: #6e685a;
 }
+
+/* A shared guest creator and in-town wardrobe, with independent garment choices. */
+.welcome.character-creator {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  box-sizing: border-box;
+  width: min(960px, calc(100vw - 40px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  padding: 26px 30px;
+  z-index: 20;
+}
+.character-creator h1 {
+  font-size: 34px;
+  margin: 8px 0;
+}
+.character-creator > p {
+  margin: 0 0 16px;
+  font-size: 13px;
+}
+#guest-form {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 20px;
+}
+.creator-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+}
+.creator-field {
+  min-width: 0;
+}
+.creator-field label {
+  display: block;
+  margin: 0 0 5px;
+  font-size: 12px;
+}
+.creator-field select,
+.creator-field input {
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 7px 10px;
+  border: 1px solid #cfc3ac;
+  border-radius: 9px;
+  background: #fffaf0;
+  color: #514a3d;
+  font:
+    13px "Trebuchet MS",
+    sans-serif;
+  box-sizing: border-box;
+}
+.creator-field input:disabled {
+  opacity: 0.65;
+}
+.creator-wide {
+  grid-column: 1/-1;
+}
+.creator-field small {
+  display: block;
+  font-size: 10px;
+  line-height: 1.5;
+  margin-top: 5px;
+}
+.creator-preview {
+  background: #e8dfcb;
+  border-radius: 18px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-width: 0;
+}
+#look-preview {
+  display: block;
+  width: 100%;
+  height: 255px;
+  image-rendering: auto;
+}
+.creator-preview strong {
+  font-size: 15px;
+}
+.creator-preview p {
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 8px 0;
+}
+.creator-preview small {
+  font-size: 11px;
+  line-height: 1.5;
+}
+.creator-actions {
+  grid-column: 1/-1;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.character-creator .creator-actions button {
+  width: auto;
+  flex: 1;
+  padding: 12px 18px;
+  font-size: 14px;
+}
+.creator-actions #join-error {
+  flex-basis: 100%;
+  margin: 0;
+}
+.character-creator > small {
+  display: block;
+  margin-top: 10px;
+  font-size: 11px;
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .welcome.character-creator {
+    padding: 14px 20px;
+    max-height: calc(100dvh - 12px);
+  }
+  .character-creator h1 {
+    font-size: 25px;
+  }
+  #look-preview {
+    height: 200px;
+  }
+}
+@media (max-width: 600px) and (orientation: portrait) {
+  #guest-form {
+    grid-template-columns: 1fr;
+  }
+  .creator-preview {
+    grid-row: 1;
+  }
+  #look-preview {
+    height: 190px;
+  }
+}

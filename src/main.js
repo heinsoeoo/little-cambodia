@@ -1,3 +1,4 @@
+import { createWardrobe } from "./wardrobe-ui.js";
 import { createPlayerVisibility } from "./player-visibility.js";
 import { VEHICLES, vehicleSpec, vehiclePhysics } from "./vehicle-catalog.js";
 import * as T from "three";
@@ -49,6 +50,7 @@ sun.shadow.camera.top = 180;
 sun.shadow.camera.bottom = -180;
 sun.shadow.bias = -0.001;
 const playerVisibility = createPlayerVisibility();
+const wardrobe = createWardrobe();
 const world = makeWorld(scene, map, city, { visibility: playerVisibility }),
   streetLife = createStreetLife(scene, world.path, map);
 camera.position.set(spawn[0] + 40, 58, spawn[1] + 90);
@@ -132,13 +134,34 @@ const network = new Multiplayer((event) => {
       self = null;
       joined = false;
       $("welcome").hidden = false;
+      $("nickname").disabled = false;
+      $("wardrobe").disabled = true;
+      $("wardrobe-close").hidden = true;
+      $("creator-title").textContent = "Your city. Your style.";
       $("join-error").textContent = event.status;
-      $("start").disabled = false;
-      $("start").textContent = "Join as guest ↗";
+      $("start").disabled = event.status === "Connecting…";
+      $("start").textContent =
+        event.status === "Connecting…" ? "Joining…" : "Join as guest ↗";
       syncRoster([]);
       for (const actor of actors.values()) actor.dispose();
       actors.clear();
     }
+  }
+  if (event.type === "customized") {
+    self.appearance = event.player.appearance;
+    self.preferredVehicle = event.player.preferredVehicle;
+    $("vehicle-type").value = self.preferredVehicle;
+    vehicleStats();
+    const profile = {
+      appearance: self.appearance,
+      vehicleType: self.preferredVehicle,
+    };
+    wardrobe.save(profile);
+    network.joinOptions = profile;
+    $("welcome").hidden = true;
+    paused = false;
+    $("start").disabled = false;
+    notify("Your new look is ready. Everyone in town can see it.");
   }
   if (event.type === "welcome") {
     self = structuredClone(event.player);
@@ -149,6 +172,11 @@ const network = new Multiplayer((event) => {
     $("pause").disabled = $("leave").disabled = false;
     $("connection").textContent = "● Connected";
     $("player-name").textContent = self.nickname;
+    $("wardrobe").disabled = false;
+    $("vehicle-type").value =
+      self.preferredVehicle || wardrobe.read().vehicleType;
+    vehicleStats();
+    $("join-error").textContent = "";
     camera.position.set(self.x + 40, 58, self.z + 90);
     try {
       localStorage.setItem("riverside-nickname", self.nickname);
@@ -165,6 +193,7 @@ const network = new Multiplayer((event) => {
       )
         self = structuredClone(mine);
       else {
+        self.appearance = structuredClone(mine.appearance);
         self.x += (mine.x - self.x) * 0.2;
         self.z += (mine.z - self.z) * 0.2;
         self.vehicle = structuredClone(mine.vehicle);
@@ -196,7 +225,7 @@ const network = new Multiplayer((event) => {
     notify(event.message);
     $("join-error").textContent = event.message;
     $("start").disabled = false;
-    $("start").textContent = "Join as guest ↗";
+    $("start").textContent = joined ? "Save look" : "Join as guest ↗";
   }
 });
 resize();
@@ -210,13 +239,44 @@ $("guest-form").onsubmit = (event) => {
     return;
   }
   $("start").disabled = true;
-  $("start").textContent = "Joining…";
+  $("start").textContent = joined ? "Saving…" : "Joining…";
   $("join-error").textContent = "";
-  network.connect(name);
+  const profile = wardrobe.read();
+  if (joined && self) {
+    network.send({ type: "customize", ...profile });
+  } else {
+    wardrobe.save(profile);
+    $("vehicle-type").value = profile.vehicleType;
+    network.connect(name, profile);
+  }
 };
 try {
   $("nickname").value = localStorage.getItem("riverside-nickname") || "";
 } catch {}
+$("wardrobe").onclick = () => {
+  if (!self) return;
+  stopInput();
+  paused = true;
+  wardrobe.load({
+    appearance: self.appearance,
+    vehicleType: $("vehicle-type").value,
+  });
+  $("nickname").value = self.nickname;
+  $("nickname").disabled = true;
+  $("pause-overlay").hidden = true;
+  $("pause").textContent = "Pause · P";
+  $("join-error").textContent = "";
+  $("creator-title").textContent = "Make it your own.";
+  $("start").textContent = "Save look";
+  $("start").disabled = false;
+  $("wardrobe-close").hidden = false;
+  $("welcome").hidden = false;
+};
+$("wardrobe-close").onclick = () => {
+  $("welcome").hidden = true;
+  paused = false;
+  $("join-error").textContent = "";
+};
 $("summon").onclick = () => action("summon");
 $("interact").onclick = enterExit;
 $("camera").onclick = zoom;
@@ -232,6 +292,10 @@ $("leave").onclick = () => {
   for (const actor of actors.values()) actor.dispose();
   actors.clear();
   $("welcome").hidden = false;
+  $("nickname").disabled = false;
+  $("wardrobe").disabled = true;
+  $("wardrobe-close").hidden = true;
+  $("creator-title").textContent = "Your city. Your style.";
   $("pause-overlay").hidden = true;
   $("pause").disabled = $("leave").disabled = true;
   $("connection").textContent = "Not connected";
@@ -241,6 +305,7 @@ $("leave").onclick = () => {
   syncRoster([]);
 };
 addEventListener("keydown", (event) => {
+  if (!$("welcome").hidden) return;
   if (["INPUT", "SELECT", "TEXTAREA"].includes(event.target.tagName)) return;
   if (
     ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key)
@@ -430,5 +495,6 @@ function frame(now) {
     Boolean(joined && self),
   );
   renderer.render(scene, camera);
+  wardrobe.render(now);
 }
 requestAnimationFrame(frame);

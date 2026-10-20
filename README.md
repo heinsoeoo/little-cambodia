@@ -1,4 +1,4 @@
-# Phnom Life — Central Phnom Penh (v0.7)
+# Phnom Life — Central Phnom Penh (v0.8)
 
 A guest-based multiplayer open world inspired by Phnom Penh. Enter a nickname, arrive on foot, explore the city and riverside, and summon a personal car, tuk-tuk or moto when you want to drive. Taxi missions and earnings are no longer part of the active game; jobs will be a separate later feature.
 
@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:5173/ . Join with a nickname of 2–20 characters. Open a second tab and join with another nickname to test multiplayer. Guests using the same running server share one town, with a limit of 16 connected players.
+Open http://127.0.0.1:5173/ . Choose a nickname of 2–20 characters, gender, mixed outfit and preferred vehicle in the live 3D creator, then join. Open a second tab and join with another nickname to test multiplayer. Guests using the same running server share one town, with a limit of 16 connected players.
 
 The development server includes the WebSocket backend through `vite.config.js`; restart Vite when first adding the backend to an already-running older build.
 
@@ -21,6 +21,7 @@ The development server includes the WebSocket backend through `vite.config.js`; 
 - F or **Summon vehicle**: select a car, tuk-tuk or moto and park it near your closest road. You must be reasonably near a road; busy spaces are avoided.
 - Walk within 4 m and use E or **Enter vehicle** to drive.
 - Driving: W/up accelerates, S/down brakes against forward motion then reverses, A/D steer, Space applies the regular brakes, and Shift holds the handbrake for car drifts. E or **Get out** returns you to a clear space on foot and parks your vehicle.
+- **Wardrobe** opens the same creator after joining: change gender, skin tone, hair, top, bottom, shoes or preferred vehicle, preview, then save. **Back to city** cancels unsaved edits. The vehicle choice updates the summon picker; it does not replace an existing vehicle until summoned.
 - C changes zoom. P pauses your controls; other guests and the shared world continue.
 - V talks to a nearby vendor. There are no purchases or inventory yet.
 - **Leave town** disconnects your guest and removes your presence and vehicle.
@@ -31,7 +32,7 @@ Mobile controls support simultaneous steering/movement and accelerator/reverse b
 
 `server/multiplayer.js` runs a server-owned simulation at 30 Hz and sends snapshots at 15 Hz. Clients send movement keys and explicit vehicle actions; they cannot directly set coordinates or control another guest. The browser predicts its own movement and interpolates other guests. Nicknames and parked/driven vehicles are shared, along with an online roster and minimap markers.
 
-The server validates nicknames, actions, collision boundaries, message sizes/rates and WebSocket origins. Guest IDs are random and scoped to the connection. Guests are not authenticated accounts; nicknames are not unique or verified. Reloads, reconnects and server restarts create fresh guests; only the last nickname is saved locally. Vehicles disappear on disconnect. There is no chat, persistent world database, account system, private rooms or cross-server synchronization yet.
+The server validates nicknames, actions, collision boundaries, message sizes/rates and WebSocket origins. Guest IDs are random and scoped to the connection. Guests are not authenticated accounts; nicknames are not unique or verified. Reloads, reconnects and server restarts create fresh guests; the last nickname and saved appearance/preferred vehicle are saved locally on that browser. Vehicles disappear on disconnect. There is no chat, persistent world database, account system, private rooms or cross-server synchronization yet.
 
 The current limit is 16 guests per server instance. Characters and vehicles can pass through other guests; this is a social exploration prototype, not competitive physics. NPC animation and scenery previews are cosmetic on each screen. Live Phnom Penh time is the default; the preview selector explicitly changes only your local scenery.
 
@@ -93,3 +94,9 @@ Run `npm run map:build` to regenerate `src/phnom-map-data.json` from the retaine
 The runtime omits 836 source footprints that intersect the widened driveable road corridors, leaving 4,006 buildings. Rendering, minimap and multiplayer collisions share this filtered map. Original OSM records and generated source coordinates remain intact; these omissions are a gameplay adjustment, not an assertion about real buildings.
 
 A feathered screen-space cutaway opens through walls, roofs, windows and doors directly between the camera and your character/vehicle. The center is clear so the player stays visible; the edge softens the opening. Buildings outside that area keep their usual appearance and shadows. It follows the local player while walking or driving and switches off when you leave.
+
+### Mix-and-match wardrobe
+
+Ten optional collections supply independent hair, top, bottom and shoe choices: Casual, Luxury, Street, Old money, Rapper, Punk, Sporty, Bohemian, Workwear and Riverside linen. Any garment can be combined with any other collection and any gender. Choosing a preset changes all four pieces, while changing one piece leaves the others intact. Gender and skin tone remain independent of presets.
+
+`src/wardrobe.js` is the shared catalog and strict whitelist validator. `src/character.js` builds the same 3D character for previews and live guests, including the seated motorcycle pose. `src/wardrobe-ui.js` owns the pre-join/in-town creator and side-by-side vehicle preview. The server accepts validated appearance fields at join and on explicit customization messages, then shares them in normal snapshots. Unsupported IDs and extra fields cannot inject arbitrary content or move the player.

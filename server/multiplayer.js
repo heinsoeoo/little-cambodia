@@ -1,3 +1,5 @@
+import { appearance } from "../src/wardrobe.js";
+import { VEHICLE_TYPES } from "../src/vehicle-catalog.js";
 import { WebSocketServer, WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
 import {
@@ -101,7 +103,17 @@ export function createMultiplayer(httpServer) {
           ws.close(1008, "Town full");
           return;
         }
-        client.player = createGuest(randomUUID(), name, peers.length);
+        client.player = createGuest(
+          randomUUID(),
+          name,
+          peers.length,
+          message.appearance,
+        );
+        client.player.preferredVehicle = VEHICLE_TYPES.includes(
+          message.vehicleType,
+        )
+          ? message.vehicleType
+          : "corolla";
         clearTimeout(joinTimeout);
         send(ws, {
           type: "welcome",
@@ -112,6 +124,22 @@ export function createMultiplayer(httpServer) {
         return;
       }
       if (!client.player) return;
+      if (message.type === "customize") {
+        if (now - client.lastAction <= 250) {
+          send(ws, {
+            type: "error",
+            message: "Please wait a moment, then save your look again.",
+          });
+          return;
+        }
+        client.keys.clear();
+        client.lastAction = now;
+        client.player.appearance = appearance(message.appearance);
+        if (VEHICLE_TYPES.includes(message.vehicleType))
+          client.player.preferredVehicle = message.vehicleType;
+        send(ws, { type: "customized", player: client.player });
+        return;
+      }
       if (message.type === "input" && Array.isArray(message.keys)) {
         const allowed = new Set([
           "w",

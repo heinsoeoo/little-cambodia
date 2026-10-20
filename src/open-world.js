@@ -1,3 +1,4 @@
+import { appearance } from "./wardrobe.js";
 import { phnomMap, bounds, spawn, promenade } from "./phnom-map.js";
 import { insidePolygon } from "./buildings.js";
 import { nearestRoad } from "./geo.js";
@@ -72,10 +73,11 @@ export function blocked(x, z, mode = "walk") {
     },
   );
 }
-export function createGuest(id, name, index = 0) {
+export function createGuest(id, name, index = 0, look) {
   return {
     id,
     nickname: name,
+    appearance: appearance(look),
     x: spawn[0],
     z: spawn[1] + (index % 12) * 0.4,
     heading: Math.PI,

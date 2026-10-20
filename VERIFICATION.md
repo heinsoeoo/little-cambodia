@@ -46,3 +46,12 @@
 - Local-player visibility applies a depth-aware screen-space opening to batched walls and facade/roof materials. It follows the actual projected player, accounts for device pixel ratio, uses a larger opening while driving, and disables after leaving. It leaves opaque depth and shadow behavior intact outside the opening.
 - All 36 tests pass; production build passes. New tests cover enclosed/crossing/diagonal road conflicts, all active buildings, high-DPI projection, driving/walking radii and material shader integration.
 - Live browser verification could not be completed this turn: the browser URL security policy rejected reopening the preview. No browser workaround was attempted. Visual appearance of the new cutaway still needs an in-game check.
+
+
+## v0.8 character creator and mixed wardrobe — 20 October 2026
+
+- Ten collections support independent hair, tops, bottoms and shoes, with gender and skin tone choices. Presets are optional and do not restrict combinations by gender. The 3D preview and actual guest use the same character builder and motorcycle riding pose.
+- The guest screen collects nickname and gender alongside wardrobe/vehicle previews. Saved selections are remembered locally. In-town Wardrobe previews and saves new pieces/gender/vehicle preference without reconnecting; cancel returns without saving. Vehicle selection remains a preference until summoning.
+- All 39 tests pass, including appearance whitelist validation, collection/preset independence, rebuilding every collection while maintaining riding poses, and two real WebSocket guests sharing a mixed join outfit and subsequent wardrobe changes without coordinate changes.
+- Browser verified a mixed casual/street/punk/old-money look with Celica before joining, joined with that selected vehicle in the summon picker, and saved a luxury top / Pajero preference through the in-town wardrobe without rejoining. The same preview shows the newly selected outfit and vehicle. Landscape 844×390 creator scrolls to the join action; desktop 1280×720 fits the full creator. Production build and production HTTP/WebSocket smoke check pass.
+- Earlier browser URL-policy rejection applied to an unavailable prior tab. A new authorized local preview was opened successfully for this feature. Broad physical-device performance/latency testing remains unverified.

@@ -8,10 +8,11 @@ export class Multiplayer {
     this.generation = 0;
     this.timer = null;
   }
-  connect(name) {
+  connect(name, options = this.joinOptions || {}) {
     clearTimeout(this.timer);
     clearTimeout(this.joinTimer);
     this.nickname = name;
+    this.joinOptions = options;
     this.closed = false;
     const generation = ++this.generation;
     if (this.socket) this.socket.close();
@@ -26,7 +27,9 @@ export class Multiplayer {
     this.onEvent({ type: "connection", status: "Connecting…" });
     socket.onopen = () => {
       if (generation === this.generation)
-        socket.send(JSON.stringify({ type: "join", nickname: name }));
+        socket.send(
+          JSON.stringify({ type: "join", nickname: name, ...options }),
+        );
     };
     socket.onmessage = (event) => {
       if (generation !== this.generation) return;
