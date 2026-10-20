@@ -100,3 +100,7 @@ Warm cream/sage welcome with clearer field hierarchy, full-width vehicle selecti
 ## Bilingual intro soundtrack
 
 User MP3 copied unchanged (50.8s, stereo 44.1kHz). Seven cards total 50s; Khmer story receives 12s. New audio regression test verifies portrait silence, first-text start, continuous music across language changes, mute, finish and replay reset. Intro test verifies all seven scheduled boundaries. Local browser verified manual English-to-Khmer progression and Khmer glyphs/line spacing at 1024×348. Audio perception requires listening on the actual device; browser automation has no audible monitoring.
+
+## Touch viewport fix
+
+Game canvas and thumb controls own touch gestures. Buttons use manipulation; menus/forms retain one-finger scrolling with pan-y. Non-passive touch/gesture guards block multi-finger browser pinch, with a position/time-bounded double-tap fallback on game surfaces/buttons for Safari. Editable fields are exempt from the double-tap fallback. Mobile form controls use 16px text to avoid focus zoom. Gesture regression and existing independent multi-touch controls pass. Physical iPhone/iPad pinch behavior requires on-device confirmation.

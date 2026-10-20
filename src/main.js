@@ -10,7 +10,11 @@ import { makeWorld } from "./world.js";
 import { palette } from "./pixel-art.js";
 import { CityClock, activityAt } from "./schedule.js";
 import { createStreetLife } from "./street-life.js";
-import { bindHoldControls, needsRotation } from "./mobile.js";
+import {
+  bindHoldControls,
+  bindViewportGestures,
+  needsRotation,
+} from "./mobile.js";
 import { nearestRoad, project } from "./geo.js";
 import { stepGuest, nickname } from "./open-world.js";
 import { Multiplayer } from "./network.js";
@@ -30,6 +34,7 @@ let self = null,
   sendElapsed = 0,
   hud = 0;
 const audio = createAudio();
+bindViewportGestures(document);
 const clock = new CityClock(),
   clearTouch = bindHoldControls(document, keys);
 const notify = (text, seconds = 4) => {
