@@ -20,7 +20,15 @@
       <button id="camera" aria-label="Switch camera view">Zoom · C</button
       ><button id="pause" disabled>Pause · P</button
       ><button id="wardrobe" disabled>Wardrobe</button
-      ><button id="leave" disabled>Leave town</button>
+      ><button id="leave" disabled>Leave town</button
+      ><a
+        id="feedback"
+        class="feedback-link"
+        href="https://www.facebook.com/littlecambodiagame"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Feedback ↗</a
+      >
       <button
         id="mobile-map-toggle"
         class="mobile-only"
@@ -216,7 +224,16 @@
         </div>
       </form>
       <div class="creator-footer">
-        <small>No account needed. Come as you are.</small>
+        <small
+          >No account needed. Come as you are.
+          <a
+            class="feedback-link"
+            href="https://www.facebook.com/littlecambodiagame"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Share feedback ↗</a
+          ></small
+        >
         <div id="creator-utilities">
           <button id="intro-replay" class="intro-replay" type="button">
             For Claraa ♡
@@ -234,11 +251,13 @@
     </section>
     <div id="toast" role="status">Welcome to Little Riverside</div>
     <div class="touch" aria-label="Mobile movement controls">
-      <div class="walk-pad" aria-label="Walking directions">
-        <button data-key="arrowup" aria-label="Walk forward">↑</button
-        ><button data-key="arrowleft" aria-label="Walk left">←</button
-        ><button data-key="arrowdown" aria-label="Walk backward">↓</button
-        ><button data-key="arrowright" aria-label="Walk right">→</button>
+      <div
+        class="walk-pad"
+        id="walk-joystick"
+        aria-label="Walking joystick: drag to move"
+      >
+        <span class="joystick-rim" aria-hidden="true"></span>
+        <span class="joystick-thumb" aria-hidden="true"></span>
       </div>
       <div class="steering">
         <button data-key="arrowleft" aria-label="Move or steer left">←</button

@@ -89,3 +89,52 @@ export function bindViewportGestures(root) {
       root.removeEventListener(type, handler);
   };
 }
+
+// A captured pointer keeps the walking wheel responsive outside its rim.
+export function bindWalkingJoystick(element, keys) {
+  let pointer = null;
+  const directions = ["arrowleft", "arrowright", "arrowup", "arrowdown"];
+  const clear = () => {
+    pointer = null;
+    directions.forEach((key) => keys.delete(key));
+    element.style.setProperty("--stick-x", "0px");
+    element.style.setProperty("--stick-y", "0px");
+    element.classList.remove("active");
+  };
+  const move = (event) => {
+    if (event.pointerId !== pointer) return;
+    event.preventDefault();
+    const rect = element.getBoundingClientRect();
+    const radius = rect.width * 0.32;
+    let x = event.clientX - rect.left - rect.width / 2;
+    let y = event.clientY - rect.top - rect.height / 2;
+    const length = Math.hypot(x, y);
+    if (length > radius) {
+      x *= radius / length;
+      y *= radius / length;
+    }
+    directions.forEach((key) => keys.delete(key));
+    if (Math.hypot(x, y) > radius * 0.22) {
+      if (x < -radius * 0.3) keys.add("arrowleft");
+      if (x > radius * 0.3) keys.add("arrowright");
+      if (y < -radius * 0.3) keys.add("arrowup");
+      if (y > radius * 0.3) keys.add("arrowdown");
+    }
+    element.style.setProperty("--stick-x", `${x}px`);
+    element.style.setProperty("--stick-y", `${y}px`);
+  };
+  element.addEventListener("pointerdown", (event) => {
+    if (pointer !== null) return;
+    pointer = event.pointerId;
+    element.setPointerCapture(pointer);
+    element.classList.add("active");
+    move(event);
+  });
+  element.addEventListener("pointermove", move);
+  for (const type of ["pointerup", "pointercancel", "lostpointercapture"])
+    element.addEventListener(type, (event) => {
+      if (event.pointerId === pointer) clear();
+    });
+  element.addEventListener("contextmenu", (event) => event.preventDefault());
+  return clear;
+}

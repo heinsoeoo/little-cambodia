@@ -12,6 +12,7 @@ import { CityClock, activityAt } from "./schedule.js";
 import { createStreetLife } from "./street-life.js";
 import {
   bindHoldControls,
+  bindWalkingJoystick,
   bindViewportGestures,
   needsRotation,
 } from "./mobile.js";
@@ -36,7 +37,8 @@ let self = null,
 const audio = createAudio();
 bindViewportGestures(document);
 const clock = new CityClock(),
-  clearTouch = bindHoldControls(document, keys);
+  clearTouch = bindHoldControls(document, keys),
+  clearJoystick = bindWalkingJoystick($("walk-joystick"), keys);
 const notify = (text, seconds = 4) => {
   $("toast").textContent = text;
   $("toast").style.opacity = 1;
@@ -99,7 +101,10 @@ function resize() {
   mobileHUD.resize(
     mobileViewport({ width: viewportWidth, height: viewportHeight, coarse }),
   );
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  // Touch screens render at native CSS resolution and avoid a second shadow pass.
+  renderer.setPixelRatio(Math.min(devicePixelRatio, coarse ? 1 : 1.5));
+  renderer.shadowMap.enabled = !coarse;
+  sun.castShadow = !coarse;
   renderer.setSize(viewportWidth, viewportHeight, false);
   const half = highCamera ? 50 : 25;
   camera.left = (-half * viewportWidth) / viewportHeight;
@@ -121,6 +126,7 @@ function resize() {
 function stopInput() {
   keys.clear();
   clearTouch();
+  clearJoystick();
   network?.input(keys);
 }
 function pause() {
@@ -457,7 +463,8 @@ function minimap() {
   }
 }
 let previous = performance.now(),
-  accumulator = 0;
+  accumulator = 0,
+  streetElapsed = 0;
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min((now - previous) / 1000, 0.1);
@@ -478,7 +485,14 @@ function frame(now) {
   clock.tick(active ? dt : 0);
   const time = clock.read(),
     activity = activityAt(time);
-  streetLife.update(dt, time);
+  streetElapsed += dt;
+  if (
+    streetElapsed >=
+    (document.body.classList.contains("mobile-ui") ? 1 / 15 : 1 / 30)
+  ) {
+    streetLife.update(streetElapsed, time);
+    streetElapsed = 0;
+  }
   world.facades.setNight(activity.night);
   renderer.setClearColor(activity.night ? palette.night : palette.sky);
   for (const player of network.players) {
