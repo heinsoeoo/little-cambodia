@@ -110,6 +110,7 @@ export function createCharacter(initial) {
       1.68,
       0,
     );
+    cap.name = "hair-cap";
     if (["long", "bob", "braids", "waves"].includes(hairStyle.hairShape)) {
       for (const x of [-0.21, 0.21]) {
         const h = sphere(0.14, x, 1.48, -0.06, hair);
@@ -296,15 +297,14 @@ export function createCharacter(initial) {
         bv.sub(av).normalize(),
       );
     }
+    const arms = [];
     for (const s of [-1, 1]) {
-      limb(
-        standing,
-        [s * 0.28 * broad, 1.3, 0],
-        [s * 0.36, 0.77, 0],
-        0.09,
-        cloth,
-      );
-      sphere(0.085, s * 0.36, 0.7, 0, skin, standing);
+      const arm = new T.Group();
+      arm.position.set(s * 0.28 * broad, 1.3, 0);
+      standing.add(arm);
+      arms.push(arm);
+      limb(arm, [0, 0, 0], [s * (0.36 - 0.28 * broad), -0.53, 0], 0.09, cloth);
+      sphere(0.085, s * (0.36 - 0.28 * broad), -0.6, 0, skin, arm);
       limb(riding, [s * 0.24, 1.3, 0.04], [s * 0.38, 1, 0.35], 0.1, cloth);
       limb(riding, [s * 0.38, 1, 0.35], [s * 0.4, 0.78, 0.85], 0.075, skin);
       limb(riding, [s * 0.22, 0.62, 0], [s * 0.43, 0.3, 0.38], 0.11, pants);
@@ -312,7 +312,7 @@ export function createCharacter(initial) {
       box(0.23, shoeSize, 0.35, s * 0.43, 0.02, 0.28, footwear, riding);
     }
     riding.visible = false;
-    rig = { standing, riding, legs };
+    rig = { standing, riding, legs, arms };
     group.userData.appearance = look;
     group.userData.outfitCut = cut;
     group.userData.silhouette = male
@@ -348,6 +348,16 @@ export function createCharacter(initial) {
     group,
     setAppearance: rebuild,
     pose,
+    get arms() {
+      return rig.arms;
+    },
+    greet(time, side = 1) {
+      rig.arms.forEach((arm, i) => {
+        const sign = i === 0 ? -1 : 1;
+        arm.rotation.z =
+          sign * (i === side ? 2.5 + Math.sin(time * 4) * 0.15 : 0.08);
+      });
+    },
     dispose: () => disposeMeshes(group),
   };
 }

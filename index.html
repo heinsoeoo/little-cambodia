@@ -369,11 +369,19 @@
           data-intro-card="couple"
           data-duration="5000"
         >
-          <img
-            src="/art/hein-claraa-couple.png"
-            alt="Cozy illustrated characters of Hein and Claraa, wearing black and posing together with a peace sign"
-            fetchpriority="high"
-          />
+          <div class="intro-couple-stage">
+            <img
+              id="intro-couple-fallback"
+              src="/art/hein-claraa-couple.png"
+              alt="Hein and Claraa together"
+            />
+            <canvas
+              id="intro-couple"
+              hidden
+              role="img"
+              aria-label="Animated in-game characters of Hein with glasses and a blue watch, and Claraa waving together"
+            ></canvas>
+          </div>
           <p class="intro-kicker">HEIN &amp; CLARAA</p>
           <p class="intro-portrait-caption">
             Every little world begins with someone you love.

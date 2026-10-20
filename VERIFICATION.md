@@ -109,3 +109,8 @@ Game canvas and thumb controls own touch gestures. Buttons use manipulation; men
 ## Accelerated shared calendar
 
 60 tests pass, including tenfold clock advancement, midnight/month/year/leap-day rollover, weekend market timing, preview isolation, and real WebSocket welcome/state calendar synchronization. Browser verified a joined guest sees a compact date/time pill on a landscape mobile layout. Walking and driving tuning are unchanged. The shared timeline is server-authoritative and derived from a stable epoch so deployment and individual pause/menu state do not reset it.
+
+
+## Driving calendar layout and in-game intro couple
+
+The mobile status, calendar and speed badge now occupy separate safe-area-relative rows. Browser verified driving at 844×390 with a 6.5px gap between the calendar and speed display. The intro portrait uses the same character renderer as gameplay, with glasses, a single navy/blue watch, dark hair and a gentle greeting animation. Reduced motion renders a fixed pose unless the existing opt-in is enabled. The world render pauses behind the intro to avoid rendering both scenes each frame. Regression suite: 61 tests pass.

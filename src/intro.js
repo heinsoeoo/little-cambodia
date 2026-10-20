@@ -108,6 +108,12 @@ export function createIntro({
   }
   return {
     play,
+    get card() {
+      return current;
+    },
+    get animated() {
+      return !isStatic();
+    },
     get active() {
       return active;
     },

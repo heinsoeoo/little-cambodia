@@ -1,6 +1,7 @@
 import { places, nearestPlace } from "./places.js";
 import { createBrowserNotice, needsBrowserNotice } from "./browser-notice.js";
 import { createAudio } from "./audio.js";
+import { createIntroCouple } from "./intro-couple.js";
 import { createIntro } from "./intro.js";
 import { createMobileHUD, mobileViewport } from "./mobile-hud.js";
 import { createWardrobe } from "./wardrobe-ui.js";
@@ -72,6 +73,7 @@ sun.shadow.camera.bottom = -180;
 sun.shadow.bias = -0.001;
 const playerVisibility = createPlayerVisibility();
 const wardrobe = createWardrobe();
+const introCouple = createIntroCouple($("intro-couple"));
 const world = makeWorld(scene, map, city, { visibility: playerVisibility }),
   streetLife = createStreetLife(scene, world.path, map);
 camera.position.set(spawn[0] + 40, 58, spawn[1] + 90);
@@ -519,6 +521,13 @@ function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min((now - previous) / 1000, 0.1);
   previous = now;
+  if (intro.active) {
+    audio.update(dt, self, keys, false);
+    clock.tick(dt);
+    introCouple.render(now, intro.card === 0, intro.animated);
+    return;
+  }
+  introCouple.render(now, false, false);
   const ready = Boolean(joined && network.id && !paused && !portraitBlocked);
   const active = ready && !mobileHUD.isOpen && !intro.active;
   const riverDistance = self
