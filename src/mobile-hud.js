@@ -5,6 +5,15 @@ export function createMobileHUD({ clearInput, onPrimary, onTalk }) {
   const $ = (id) => document.getElementById(id),
     header = document.querySelector("header");
   const actions = ["camera", "pause", "wardrobe", "leave"].map($);
+  function placeSound(creating) {
+    const sound = $("game-sound");
+    const target = creating
+      ? $("creator-utilities")
+      : mobile
+        ? $("mobile-menu-actions")
+        : header;
+    if (sound && target && sound.parentElement !== target) target.append(sound);
+  }
   let mobile = false,
     menuOpen = false;
   function closeMenu() {
@@ -37,6 +46,8 @@ export function createMobileHUD({ clearInput, onPrimary, onTalk }) {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeMenu();
   });
+  document.body.classList.toggle("ui-creating", !$("welcome").hidden);
+  placeSound(!$("welcome").hidden);
   return {
     get isOpen() {
       return mobile && menuOpen;
@@ -45,6 +56,7 @@ export function createMobileHUD({ clearInput, onPrimary, onTalk }) {
     resize(value) {
       if (value === mobile) return;
       mobile = value;
+      placeSound(!$("welcome").hidden);
       document.body.classList.toggle("mobile-ui", mobile);
       closeMenu();
       if (!mobile) {
@@ -58,6 +70,7 @@ export function createMobileHUD({ clearInput, onPrimary, onTalk }) {
         else header.insertBefore(button, $("mobile-map-toggle"));
     },
     update(state, can, creating, vendor) {
+      placeSound(creating);
       document.body.classList.toggle("in-town", Boolean(state));
       document.body.classList.toggle("ui-creating", creating);
       document.body.dataset.playMode = state?.mode || "walk";

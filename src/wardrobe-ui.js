@@ -3,7 +3,6 @@ import {
   GENDERS,
   hairstyle,
   OUTFIT_CUTS,
-  outfitCut,
   SKIN_TONES,
   STYLES,
   appearance,
@@ -95,7 +94,7 @@ export function createWardrobe() {
     $("creator-back").hidden = !detail;
     $("creator-title").textContent = detail
       ? "Your outfit. Your way."
-      : "Your city. Your style.";
+      : "A little world, all yours.";
     character.group.visible = true;
     if (vehicle) vehicle.visible = !detail;
     $("look-preview").setAttribute(
@@ -112,7 +111,7 @@ export function createWardrobe() {
     } else {
       character.group.position.set(-2, 0, 0);
       character.group.scale.setScalar(1.55);
-      camera.position.set(7, 4.2, 10);
+      camera.position.set(6.2, 3.7, 8.6);
       camera.lookAt(0, 0.9, 0);
       stage.scale.set(1, 1, 1);
     }
@@ -134,7 +133,7 @@ export function createWardrobe() {
       vehicle.visible = mode === "main";
     }
     $("look-summary").textContent =
-      `${outfitCut(look)} fit · ${style(look.top).name} top · ${style(look.bottom).name} bottom · ${hairstyle(look.hair, look.gender).name} · ${style(look.shoes).name} shoes`;
+      `${style(look.top).name} ${look.top === look.bottom && look.top === look.shoes ? "outfit" : "mix"} · ${hairstyle(look.hair, look.gender).name}`;
     $("look-vehicle-name").textContent = vehicleSpec(profile.vehicleType).name;
     $("main-outfit").value = $("look-preset").value;
   }
@@ -238,6 +237,11 @@ export function createWardrobe() {
         lastHeight = height;
         renderer.setSize(width, height, false);
         camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+      }
+      const previewFov = mode === "main" && width / height > 2 ? 23 : 34;
+      if (camera.fov !== previewFov) {
+        camera.fov = previewFov;
         camera.updateProjectionMatrix();
       }
       character.group.rotation.y = 0.2 + Math.sin(time / 3000) * 0.35;

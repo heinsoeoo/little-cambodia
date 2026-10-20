@@ -2512,3 +2512,491 @@ body {
   font-size: 13px;
   padding: 10px 16px;
 }
+
+/* Warm, compact welcome screen with a deliberate mobile hierarchy. */
+body.ui-creating::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: #243b3159;
+  backdrop-filter: blur(9px);
+  z-index: 19;
+  pointer-events: none;
+}
+.welcome.character-creator {
+  width: min(1040px, calc(var(--game-width, 100vw) - 48px));
+  padding: 28px;
+  border: 1px solid #fff9e8c9;
+  border-radius: 28px;
+  background: linear-gradient(125deg, #fbf5e9, #f2eadb);
+  box-shadow:
+    0 22px 90px #142a3340,
+    inset 0 1px #fff;
+  color: #343f36;
+}
+.creator-heading {
+  margin-bottom: 20px;
+}
+.creator-heading .eyebrow {
+  font:
+    700 10px/1.5 -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  letter-spacing: 2px;
+  color: #617261;
+}
+.creator-heading .eyebrow span {
+  color: #96856f;
+  letter-spacing: 1px;
+}
+.character-creator .creator-heading h1 {
+  margin: 6px 0 0;
+  font:
+    400 clamp(25px, 3.5vw, 38px) / 1.12 Georgia,
+    serif;
+  letter-spacing: -1px;
+  color: #354338;
+}
+.character-creator #guest-form {
+  grid-template-columns: 1fr 1.08fr;
+  gap: 20px;
+  align-items: stretch;
+}
+.character-creator #setup-main {
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 12px;
+  align-content: center;
+}
+.character-creator #setup-main .creator-field {
+  grid-column: auto;
+}
+.character-creator #setup-main .creator-wide {
+  grid-column: 1 / -1;
+}
+.character-creator .creator-field label {
+  font:
+    600 12px/1.4 -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  color: #697263;
+  margin-bottom: 7px;
+}
+.character-creator .creator-field input,
+.character-creator .creator-field select,
+.character-creator #outfit-set-fields select {
+  height: 46px;
+  font:
+    400 16px/1.2 -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  padding: 10px 12px;
+  border: 1px solid #d8d3c3;
+  border-radius: 12px;
+  color: #354338;
+  background-color: #fffcf5;
+  box-shadow: 0 2px 3px #4a443906;
+}
+.character-creator input::placeholder {
+  color: #979c8e;
+}
+.character-creator input:focus-visible,
+.character-creator select:focus-visible,
+.character-creator button:focus-visible {
+  outline: 3px solid #b2c4a3;
+  outline-offset: 3px;
+}
+.outfit-main-choice {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+.character-creator .outfit-main-choice #outfit-open {
+  width: auto;
+  min-height: 46px;
+  padding: 10px 16px;
+  border: 1px solid #c5ceba;
+  border-radius: 12px;
+  background: #e4eadb;
+  color: #4b6147;
+  font:
+    600 13px -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  text-align: center;
+}
+.character-creator .creator-preview {
+  position: relative;
+  padding: 18px 16px 14px;
+  border: 1px solid #ded8c5;
+  border-radius: 22px;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 40%, #fdf5de, #e5e7d7 85%);
+  box-shadow: inset 0 1px #fff9;
+}
+.preview-heading {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: #788270;
+  font:
+    600 9px -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  letter-spacing: 1.3px;
+}
+.preview-location {
+  padding: 5px 9px;
+  background: #faf8eeaa;
+  border: 1px solid #fff9;
+  border-radius: 20px;
+  font-size: 10px;
+  letter-spacing: 0;
+  color: #718068;
+}
+.character-creator #look-preview {
+  height: 220px;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+}
+.character-creator .creator-preview strong {
+  font:
+    600 14px/1.4 -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  color: #4d5b49;
+}
+.character-creator .creator-preview p {
+  font:
+    400 11px/1.4 -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  color: #808674;
+  margin: 5px 0 0;
+}
+.character-creator .creator-actions {
+  gap: 10px;
+}
+.character-creator .creator-actions #start {
+  min-height: 48px;
+  padding: 12px 20px;
+  border: 1px solid #435f45;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #617e58, #4c6947);
+  color: #fffaf0;
+  box-shadow:
+    0 5px 12px #4a64351f,
+    inset 0 1px #ffffff26;
+  font:
+    600 15px -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  letter-spacing: 0.2px;
+}
+.character-creator .creator-actions #start:active {
+  transform: translateY(1px);
+}
+.creator-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding-top: 14px;
+  margin-top: 16px;
+  border-top: 1px solid #d9d4c26b;
+}
+.creator-footer > small {
+  font:
+    400 11px/1.4 -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  color: #919381;
+}
+#creator-utilities {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.character-creator #creator-utilities button {
+  background: transparent;
+  color: #718069;
+  border: 0;
+  box-shadow: none;
+  border-radius: 8px;
+  padding: 7px 4px;
+  width: auto;
+  margin: 0;
+  font:
+    500 11px/1.3 -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
+#creator-utilities .game-audio {
+  position: static;
+  opacity: 1;
+  z-index: auto;
+}
+header > .game-audio {
+  position: static;
+  padding: 10px;
+}
+#mobile-menu-actions > .game-audio {
+  position: static;
+  width: 100%;
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .mobile-ui .welcome.character-creator {
+    width: calc(
+      var(--game-width) -
+        max(32px, env(safe-area-inset-left) + env(safe-area-inset-right) + 16px)
+    );
+    max-height: calc(var(--game-height) - 20px);
+    padding: 18px 22px 12px;
+    border-radius: 22px;
+  }
+  .creator-heading {
+    margin-bottom: 12px;
+  }
+  .character-creator .creator-heading h1 {
+    font-size: 28px;
+  }
+  .character-creator #guest-form {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+    gap: 12px 24px;
+  }
+  .character-creator #setup-main {
+    gap: 11px 12px;
+  }
+  .character-creator .creator-field label {
+    margin-bottom: 5px;
+    font-size: 11px;
+  }
+  .character-creator .creator-field input,
+  .character-creator .creator-field select {
+    height: 43px;
+  }
+  .character-creator .creator-preview {
+    padding: 12px;
+  }
+  .character-creator #look-preview {
+    height: 156px;
+  }
+  .character-creator.creator-detail #look-preview {
+    height: 180px;
+  }
+  .character-creator .creator-actions #start {
+    min-height: 44px;
+  }
+  .creator-footer {
+    padding-top: 5px;
+    margin-top: 8px;
+  }
+  .character-creator #creator-utilities button {
+    min-height: 32px;
+  }
+}
+@media (orientation: landscape) and (max-height: 390px) {
+  .mobile-ui .welcome.character-creator {
+    padding: 12px 18px 7px;
+    max-height: calc(var(--game-height) - 12px);
+  }
+  .creator-heading {
+    margin-bottom: 9px;
+  }
+  .character-creator .creator-heading h1 {
+    font-size: 23px;
+    margin-top: 2px;
+  }
+  .character-creator #setup-main {
+    gap: 7px 10px;
+  }
+  .character-creator .creator-field input,
+  .character-creator .creator-field select {
+    height: 39px;
+  }
+  .character-creator .outfit-main-choice #outfit-open {
+    min-height: 39px;
+  }
+  .character-creator #look-preview {
+    height: 120px;
+  }
+  .character-creator #guest-form {
+    gap: 9px 20px;
+  }
+  .character-creator .creator-actions #start {
+    min-height: 42px;
+  }
+  .creator-footer {
+    margin-top: 5px;
+    padding-top: 0;
+  }
+}
+@media (orientation: portrait) and (max-width: 650px) {
+  .welcome.character-creator {
+    width: calc(100vw - 24px);
+    padding: 20px;
+  }
+  .character-creator #guest-form {
+    grid-template-columns: 1fr;
+  }
+  .character-creator .creator-preview {
+    grid-row: 1;
+  }
+  .character-creator #look-preview {
+    height: 180px;
+  }
+  .creator-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+/* Keep the canvas intrinsic bitmap size from stretching the form's grid row. */
+.character-creator #look-preview {
+  flex: none;
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .character-creator #look-preview {
+    height: 126px;
+  }
+  .character-creator .creator-actions #start {
+    padding: 10px 18px;
+  }
+  .creator-footer {
+    padding-top: 2px;
+    margin-top: 5px;
+  }
+  .character-creator #creator-utilities button {
+    min-height: 28px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+}
+@media (orientation: landscape) and (max-height: 390px) {
+  .character-creator #look-preview {
+    height: 100px;
+  }
+  .character-creator .creator-preview {
+    padding: 9px;
+  }
+  .character-creator .creator-field label {
+    margin-bottom: 3px;
+    font-size: 10px;
+  }
+  .character-creator #setup-main {
+    gap: 6px 10px;
+  }
+  .character-creator #creator-utilities button {
+    min-height: 26px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+  .preview-heading {
+    font-size: 8px;
+  }
+  .character-creator .creator-actions #start {
+    min-height: 40px;
+    padding: 9px 18px;
+  }
+}
+
+body.ui-creating header {
+  visibility: hidden;
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .character-creator.creator-detail #outfit-editor {
+    max-height: calc(var(--game-height, 100dvh) - 190px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 5px;
+    scrollbar-width: thin;
+    scrollbar-color: #bac4ab transparent;
+  }
+  .character-creator.creator-detail #look-preview {
+    height: 126px;
+  }
+  .character-creator .creator-actions #creator-back,
+  .character-creator .creator-actions #wardrobe-close {
+    min-height: 44px;
+    border-radius: 12px;
+    border: 1px solid #d1d6c5;
+    background: #e7ecdf;
+    color: #5a6e50;
+    font-size: 13px;
+  }
+}
+@media (orientation: landscape) and (max-height: 390px) {
+  .mobile-ui .welcome.character-creator {
+    padding-top: 10px;
+    padding-bottom: 5px;
+  }
+  .creator-heading {
+    margin-bottom: 6px;
+  }
+  .character-creator.creator-detail #outfit-editor {
+    max-height: calc(var(--game-height, 100dvh) - 170px);
+  }
+  .character-creator.creator-detail #look-preview {
+    height: 100px;
+  }
+  .character-creator .creator-actions #creator-back,
+  .character-creator .creator-actions #wardrobe-close {
+    min-height: 40px;
+  }
+}
+@media (orientation: landscape) and (max-height: 320px) {
+  .mobile-ui .welcome.character-creator {
+    padding: 8px 16px 4px;
+  }
+  .creator-heading {
+    margin-bottom: 5px;
+  }
+  .character-creator .creator-heading h1 {
+    font-size: 21px;
+  }
+  .creator-heading .eyebrow {
+    font-size: 8px;
+    line-height: 1.2;
+  }
+  .character-creator #setup-main {
+    gap: 4px 10px;
+  }
+  .character-creator .creator-field input,
+  .character-creator .creator-field select {
+    height: 36px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+  }
+  .character-creator .creator-field label {
+    font-size: 9px;
+    margin-bottom: 2px;
+  }
+  .character-creator .outfit-main-choice #outfit-open {
+    min-height: 36px;
+  }
+  .character-creator #look-preview,
+  .character-creator.creator-detail #look-preview {
+    height: 66px;
+  }
+  .character-creator .creator-preview strong {
+    font-size: 12px;
+  }
+  .character-creator .creator-preview p {
+    font-size: 10px;
+    margin-top: 2px;
+  }
+  .character-creator #guest-form {
+    gap: 7px 20px;
+  }
+  .preview-location {
+    padding: 3px 7px;
+    font-size: 9px;
+  }
+  .creator-footer {
+    margin-top: 4px;
+  }
+  .character-creator.creator-detail #outfit-editor {
+    max-height: calc(var(--game-height, 100dvh) - 155px);
+  }
+}

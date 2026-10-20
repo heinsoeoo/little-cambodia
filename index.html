@@ -119,8 +119,10 @@
       >
     </footer>
     <section id="welcome" class="welcome character-creator">
-      <div class="eyebrow">COME AS YOU ARE. MAKE IT YOURS.</div>
-      <h1 id="creator-title">Your city. Your style.</h1>
+      <div class="creator-heading">
+        <div class="eyebrow">LITTLE CAMBODIA <span>· PHNOM PENH</span></div>
+        <h1 id="creator-title">A little world, all yours.</h1>
+      </div>
       <form id="guest-form" novalidate>
         <div id="setup-main" class="creator-fields">
           <div class="creator-field">
@@ -196,6 +198,10 @@
           </div>
         </div>
         <div id="creator-preview" class="creator-preview">
+          <div class="preview-heading">
+            <span>YOUR LITTLE ADVENTURE</span
+            ><span class="preview-location">Phnom Penh</span>
+          </div>
           <canvas id="look-preview" aria-label="3D character preview"></canvas
           ><strong id="look-vehicle-name" hidden></strong>
           <p id="look-summary" aria-live="polite"></p>
@@ -209,12 +215,14 @@
           <p id="join-error" role="status"></p>
         </div>
       </form>
-      <small
-        >No account needed · Nickname and look visible to other guests</small
-      >
-      <button id="intro-replay" class="intro-replay" type="button">
-        For Claraa · Watch dedication ♡
-      </button>
+      <div class="creator-footer">
+        <small>No account needed. Come as you are.</small>
+        <div id="creator-utilities">
+          <button id="intro-replay" class="intro-replay" type="button">
+            For Claraa ♡
+          </button>
+        </div>
+      </div>
     </section>
     <section id="pause-overlay" class="pause-overlay" hidden>
       <div class="pause-card panel">
@@ -336,7 +344,7 @@
       <button id="intro-skip" type="button">Skip intro →</button>
       <div class="intro-progress" aria-hidden="true"></div>
     </section>
-    <button data-audio-toggle class="game-audio" type="button">
+    <button id="game-sound" data-audio-toggle class="game-audio" type="button">
       Play sound ♫
     </button>
     <script type="module" src="/src/main.js"></script>

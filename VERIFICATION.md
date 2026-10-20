@@ -92,3 +92,7 @@ Build and intro regression test pass. Tested reduced-motion default, animation o
 Public HTTPS game at https://little-cambodia.hexdock.dev. HTTP redirects to HTTPS. Certificate renewal timer enabled. App runs as unprivileged systemd service. Production health check, secure WebSocket guest join and Mercedes summoning pass. Browser joined as Launch check. 44 local tests pass. Repository created private at heinsoeoo/little-cambodia and all commits pushed. CI tests/format/build ran; deployment awaits repository DEPLOY_SSH_KEY approval/configuration.
 
 Restricted CI receiver was tested with its dedicated SSH key; a group-permission failure triggered rollback, was corrected with chgrp, and the fresh release then passed. Arbitrary shell command rejected. Server idle process memory approximately 43 MB; no concurrent-player load test performed.
+
+## Cozy mobile setup redesign
+
+Warm cream/sage welcome with clearer field hierarchy, full-width vehicle selection, shorter preview summary, landscape-specific canvas framing, and a footer with sound/dedication controls. Sound moves into the in-game menu/header after joining. Corrected intrinsic canvas flex growth that pushed the primary action off screen. Short landscape controls and independently scrolling outfit choices preserve navigation access. Verified browser layouts at 1024×420, 1024×348, and 932×300; main setup at 1024×348 has equal scroll/client height. Physical iPhone not available in automation. Build and all 44 tests pass.
