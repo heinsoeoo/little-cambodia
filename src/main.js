@@ -1,3 +1,4 @@
+import { createAudio } from "./audio.js";
 import { createIntro } from "./intro.js";
 import { createMobileHUD, mobileViewport } from "./mobile-hud.js";
 import { createWardrobe } from "./wardrobe-ui.js";
@@ -28,6 +29,7 @@ let self = null,
   noticeUntil = 0,
   sendElapsed = 0,
   hud = 0;
+const audio = createAudio();
 const clock = new CityClock(),
   clearTouch = bindHoldControls(document, keys);
 const notify = (text, seconds = 4) => {
@@ -140,8 +142,10 @@ function enterExit() {
 function talk() {
   if (!self || paused || portraitBlocked) return;
   const vendor = streetLife.nearest(self);
-  if (vendor && vendor.distance < 7 && Math.abs(self.speed) < 1.5)
+  if (vendor && vendor.distance < 7 && Math.abs(self.speed) < 1.5) {
+    audio.effect("talk");
     notify(`${vendor.food} vendor: “Fresh and ready! Enjoy the riverside.”`, 6);
+  }
 }
 function syncRoster(players) {
   $("online").textContent = `${players.length} / 16 guests online`;
@@ -239,6 +243,7 @@ const network = new Multiplayer((event) => {
   }
   if (event.type === "action") {
     self = structuredClone(event.player);
+    audio.effect(event.action);
     notify(
       event.action === "summon"
         ? document.body.classList.contains("mobile-ui")
@@ -272,7 +277,13 @@ const mobileHUD = createMobileHUD({
     else action("summon");
   },
 });
-const intro = createIntro({ onOpen: stopInput });
+const intro = createIntro({
+  onOpen: () => {
+    stopInput();
+    audio.setIntro(true);
+  },
+  onClose: () => audio.setIntro(false),
+});
 resize();
 window.visualViewport?.addEventListener("resize", resize);
 addEventListener("resize", resize);
@@ -447,6 +458,7 @@ function frame(now) {
   previous = now;
   const ready = Boolean(joined && network.id && !paused && !portraitBlocked);
   const active = ready && !mobileHUD.isOpen && !intro.active;
+  audio.update(dt, self, keys, active);
   accumulator += dt;
   while (accumulator >= 1 / 60) {
     if (active && self) stepGuest(self, keys, 1 / 60);

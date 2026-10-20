@@ -123,3 +123,7 @@ Outfit cut defaults to **Match gender**: Male has athletic/tapered tailoring, Fe
 The cinematic begins with a photo-inspired cozy illustration of Hein and Claraa, a gentle fade and camera-like push-in, then the dedication, love note and creator credit. Skip is always available; Watch dedication replays it. Reduced-motion devices get a static opening with Continue. The original private photo is not bundled. The generated illustration is in `public/art/hein-claraa-couple.png`; the generation prompt is saved alongside it.
 
 Gender-specific hair labels and shapes preserve existing saved hair IDs. The black Mercedes C 300 is the initial default, with a one-time migration for older saved profiles; later vehicle choices remain saved.
+
+## Intro playback and sound
+
+The intro now restarts on every reload and every replay. Use Play sound to enable the original synthesized intro melody; browsers need a user gesture to start audio. A persistent sound toggle controls music and game effects, and remembers mute preference. Game sounds include footsteps, speed-responsive engine hum, braking, summon chimes, entering/exiting, and vendor interaction. Audio pauses when the page is hidden; tap again when returning if the browser requires it. No external music files or licenses are required. The tab icon is an original Angkor Wat silhouette.

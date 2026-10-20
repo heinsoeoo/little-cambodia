@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta charset="UTF-8" />
     <meta
       name="viewport"
@@ -321,9 +322,20 @@
           </h1>
         </div>
       </div>
+      <button
+        data-audio-toggle
+        data-intro-audio
+        class="intro-audio"
+        type="button"
+      >
+        Play sound ♫
+      </button>
       <button id="intro-skip" type="button">Skip intro →</button>
       <div class="intro-progress" aria-hidden="true"></div>
     </section>
+    <button data-audio-toggle class="game-audio" type="button">
+      Play sound ♫
+    </button>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

@@ -78,3 +78,7 @@
 ## v0.11 cinematic and setup
 
 Production build passes. Existing 42 tests pass; the added gender-specific hairstyle construction test also passes (43 total tests). Browser checked opening couple art and manual reduced-motion transitions through dedication, love note and credit; replay returns to portrait and Continue returns to setup. Confirmed black C 300 selected for the migrated saved profile, main outfit selector and Customize entry. Couple portrait framing checked at 1280×720 and 1024×348. Browser has reduced motion enabled, so timed fades/push-in are implemented but were not visually exercised in this browser. LAN server restarted with updated vehicle catalog.
+
+## Reload/audio/favicon update
+
+44 tests pass, including the new regression test for reload/replay and timer cleanup. Production build passes. Browser verified a reload during the text scene returns to the couple portrait, and Play sound changes to the active Mute sound state. The browser automation does not provide audible monitoring, so perceived volume/tone still needs a phone listening check. Angkor Wat SVG favicon included locally.

@@ -1,4 +1,4 @@
-export function createIntro({ onOpen = () => {} } = {}) {
+export function createIntro({ onOpen = () => {}, onClose = () => {} } = {}) {
   const overlay = document.getElementById("intro"),
     button = document.getElementById("intro-skip"),
     cards = [...overlay.querySelectorAll("[data-intro-card]")];
@@ -16,9 +16,7 @@ export function createIntro({ onOpen = () => {} } = {}) {
     active = false;
     overlay.hidden = true;
     document.body.classList.remove("intro-active");
-    try {
-      sessionStorage.setItem("claraa-intro-couple-seen", "1");
-    } catch {}
+    onClose();
     previousFocus?.focus?.();
   }
   function card(index) {
@@ -34,6 +32,10 @@ export function createIntro({ onOpen = () => {} } = {}) {
     previousFocus = document.activeElement;
     active = true;
     overlay.hidden = false;
+    // Restart CSS timelines instead of resuming the previous progress/portrait animation.
+    overlay.classList.remove("intro-playing");
+    void overlay.offsetWidth;
+    overlay.classList.add("intro-playing");
     document.body.classList.add("intro-active");
     overlay.classList.toggle("intro-static", reduced);
     button.textContent = reduced ? "Continue →" : "Skip intro →";
@@ -58,15 +60,14 @@ export function createIntro({ onOpen = () => {} } = {}) {
     if (event.key === "Escape") finish();
     if (event.key === "Tab") {
       event.preventDefault();
-      button.focus();
+      (document.activeElement === button
+        ? document.querySelector("[data-intro-audio]")
+        : button
+      ).focus();
     }
   });
-  let seen = false;
-  try {
-    seen = sessionStorage.getItem("claraa-intro-couple-seen") === "1";
-  } catch {}
-  if (seen) finish();
-  else play();
+  /* Always begin at the portrait, including reloads and replay. */
+  play();
   return {
     play,
     get active() {
