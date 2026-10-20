@@ -1,44 +1,36 @@
-# Phnom Drive
+# Phnom Drive — Little Riverside (v0.5)
 
-Playable Three.js taxi prototype for central Phnom Penh. Original procedural artwork and code, inspired by the accessible city-driving loop of OpenTaxi.
+A playable, handcrafted Cambodian town for the pixel-art driving game. This version replaces the default dense geographic city with a compact authored neighbourhood: small homes, shops, garden paths, a market square and a clean riverbank. It is inspired by Phnom Penh, not a street-for-street representation.
 
-## Play locally
-
-Requires Node.js 20.19+ or 22+.
+## Play
 
 ```sh
-npm install
+npm ci
 npm run dev
 ```
 
-Open the address printed by Vite (normally http://127.0.0.1:5173). Click **Start your shift**.
+Open the local Vite address and choose **Start your shift**. WASD/arrows drive, Space brakes, E picks up/drops off, R resets to the road, C changes zoom and P pauses. Mobile users get steering/accelerator/reverse/brake buttons and a portrait rotation prompt.
 
-- WASD / arrow keys: accelerate, reverse and steer.
-- Space: brake. E: pick up/drop off when stopped within 15 m.
-- R: return to the nearest road. C: near/wide pixel-town view. P: pause/resume.
-- Camera button: switch view. Mobile steering, accelerator, reverse and brake buttons support simultaneous fingers; pickup/drop-off uses the mission button. Portrait phones show a rotate prompt and suspend driving.
+Follow the route and stop within 15 m to pick up or deliver. Completed fares earn 6,000 fictional riel, saved in the browser. No account is needed.
 
-Follow the lime route on the road and minimap. Navigation recalculates every second through connected OSM nodes and respects mapped one-way streets. Restricted and pedestrian-only roads are excluded. If a road connection cannot be found, the map clearly falls back to dotted direct guidance. Pause also activates when you switch away from the game. Each completed fare earns 6,000 fictional riel, saved locally in your browser. No login or backend is needed.
+## New map direction
 
-## What's included
+- 16 original house/shop sprites on an authored, connected neighbourhood street grid.
+- Shingled roofs, short front walls, doors, windows and small garden paths.
+- A market square and flower garden with a fountain.
+- Tree-lined edges and a distinct grass/paving/sand/water riverbank.
+- A flat painted tile-style world, viewed from above, replaces tall extruded buildings.
+- Collisions use the same authored house footprints shown on the map.
 
-961 drivable OSM road ways and 4,842 building footprints; a roughly 2.7 × 3.0 km district; arcade taxi handling; footprint collision checks; a stylized Independence Monument; procedural trees; six road-snapped fare locations; minimap; day/evening lighting. Counts reflect the bundled extract.
+`src/town-map.js` defines the layout and five taxi destinations. `src/town-world.js` paints the original pixel map and supplies collision rules. Both are separate from the shared vehicle, missions, navigation, clock and mobile systems.
 
-## Structure and extension
+## People and time
 
-- `src/cities.js`: city-specific origin, data file, bounds, and fare landmarks.
-- `src/geo.js`: coordinate projection, map parsing, road proximity.
-- `src/navigation.js`: road graph, shortest-path routing, one-way constraints and opening spawn.
-- `src/world.js`: procedural environment, taxi model and spatial collision index.
-- `src/vehicle.js`: fixed-step vehicle simulation.
-- `src/missions.js`: pickup/drop-off rules, rewards and save state.
-- `src/main.js`: renderer, camera, controls, UI and application lifecycle.
-- `public/data/`: bundled OSM source extract and attribution.
-- `PLAN.md`: inspection findings, scope and follow-up milestones.
+The clock defaults to Asia/Phnom_Penh. **City time** offers weekday-noon and weekend-market previews. The weekend market runs Saturday/Sunday 18:00–23:00 with 240 pedestrians and 22 vendors; other periods have fewer characters. Counts and daily seller schedules are illustrative gameplay choices. Previews advance six game seconds per real second while playing and freeze during pause or portrait protection.
 
-To add Siem Reap, provide another city configuration and an OSM extract with the same schema, select that configuration in main, and supply local landmarks. Map and collision extents derive from city bounds; scenery population should be tuned per city. A city selection screen and city-specific storage keys are future work. The shared simulation and mission modules require no city-specific logic.
+**Visit riverside** moves the taxi to a nearby access road. Stop and use **Talk to vendor** or V for ambient dialogue. There is no purchase/inventory system yet.
 
-## Verify / distribute
+## Verification / build
 
 ```sh
 npm test
@@ -46,35 +38,14 @@ npm run format:check
 npm run build
 ```
 
-Serve `dist/` using any static HTTP server. Do not open index.html directly from the filesystem. Building from the lockfile with `npm ci` gives reproducible dependency versions. Runtime map data and all procedural pixel textures are local. The interface uses installed monospace fonts.
+Serve `dist/` from a static HTTP server; opening index.html directly does not work. Dependencies and generated builds are excluded from Git.
 
-## Prototype limits
+## Geographic prototype retained
 
-Desktop browser smoke-tested; touch controls implemented but not verified on a physical phone. No traffic AI, walking, multiplayer, turn-by-turn navigation, sound or realistic suspension. Buildings use OSM footprints with mostly generated heights; this is stylized scenery, not an accurate architectural reconstruction. The expanded district includes the Tonlé Sap riverside and night-market access. The map edge is bounded; there is no city streaming. Collision uses a point plus 1.5 m footprint clearance, not rigid-body physics. Static geometry is merged by material into 29 mesh draws (excluding NPCs and stalls); actual frame-rate gains depend on the device. The fixed orthographic camera provides a diagonal town view. Tall map buildings can still occlude the taxi; broader camera handling and device performance profiling remain future work. Routing does not yet account for turn restrictions, road closures or traffic.
+The prior OSM extracts, city configuration, geographic world builder and tests remain in the repository as reference material. They are no longer the default playable map. See `SOURCES.md` and `public/data/ATTRIBUTION.md` for OSM data provenance and ODbL attribution. The authored Little Riverside map is original artwork and geometry; it does not derive its street layout from OSM.
 
-## Data and credits
+## Limits
 
-© OpenStreetMap contributors, ODbL. Source and license: https://www.openstreetmap.org/copyright . The unmodified source extract is distributed in `public/data/phnom-penh.osm.json`. See `public/data/ATTRIBUTION.md` for query and retrieval details. Three.js is MIT licensed. See installed dependency licenses. No reference game assets or code are included.
+A stylized small neighbourhood, not an entire city. No traffic AI, interiors, walking controls, multiplayer, turn restrictions or real-world street closures. Physical-phone performance and long sessions are not fully verified. The NPCs are simple animated sprites. No assets from Harvest Moon or Stardew Valley are included.
 
-
-## Git history
-
-This folder is a Git repository on `main`. The original playable prototype is preserved in the first commit, followed by the navigation and rendering enhancement. Dependencies and generated builds are ignored. No remote is configured yet.
-
-
-## City life (v0.3)
-
-The city defaults to live **Asia/Phnom_Penh** time. The City time selector offers weekday-noon and weekend-market previews. Previews advance six game seconds per real second while playing; pause or portrait mode stops preview time. Live mode always reflects the current clock.
-
-Weekend market activity runs Saturday/Sunday 18:00–23:00: 240 walking NPCs plus 22 vendors. Weekdays and daytime have smaller populations; carts close overnight. Except for the weekend hours, these are illustrative gameplay schedules and population counts, not a claim about each real seller. Use **Visit riverside**, park, then **Talk to vendor** or V for ambient dialogue. There is no purchase/inventory system yet. Road closures across the real walking-street area are not fully simulated.
-
-The river polygon and footprints come from OSM. Building classification uses building/shop/tourism and land-use tags. Available height and level tags are honored; 4,680 buildings lack those tags and use explicitly estimated heights. Roofs, doors, windows, stall positions and NPCs are procedural representations, not street-view reconstructions. The shoreline promenade follows an offset of the mapped river bank. Whole-building geometry is supported; multipolygon courtyards and detailed roof forms remain simplified.
-
-Additional modules: `buildings.js` and `facades.js` for building metadata and detail; `schedule.js` for clock/activity; `riverside.js` for shore geometry; `street-life.js` for vendors/crowds; `mobile.js` for input and rotation logic. `scripts/convert-osm.py` prepares the official map API XML response. See `SOURCES.md` for geographic and schedule references.
-
-
-## Pixel-town art direction (v0.4)
-
-The game now uses a warm, limited-color retro presentation inspired by classic cozy farming RPGs: low-resolution WebGL enlarged with nearest-neighbor pixels, a fixed diagonal orthographic camera with two zoom levels (C), original animated pixel NPC sprites, repeated grass/roof/road/water textures, and parchment-and-wood interface panels. The physics and geographic map remain shared with the prior prototype. It is a 2.5D pixel-art treatment, not a complete conversion to a hand-authored 2D tile world or a literal 8-bit engine.
-
-All sprite frames and textures are generated locally by `src/pixel-art.js`. No artwork, sprites or fonts from Harvest Moon or Stardew Valley are used. The output resolution is based on viewport size (roughly 270 vertical game pixels or fewer), while the HTML interface remains full resolution for readability. C changes the visible world area without changing driving controls.
+The local Git repository uses `main`; no remote is configured.

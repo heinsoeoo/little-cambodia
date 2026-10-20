@@ -188,7 +188,11 @@ export function createStreetLife(scene, path, map) {
       }
       if (pixelPeople) {
         dummy.position.set(point[0], 1.43, point[1]);
-        dummy.rotation.set(0, Math.atan2(36, 48), 0);
+        dummy.rotation.set(
+          0,
+          map?.layout === "town" ? 0 : Math.atan2(36, 48),
+          0,
+        );
         dummy.updateMatrix();
         pixelPeople.setMatrixAt(i, dummy.matrix);
       }

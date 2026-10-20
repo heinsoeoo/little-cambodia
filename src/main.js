@@ -1,17 +1,18 @@
 import * as T from "three";
+import { townCity, createTownMap } from "./town-map.js";
+import { makeTownWorld } from "./town-world.js";
 import { palette } from "./pixel-art.js";
 import { CityClock, activityAt } from "./schedule.js";
 import { createStreetLife } from "./street-life.js";
 import { samplePath } from "./riverside.js";
 import { bindHoldControls, needsRotation } from "./mobile.js";
-import { cities } from "./cities.js";
-import { project, prepare, nearestRoad } from "./geo.js";
+import { project, nearestRoad } from "./geo.js";
 import { buildGraph, findRoute, approachSpawn } from "./navigation.js";
 import { Missions } from "./missions.js";
 import { stepVehicle } from "./vehicle.js";
-import { makeWorld, taxi, routeRibbon } from "./world.js";
+import { taxi, routeRibbon } from "./world.js";
 const $ = (id) => document.getElementById(id),
-  city = cities.phnomPenh,
+  city = townCity,
   keys = new Set();
 let started = false,
   paused = false,
@@ -144,7 +145,7 @@ $("visit-riverside").onclick = () => {
   car.z = stop.point[1];
   car.heading = Math.PI / 2;
   car.speed = 0;
-  camera.position.set(car.x + 36, 72, car.z + 48);
+  camera.position.set(car.x, 90, car.z + 60);
   routeElapsed = 1;
   notify("Riverside access · food carts are beside the water");
 };
@@ -281,6 +282,14 @@ function drawMap() {
     );
     c.stroke();
   }
+  c.fillStyle = "#b77955";
+  for (const building of map.buildings) {
+    c.beginPath();
+    building.points.forEach((p, i) =>
+      i ? c.lineTo(px(p[0]), pz(p[1])) : c.moveTo(px(p[0]), pz(p[1])),
+    );
+    c.fill();
+  }
   const t = target();
   c.strokeStyle = "#b45940";
   c.lineWidth = 2;
@@ -310,15 +319,13 @@ function drawMap() {
 }
 async function loadCity() {
   try {
-    const response = await fetch(city.data);
-    if (!response.ok) throw new Error(`Map load failed (${response.status})`);
-    map = prepare(await response.json(), city);
-    world = makeWorld(scene, map, city);
+    map = createTownMap();
+    world = makeTownWorld(scene, map, city);
     streetLife = createStreetLife(scene, world.path, map);
     graph = buildGraph(map.roads);
     stops = city.landmarks.map((l) => ({
       ...l,
-      ...nearestRoad(project(l.lon, l.lat, city.origin), map.roads),
+      ...nearestRoad(l.point || project(l.lon, l.lat, city.origin), map.roads),
     }));
     mission = new Missions(stops, { balance, trips });
     const spawn = approachSpawn(stops[0]);
@@ -333,11 +340,8 @@ async function loadCity() {
     ready = true;
     updateMission();
     $("start").disabled = false;
-    notify(
-      `City ready · ${map.roads.length} roads · ${map.buildings.length} buildings`,
-      5,
-    );
-    camera.position.set(car.x + 36, 72, car.z + 48);
+    notify(`Little Riverside · ${map.buildings.length} homes & shops`, 5);
+    camera.position.set(car.x, 90, car.z + 60);
   } catch (e) {
     $("mission-description").textContent = e.message;
     $("start").textContent = "City unavailable — reload to retry";
@@ -376,11 +380,11 @@ function animate(now) {
   model.position.set(car.x, 0, car.z);
   model.rotation.y = car.heading;
   // Fixed diagonal view keeps the map readable like a small pixel-art town.
-  const desired = new T.Vector3(car.x + 36, 72, car.z + 48);
+  const desired = new T.Vector3(car.x, 90, car.z + 60);
   camera.position.lerp(desired, 1 - Math.exp(-dt * 7));
   camera.position.x = Math.round(camera.position.x * 4) / 4;
   camera.position.z = Math.round(camera.position.z * 4) / 4;
-  camera.lookAt(camera.position.x - 36, 0, camera.position.z - 48);
+  camera.lookAt(camera.position.x, 0, camera.position.z - 60);
   ring.rotation.z += dt * 0.2;
   if (!paused) {
     routeElapsed += dt;
