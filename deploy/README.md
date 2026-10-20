@@ -13,7 +13,7 @@ Game sessions are in memory and reset on restart/deployment. No database is used
 
 ## GitHub Actions
 
-The workflow tests pull requests and main, checks formatting, builds with Node 22, and deploys only successful main builds. Main deployments are serialized. Official actions are pinned to commit SHAs. GitHub needs one Actions secret, DEPLOY_SSH_KEY, containing the dedicated littlecambodia_actions private key. Never commit it. SSH host key is pinned in deploy/known_hosts.
+The workflow tests pull requests and main, checks formatting, builds with Node 22, and deploys only successful main builds. Main deployments are serialized. Official actions are pinned to commit SHAs. The approved Actions secret DEPLOY_SSH_KEY is configured with the dedicated littlecambodia_actions private key. Never commit it. SSH host key is pinned in deploy/known_hosts.
 
 The CI key connects as littlecambodia-deploy, with a forced receiver command and no forwarding or PTY. The user may upload game releases and restart only littlecambodia.service through a specific sudoers rule; it has no root SSH access. The receiver validates commit IDs, serializes deploys and limits uploads to 50 MB. Source maintainers who can change production workflows/code can deploy game code; protect main appropriately as collaborators are added.
 
