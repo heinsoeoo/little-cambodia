@@ -82,3 +82,7 @@ Production build passes. Existing 42 tests pass; the added gender-specific hairs
 ## Reload/audio/favicon update
 
 44 tests pass, including the new regression test for reload/replay and timer cleanup. Production build passes. Browser verified a reload during the text scene returns to the couple portrait, and Play sound changes to the active Mute sound state. The browser automation does not provide audible monitoring, so perceived volume/tone still needs a phone listening check. Angkor Wat SVG favicon included locally.
+
+## Intro motion override
+
+Build and intro regression test pass. Tested reduced-motion default, animation opt-in, saved preference on reload, and switching back with timers cancelled. Browser confirmed Animate intro anyway becomes Use reduced motion and Continue becomes Skip intro; preference survives reload while macOS reduced motion remains enabled.

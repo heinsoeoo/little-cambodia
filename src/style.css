@@ -2388,7 +2388,7 @@ body {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cinematic-intro * {
+  .cinematic-intro:not(.intro-force-motion) * {
     animation: none !important;
     transition: none !important;
   }
@@ -2455,7 +2455,7 @@ body {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .intro-portrait.is-active img {
+  .cinematic-intro:not(.intro-force-motion) .intro-portrait.is-active img {
     animation: none;
   }
 }
@@ -2498,4 +2498,17 @@ body {
 .mobile-ui.in-town .game-audio {
   bottom: auto;
   top: max(62px, env(safe-area-inset-top));
+}
+
+.intro-motion {
+  position: absolute;
+  top: max(18px, env(safe-area-inset-top));
+  right: max(18px, env(safe-area-inset-right));
+  z-index: 5;
+  border: 1px solid #bda97c70;
+  border-radius: 24px;
+  background: #192b25;
+  color: #f4e7cd;
+  font-size: 13px;
+  padding: 10px 16px;
 }

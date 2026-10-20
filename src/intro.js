@@ -1,8 +1,14 @@
 export function createIntro({ onOpen = () => {}, onClose = () => {} } = {}) {
   const overlay = document.getElementById("intro"),
     button = document.getElementById("intro-skip"),
+    motionButton = document.getElementById("intro-motion"),
     cards = [...overlay.querySelectorAll("[data-intro-card]")];
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let animateAnyway = false;
+  try {
+    animateAnyway = localStorage.getItem("phnom-intro-animate") === "1";
+  } catch {}
+  const isStatic = () => reduced && !animateAnyway;
   let timers = [],
     active = false,
     previousFocus,
@@ -37,11 +43,17 @@ export function createIntro({ onOpen = () => {}, onClose = () => {} } = {}) {
     void overlay.offsetWidth;
     overlay.classList.add("intro-playing");
     document.body.classList.add("intro-active");
-    overlay.classList.toggle("intro-static", reduced);
-    button.textContent = reduced ? "Continue →" : "Skip intro →";
+    overlay.classList.toggle("intro-static", isStatic());
+    overlay.classList.toggle("intro-force-motion", reduced && animateAnyway);
+    motionButton.hidden = !reduced;
+    motionButton.textContent = animateAnyway
+      ? "Use reduced motion"
+      : "Animate intro anyway";
+    motionButton.setAttribute("aria-pressed", String(animateAnyway));
+    button.textContent = isStatic() ? "Continue →" : "Skip intro →";
     card(0);
     button.focus();
-    if (reduced) {
+    if (isStatic()) {
       return;
     }
     timers.push(
@@ -52,18 +64,29 @@ export function createIntro({ onOpen = () => {}, onClose = () => {} } = {}) {
     );
   }
   button.onclick = () => {
-    if (reduced && current < cards.length - 1) card(current + 1);
+    if (isStatic() && current < cards.length - 1) card(current + 1);
     else finish();
+  };
+  motionButton.onclick = () => {
+    animateAnyway = !animateAnyway;
+    try {
+      localStorage.setItem("phnom-intro-animate", animateAnyway ? "1" : "0");
+    } catch {}
+    play();
+    motionButton.focus();
   };
   document.getElementById("intro-replay").onclick = play;
   overlay.addEventListener("keydown", (event) => {
     if (event.key === "Escape") finish();
     if (event.key === "Tab") {
       event.preventDefault();
-      (document.activeElement === button
-        ? document.querySelector("[data-intro-audio]")
-        : button
-      ).focus();
+      const controls = [...overlay.querySelectorAll("button")].filter(
+        (control) => !control.hidden,
+      );
+      const index = controls.indexOf(document.activeElement);
+      controls[
+        (index + (event.shiftKey ? -1 : 1) + controls.length) % controls.length
+      ]?.focus();
     }
   });
   /* Always begin at the portrait, including reloads and replay. */

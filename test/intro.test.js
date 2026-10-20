@@ -4,10 +4,13 @@ import { createIntro } from "../src/intro.js";
 
 test("reload and replay always restart the portrait and cancel old scene timers", () => {
   const saved = Object.fromEntries(
-    ["document", "matchMedia", "setTimeout", "clearTimeout"].map((k) => [
-      k,
-      globalThis[k],
-    ]),
+    [
+      "document",
+      "matchMedia",
+      "setTimeout",
+      "clearTimeout",
+      "localStorage",
+    ].map((k) => [k, globalThis[k]]),
   );
   const element = () => ({
     hidden: false,
@@ -22,7 +25,8 @@ test("reload and replay always restart the portrait and cancel old scene timers"
   const cards = Array.from({ length: 4 }, element),
     overlay = element(),
     skip = element(),
-    replay = element();
+    replay = element(),
+    motion = element();
   overlay.querySelectorAll = () => cards;
   const pending = new Map();
   let sequence = 0,
@@ -30,7 +34,12 @@ test("reload and replay always restart the portrait and cancel old scene timers"
     closes = 0;
   globalThis.document = {
     getElementById: (id) =>
-      ({ intro: overlay, "intro-skip": skip, "intro-replay": replay })[id],
+      ({
+        intro: overlay,
+        "intro-skip": skip,
+        "intro-replay": replay,
+        "intro-motion": motion,
+      })[id],
     body: element(),
   };
   globalThis.matchMedia = () => ({ matches: false });
@@ -61,6 +70,32 @@ test("reload and replay always restart the portrait and cancel old scene timers"
     assert.equal(cards[0]["aria-hidden"], "false");
     assert.equal(opens, 3);
     assert.equal(closes, 1);
+    pending.clear();
+    const preferences = new Map();
+    globalThis.localStorage = {
+      getItem: (key) => preferences.get(key),
+      setItem: (key, value) => preferences.set(key, value),
+    };
+    globalThis.matchMedia = () => ({ matches: true });
+    createIntro();
+    assert.equal(pending.size, 0);
+    assert.equal(skip.textContent, "Continue →");
+    assert.equal(motion.hidden, false);
+    motion.onclick();
+    assert.equal(pending.size, 4);
+    assert.equal(skip.textContent, "Skip intro →");
+    assert.equal(preferences.get("phnom-intro-animate"), "1");
+    pending.clear();
+    createIntro();
+    assert.equal(
+      pending.size,
+      4,
+      "reload retains the explicit animation choice",
+    );
+    motion.onclick();
+    assert.equal(pending.size, 0);
+    assert.equal(skip.textContent, "Continue →");
+    assert.equal(preferences.get("phnom-intro-animate"), "0");
   } finally {
     for (const [key, value] of Object.entries(saved)) globalThis[key] = value;
   }
