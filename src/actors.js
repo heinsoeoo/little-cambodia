@@ -1,5 +1,4 @@
 import * as T from "three";
-import { personTexture } from "./pixel-art.js";
 export function playerColor(id) {
   let hash = 0;
   for (const ch of id) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
@@ -61,39 +60,45 @@ function vehicleModel(type) {
   return group;
 }
 export function createActor(scene, player) {
-  const group = new T.Group(),
-    texture = personTexture(),
-    avatar = new T.Mesh(
-      new T.PlaneGeometry(1.9, 2.85),
-      new T.MeshBasicMaterial({
-        map: texture,
-        alphaTest: 0.5,
-        side: T.DoubleSide,
-        color: playerColor(player.id),
-      }),
-    );
-  avatar.position.y = 1.43;
-  group.add(avatar);
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.min(256, Math.max(64, player.nickname.length * 16 + 16));
-  canvas.height = 32;
-  const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#f3e0b5";
-  ctx.fillRect(0, 0, 256, 32);
-  ctx.fillStyle = "#503d33";
-  ctx.font = "bold 24px monospace";
-  ctx.textAlign = "center";
-  ctx.fillText(player.nickname, canvas.width / 2, 25, canvas.width - 8);
-  const nameTexture = new T.CanvasTexture(canvas);
-  nameTexture.magFilter = nameTexture.minFilter = T.NearestFilter;
-  nameTexture.generateMipmaps = false;
-  nameTexture.colorSpace = T.SRGBColorSpace;
-  const label = new T.Sprite(
-    new T.SpriteMaterial({ map: nameTexture, depthTest: false }),
+  const group = new T.Group();
+  const avatar = new T.Group();
+  const coat = new T.Mesh(
+    new T.CylinderGeometry(0.25, 0.36, 0.85, 10),
+    new T.MeshLambertMaterial({ color: playerColor(player.id) }),
   );
-  label.scale.set(canvas.width / 16, 2.4, 1);
-  label.position.y = 4.1;
-  group.add(label);
+  coat.position.y = 1;
+  avatar.add(coat);
+  const head = new T.Mesh(
+    new T.SphereGeometry(0.25, 12, 10),
+    new T.MeshLambertMaterial({ color: 0xd6ae8b }),
+  );
+  head.position.y = 1.62;
+  avatar.add(head);
+  const hair = new T.Mesh(
+    new T.SphereGeometry(0.26, 10, 6, 0, Math.PI * 2, 0, Math.PI * 0.53),
+    new T.MeshLambertMaterial({ color: 0x65534b }),
+  );
+  hair.position.y = 1.67;
+  avatar.add(hair);
+  const legs = [];
+  for (const x of [-0.15, 0.15]) {
+    const leg = new T.Mesh(
+      new T.CylinderGeometry(0.09, 0.1, 0.65, 8),
+      new T.MeshLambertMaterial({ color: 0x626b70 }),
+    );
+    leg.position.set(x, 0.35, 0);
+    legs.push(leg);
+    avatar.add(leg);
+  }
+  avatar.traverse((o) => {
+    if (o.isMesh) o.castShadow = true;
+  });
+  group.add(avatar);
+  const label = document.createElement("div");
+  label.className = "player-nameplate";
+  label.textContent = player.nickname;
+  document.body.append(label);
+  const projected = new T.Vector3();
   scene.add(group);
   let vehicle = null,
     type = null;
@@ -108,10 +113,14 @@ export function createActor(scene, player) {
       group.position.x += (state.x - group.position.x) * factor;
       group.position.z += (state.z - group.position.z) * factor;
       avatar.visible = state.mode === "walk";
-      texture.offset.x =
-        state.mode === "walk" && state.speed > 0.1
-          ? (Math.floor(performance.now() / 180) % 2) * 0.5
-          : 0;
+      avatar.rotation.y = state.heading;
+      legs.forEach(
+        (leg, i) =>
+          (leg.rotation.x =
+            state.mode === "walk" && state.speed > 0.1
+              ? Math.sin(performance.now() / 130 + i * Math.PI) * 0.35
+              : 0),
+      );
       if ((state.vehicle?.type || null) !== type) {
         if (vehicle) {
           scene.remove(vehicle);
@@ -133,6 +142,16 @@ export function createActor(scene, player) {
         vehicle.rotation.y = state.vehicle.heading;
       }
     },
+    projectLabel(camera, width, height) {
+      projected.set(group.position.x, 3.1, group.position.z).project(camera);
+      label.hidden =
+        projected.z < -1 ||
+        projected.z > 1 ||
+        Math.abs(projected.x) > 1.1 ||
+        Math.abs(projected.y) > 1.1;
+      label.style.left = `${(projected.x * 0.5 + 0.5) * width}px`;
+      label.style.top = `${(-projected.y * 0.5 + 0.5) * height}px`;
+    },
     dispose() {
       scene.remove(group);
       if (vehicle) {
@@ -142,11 +161,11 @@ export function createActor(scene, player) {
           o.material?.dispose();
         });
       }
-      avatar.geometry.dispose();
-      avatar.material.dispose();
-      texture.dispose();
-      label.material.dispose();
-      nameTexture.dispose();
+      avatar.traverse((o) => {
+        o.geometry?.dispose();
+        o.material?.dispose();
+      });
+      label.remove();
     },
   };
 }

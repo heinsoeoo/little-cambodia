@@ -1263,3 +1263,157 @@ footer a {
     bottom: 84px;
   }
 }
+/* Soft illustrated town: smooth scenery, crisp accessible interface text. */
+:root {
+  font-family: ui-rounded, "Trebuchet MS", Arial, sans-serif;
+  color: #514c42;
+  background: #e8c8b6;
+}
+#world {
+  image-rendering: auto !important;
+}
+button,
+select,
+h1,
+h2,
+.brand,
+.wallet b,
+.dash #speed {
+  font-family: ui-rounded, "Trebuchet MS", Arial, sans-serif !important;
+  letter-spacing: normal;
+}
+.panel,
+.welcome,
+.pause-card {
+  background: #faf3e5ee;
+  border: 1px solid #d9cbb6;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px #53453618;
+  backdrop-filter: blur(8px);
+  color: #514c42;
+}
+button,
+header button,
+.city,
+.touch button {
+  border: 1px solid #ccb99d;
+  border-radius: 9px;
+  background: #e8d6b9;
+  color: #5a5144;
+  box-shadow: none;
+}
+.brand {
+  color: #514c42;
+  text-shadow: 0 1px 3px #fff8;
+  font-family: "Trebuchet MS", sans-serif !important;
+}
+.brand b {
+  color: #8e6b58;
+}
+.brand small {
+  color: #625c4e;
+}
+.eyebrow {
+  letter-spacing: 1.3px;
+  color: #9c8065;
+}
+p,
+.city-life p {
+  color: #827968;
+}
+.welcome input {
+  font-family: "Trebuchet MS", sans-serif;
+  border: 1px solid #d4c5ac;
+  border-radius: 9px;
+  background: #fffaf0;
+  color: #514c42;
+}
+.welcome h1 {
+  font-family: Georgia, serif !important;
+  font-weight: 400;
+  letter-spacing: -1px;
+  color: #625242;
+}
+.welcome h1 em {
+  color: #aa7e68;
+}
+.mission select,
+.city-life select {
+  font-family: "Trebuchet MS", sans-serif;
+  border: 1px solid #d4c5ac;
+  border-radius: 8px;
+  background: #f3e8d4;
+}
+.mission > small,
+.job-note,
+.map-heading,
+.map-footer {
+  color: #8e816c;
+}
+#map {
+  border: 1px solid #d6c6ab;
+  border-radius: 8px;
+  image-rendering: auto;
+}
+#toast {
+  font-family: "Trebuchet MS", sans-serif;
+  border: 1px solid #cfbea2;
+  border-radius: 12px;
+  background: #fbf3e2;
+  color: #625747;
+  box-shadow: 0 4px 16px #53453620;
+  font-weight: 400;
+}
+header,
+.panel,
+.welcome,
+.touch,
+footer {
+  z-index: 2;
+}
+.player-nameplate {
+  position: fixed;
+  z-index: 1;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  padding: 3px 9px;
+  border: 1px solid #ffffffa8;
+  border-radius: 12px;
+  background: #fff9eced;
+  color: #51493e;
+  font:
+    600 13px/1.35 "Trebuchet MS",
+    Arial,
+    sans-serif;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px #473b3520;
+  image-rendering: auto;
+}
+.touch .accelerate {
+  background: #b7c7a4;
+  color: #4a624d;
+}
+.touch .brake {
+  background: #dfb5a4;
+  color: #775248;
+}
+.touch button.pressed {
+  background: #f7ead4;
+  box-shadow: none;
+}
+.pause-overlay {
+  z-index: 10;
+}
+.rotate-overlay {
+  z-index: 1000;
+  background: #7d927e;
+}
+.rotate-card h2,
+.rotate-card p {
+  color: #fff6e8;
+}
+footer {
+  font-family: "Trebuchet MS", sans-serif;
+  text-shadow: 0 1px 2px #fff8;
+  color: #6e685a;
+}

@@ -48,7 +48,7 @@ npm start
 
 ## World and future jobs
 
-The default map is the authored pixel neighbourhood from v0.5: 16 homes/shops, connected streets, a garden, market square and riverfront. Guest walking can reach the promenade; vehicles remain on the landward side of the riverbank. Building and water boundaries are checked by the shared simulation.
+The default map is the authored neighbourhood, now presented as a cozy 3D town: 16 homes/shops, connected streets, a garden, market square and riverfront. Guest walking can reach the promenade; vehicles remain on the landward side of the riverbank. Building and water boundaries are checked by the shared simulation.
 
 The old `missions.js` taxi loop, geographic OSM extracts and legacy world builders remain as reference/future-job code, but are not imported by the active open-world client. A future jobs layer can use the existing car/tuk-tuk/moto vehicle type and shared player state without making every guest a taxi driver.
 
@@ -60,7 +60,7 @@ The old `missions.js` taxi loop, geographic OSM extracts and legacy world builde
 - `src/actors.js`: guest sprites, nickname labels and three personal vehicle models.
 - `server/multiplayer.js`: guest sessions, authoritative simulation and snapshots.
 - `server/index.js`: production HTTP + WebSocket server.
-- `src/town-map.js`, `src/town-world.js`: authored map and pixel scenery.
+- `src/town-map.js`, `src/cozy-world.js`: authored map and cozy 3D houses, trees and riverside scenery.
 - `src/street-life.js`, `src/schedule.js`: cosmetic NPCs, vendors and local time previews.
 
 ## Verify
@@ -73,4 +73,4 @@ npm run build
 
 Tests include real local WebSocket clients for presence, movement, summoned vehicles, disconnects and origin rejection, plus walking and vehicle state transitions. Network tests need permission to listen on loopback. See `VERIFICATION.md` for browser checks and remaining limits.
 
-The local Git repository uses `main`; no remote is configured. The pixel artwork is original. OSM data is retained with attribution in `SOURCES.md` and `public/data/ATTRIBUTION.md`; the active town street layout is authored rather than geographically exact.
+The local Git repository uses `main`; no remote is configured. The procedural 3D scenery is original. Player nicknames use a crisp screen-space text overlay. OSM data is retained with attribution in `SOURCES.md` and `public/data/ATTRIBUTION.md`; the active town street layout is authored rather than geographically exact.

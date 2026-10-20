@@ -79,7 +79,7 @@ export function createStreetLife(scene, path, map) {
     });
   }
   const bodies = new T.InstancedMesh(
-    new T.BoxGeometry(0.5, 0.7, 0.3),
+    new T.CylinderGeometry(0.24, 0.32, 0.75, 8),
     new T.MeshLambertMaterial({ color: 0xffffff }),
     262,
   );
@@ -89,12 +89,15 @@ export function createStreetLife(scene, path, map) {
     262,
   );
   const legs = new T.InstancedMesh(
-    new T.BoxGeometry(0.16, 0.6, 0.18),
+    new T.CylinderGeometry(0.08, 0.09, 0.6, 6),
     new T.MeshLambertMaterial({ color: 0x3b4d53 }),
     524,
   );
   group.add(bodies, heads, legs);
-  const spriteMap = typeof document === "undefined" ? null : personTexture();
+  const spriteMap =
+    typeof document === "undefined" || map?.style === "cozy"
+      ? null
+      : personTexture();
   const pixelPeople = spriteMap
     ? new T.InstancedMesh(
         new T.PlaneGeometry(1.9, 2.85),

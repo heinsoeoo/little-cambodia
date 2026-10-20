@@ -1,6 +1,6 @@
 import * as T from "three";
 import { townCity, createTownMap } from "./town-map.js";
-import { makeTownWorld } from "./town-world.js";
+import { makeCozyWorld } from "./cozy-world.js";
 import { palette } from "./pixel-art.js";
 import { CityClock, activityAt } from "./schedule.js";
 import { createStreetLife } from "./street-life.js";
@@ -11,7 +11,7 @@ import { Multiplayer } from "./network.js";
 import { createActor, playerColor } from "./actors.js";
 const $ = (id) => document.getElementById(id),
   city = townCity,
-  map = createTownMap(),
+  map = { ...createTownMap(), style: "cozy" },
   keys = new Set(),
   actors = new Map();
 let self = null,
@@ -30,25 +30,30 @@ const notify = (text, seconds = 4) => {
   noticeUntil = performance.now() + seconds * 1000;
 };
 const scene = new T.Scene(),
-  renderer = new T.WebGLRenderer({ canvas: $("world"), antialias: false }),
+  renderer = new T.WebGLRenderer({ canvas: $("world"), antialias: true }),
   camera = new T.OrthographicCamera(-50, 50, 30, -30, 0.1, 2200);
 renderer.setPixelRatio(1);
 renderer.outputColorSpace = T.SRGBColorSpace;
-const ambient = new T.HemisphereLight(0xf8f3d9, 0x45645b, 2.6),
-  sun = new T.DirectionalLight(0xffe2ac, 1.4);
+const ambient = new T.HemisphereLight(0xf8f3d9, 0x45645b, 1.7),
+  sun = new T.DirectionalLight(0xffe2ac, 1.1);
 sun.position.set(-200, 300, -100);
 scene.add(ambient, sun);
-const world = makeTownWorld(scene, map, city),
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = T.PCFSoftShadowMap;
+sun.castShadow = true;
+sun.shadow.mapSize.set(1024, 1024);
+sun.shadow.camera.left = -150;
+sun.shadow.camera.right = 150;
+sun.shadow.camera.top = 180;
+sun.shadow.camera.bottom = -180;
+sun.shadow.bias = -0.001;
+const world = makeCozyWorld(scene, map, city),
   streetLife = createStreetLife(scene, world.path, map);
-camera.position.set(88, 90, 72);
+camera.position.set(128, 58, 102);
 function resize() {
-  const scale = Math.max(2, Math.ceil(innerHeight / 270)),
-    half = highCamera ? 49 : 30;
-  renderer.setSize(
-    Math.ceil(innerWidth / scale),
-    Math.ceil(innerHeight / scale),
-    false,
-  );
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  renderer.setSize(innerWidth, innerHeight, false);
+  const half = highCamera ? 50 : 25;
   camera.left = (-half * innerWidth) / innerHeight;
   camera.right = (half * innerWidth) / innerHeight;
   camera.top = half;
@@ -129,7 +134,7 @@ const network = new Multiplayer((event) => {
     $("pause").disabled = $("leave").disabled = false;
     $("connection").textContent = "● Connected";
     $("player-name").textContent = self.nickname;
-    camera.position.set(self.x, 90, self.z + 60);
+    camera.position.set(self.x + 40, 58, self.z + 90);
     try {
       localStorage.setItem("riverside-nickname", self.nickname);
     } catch {}
@@ -331,10 +336,10 @@ function frame(now) {
   }
   const focus = self || { x: 88, z: 12 };
   camera.position.lerp(
-    new T.Vector3(focus.x, 90, focus.z + 60),
+    new T.Vector3(focus.x + 40, 58, focus.z + 90),
     1 - Math.exp(-dt * 7),
   );
-  camera.lookAt(camera.position.x, 0, camera.position.z - 60);
+  camera.lookAt(camera.position.x - 40, 0, camera.position.z - 90);
   hud += dt;
   if (hud > 0.15) {
     hud = 0;
@@ -382,6 +387,9 @@ function frame(now) {
     minimap();
   }
   if (now > noticeUntil) $("toast").style.opacity = 0;
+  camera.updateMatrixWorld();
+  for (const actor of actors.values())
+    actor.projectLabel(camera, innerWidth, innerHeight);
   renderer.render(scene, camera);
 }
 requestAnimationFrame(frame);
