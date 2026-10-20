@@ -510,7 +510,10 @@ function frame(now) {
   previous = now;
   const ready = Boolean(joined && network.id && !paused && !portraitBlocked);
   const active = ready && !mobileHUD.isOpen && !intro.active;
-  audio.update(dt, self, keys, active);
+  const riverDistance = self
+    ? nearestRoad([self.x, self.z], [{ points: world.path }]).distance
+    : Infinity;
+  audio.update(dt, self, keys, active, Math.max(0, 1 - riverDistance / 110));
   accumulator += dt;
   while (accumulator >= 1 / 60) {
     if (active && self) stepGuest(self, keys, 1 / 60);
@@ -524,6 +527,10 @@ function frame(now) {
   clock.tick(active ? dt : 0);
   const time = clock.read(),
     activity = activityAt(time);
+  ambient.intensity = activity.night ? 0.9 : 1.7;
+  sun.intensity = activity.night ? 0.22 : 1.1;
+  world.riverLife.update(dt, activity.night);
+  world.landmarkScenes.update(activity.night);
   streetElapsed += dt;
   if (
     streetElapsed >=

@@ -5,6 +5,8 @@ export function createAudio() {
     music,
     engine,
     engineGain,
+    windGain,
+    waterGain,
     songBuffer,
     songLoading,
     songSource,
@@ -124,6 +126,35 @@ export function createAudio() {
         engine.frequency.value = 45;
         engine.connect(engineGain);
         engine.start();
+        // Original filtered-noise ambience loops softly without extra downloads.
+        if (ctx.createBuffer && ctx.createBiquadFilter) {
+          const buffer = ctx.createBuffer(
+            1,
+            ctx.sampleRate * 4,
+            ctx.sampleRate,
+          );
+          const samples = buffer.getChannelData(0);
+          let brown = 0;
+          for (let i = 0; i < samples.length; i++) {
+            brown = (brown + (Math.random() * 2 - 1) * 0.035) / 1.025;
+            samples[i] = brown * 3;
+          }
+          const ambience = (frequency) => {
+            const source = ctx.createBufferSource(),
+              filter = ctx.createBiquadFilter(),
+              gain = ctx.createGain();
+            source.buffer = buffer;
+            source.loop = true;
+            filter.type = "lowpass";
+            filter.frequency.value = frequency;
+            gain.gain.value = 0;
+            source.connect(filter).connect(gain).connect(master);
+            source.start();
+            return gain;
+          };
+          windGain = ambience(550);
+          waterGain = ambience(1700);
+        }
       }
       await ctx.resume();
       void loadSong();
@@ -182,7 +213,7 @@ export function createAudio() {
       } else
         tone(name === "enter" ? 180 : 140, now, 0.18, 0.18, master, "triangle");
     },
-    update(dt, player, keys, active) {
+    update(dt, player, keys, active, riverProximity = 0) {
       if (!ctx) return;
       const driving =
         active &&
@@ -197,6 +228,20 @@ export function createAudio() {
         42 + Math.min(Math.abs(player?.speed || 0) * 4, 130),
         ctx.currentTime,
         0.15,
+      );
+      const audible = active && !intro && !muted && !document.hidden;
+      const proximity = Math.max(0, Math.min(1, riverProximity));
+      windGain?.gain.setTargetAtTime(
+        audible ? 0.045 + proximity * 0.035 : 0,
+        ctx.currentTime,
+        0.8,
+      );
+      waterGain?.gain.setTargetAtTime(
+        audible
+          ? proximity * (0.12 + Math.sin(ctx.currentTime * 0.65) * 0.025)
+          : 0,
+        ctx.currentTime,
+        0.6,
       );
       elapsed += dt;
       const moving =

@@ -5,6 +5,7 @@ import { cities } from "../src/cities.js";
 const city = cities.phnomPenh;
 const source = JSON.parse(await fs.readFile(`public${city.data}`, "utf8"));
 const special = new Map([
+  [172268264, ["Royal Palace · Moonlight Pavilion", "palace"]],
   [172268276, ["Royal Palace · Throne Hall", "palace"]],
   [172268274, ["Phochani Pavilion", "palace"]],
   [905238235, ["Khemarin Palace", "palace"]],

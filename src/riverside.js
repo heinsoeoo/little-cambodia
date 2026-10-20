@@ -1,7 +1,9 @@
 import { project } from "./geo.js";
 export function riversidePath(map, city) {
-  const river = map.water.find((w) => w.id === city.riverside?.riverWay);
-  if (!river) return [];
+  const rivers = map.water.filter(
+    (w) => w.river || w.id === city.riverside?.riverWay,
+  );
+  if (!rivers.length) return [];
   const points = [];
   for (
     let lat = city.riverside.south;
@@ -10,12 +12,13 @@ export function riversidePath(map, city) {
   ) {
     const z = project(city.origin[0], lat, city.origin)[1],
       crossings = [];
-    for (let i = 1; i < river.points.length; i++) {
-      const a = river.points[i - 1],
-        b = river.points[i];
-      if (a[1] > z != b[1] > z)
-        crossings.push(a[0] + ((z - a[1]) / (b[1] - a[1])) * (b[0] - a[0]));
-    }
+    for (const river of rivers)
+      for (let i = 1; i < river.points.length; i++) {
+        const a = river.points[i - 1],
+          b = river.points[i];
+        if (a[1] > z != b[1] > z)
+          crossings.push(a[0] + ((z - a[1]) / (b[1] - a[1])) * (b[0] - a[0]));
+      }
     if (crossings.length) points.push([Math.min(...crossings) - 7, z]);
   }
   return points;

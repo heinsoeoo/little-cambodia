@@ -1,4 +1,6 @@
 import * as T from "three";
+import { addLandmarkScenes } from "./landmark-scenes.js";
+import { animateRiverMaterial, createRiverLife } from "./river-life.js";
 import { buildingPlace } from "./places.js";
 import { addPlaceDetails } from "./place-details.js";
 import { palette, tileTexture } from "./pixel-art.js";
@@ -61,6 +63,7 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
     color: textures.water ? 0xffffff : palette.water,
     map: textures.water || null,
   });
+  const riverUniforms = animateRiverMaterial(waterMaterial);
   for (const water of map.water || []) {
     const shape = new T.Shape();
     water.points.forEach((p, i) =>
@@ -171,32 +174,34 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
   );
   buildingMaterials.forEach((material) => visibility?.apply(material));
   for (const b of map.buildings) {
-    const shape = new T.Shape();
-    b.points.forEach((p, i) =>
-      i ? shape.lineTo(p[0], -p[1]) : shape.moveTo(p[0], -p[1]),
-    );
-    const geo = new T.ExtrudeGeometry(shape, {
-      depth: b.height,
-      bevelEnabled: false,
-    });
-    geo.rotateX(-Math.PI / 2);
-    geo.translate(0, 0.1, 0);
-    batch(
-      geo,
-      buildingMaterials[
-        buildingPlace(b)?.kind === "palace"
-          ? 0
-          : map.style === "cozy"
-            ? b.id % colors.length
-            : b.kind === "home"
-              ? b.id % 3
-              : b.kind === "shop"
-                ? 3
-                : b.kind === "hotel"
-                  ? 4
-                  : 5
-      ],
-    );
+    if (b.id !== 311065501) {
+      const shape = new T.Shape();
+      b.points.forEach((p, i) =>
+        i ? shape.lineTo(p[0], -p[1]) : shape.moveTo(p[0], -p[1]),
+      );
+      const geo = new T.ExtrudeGeometry(shape, {
+        depth: b.height,
+        bevelEnabled: false,
+      });
+      geo.rotateX(-Math.PI / 2);
+      geo.translate(0, 0.1, 0);
+      batch(
+        geo,
+        buildingMaterials[
+          buildingPlace(b)?.kind === "palace"
+            ? 0
+            : map.style === "cozy"
+              ? b.id % colors.length
+              : b.kind === "home"
+                ? b.id % 3
+                : b.kind === "shop"
+                  ? 3
+                  : b.kind === "hotel"
+                    ? 4
+                    : 5
+        ],
+      );
+    }
     const xs = b.points.map((p) => p[0]),
       zs = b.points.map((p) => p[1]);
     obstacles.push({
@@ -210,7 +215,7 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
 
   const facades = addFacades(
     scene,
-    map.buildings,
+    map.buildings.filter((b) => b.id !== 311065501),
     batch,
     map.style === "cozy",
     visibility,
@@ -228,29 +233,8 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
     geometries.forEach((geometry) => geometry.dispose());
   }
 
-  // Original stylized Independence Monument, placed at its geographic center.
-  const monument = new T.Group(),
-    [mx, mz] = project(104.9281, 11.5564, city.origin);
-  monument.position.set(mx, 0, mz);
-  const stone = new T.MeshLambertMaterial({ color: 0xb56d45 });
-  for (let i = 0; i < 4; i++) {
-    const m = new T.Mesh(
-      new T.CylinderGeometry(9 - i * 1.2, 10 - i * 1.2, 1, 8),
-      stone,
-    );
-    m.position.y = 0.5 + i;
-    monument.add(m);
-  }
-  for (let i = 0; i < 5; i++) {
-    const m = new T.Mesh(
-      new T.CylinderGeometry(4 - i * 0.65, 5 - i * 0.65, 3, 4),
-      stone,
-    );
-    m.position.y = 5.5 + i * 2.4;
-    m.rotation.y = Math.PI / 4;
-    monument.add(m);
-  }
-  scene.add(monument);
+  const [mx, mz] = project(104.9281, 11.5564, city.origin);
+  const landmarkScenes = addLandmarkScenes(scene, map, city, path);
   // Instanced trees keep the district inexpensive to render.
   const trunk = new T.InstancedMesh(
     new T.CylinderGeometry(0.4, 0.55, 5, 5),
@@ -330,12 +314,15 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
     }
     return c;
   }
+  const riverLife = createRiverLife(scene, map, city, riverUniforms);
   const [west, south, east, north] = city.bounds,
     min = project(west, north, city.origin),
     max = project(east, south, city.origin);
   return {
     path,
     facades,
+    riverLife,
+    landmarkScenes,
     collides(x, z) {
       if ((map.water || []).some((w) => insidePolygon(x, z, w.points)))
         return true;

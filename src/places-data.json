@@ -16,6 +16,18 @@
     ]
   },
   {
+    "id": 172268264,
+    "name": "Royal Palace · Moonlight Pavilion",
+    "kind": "palace",
+    "points": [
+      [734.87, -389.78],
+      [753.1, -399.53],
+      [775.74, -357.24],
+      [757.51, -347.47],
+      [734.87, -389.78]
+    ]
+  },
+  {
     "id": 172268274,
     "name": "Phochani Pavilion",
     "kind": "palace",
