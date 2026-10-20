@@ -1,4 +1,4 @@
-# Phnom Life — Central Phnom Penh (v0.8)
+# Phnom Life — Central Phnom Penh (v0.9)
 
 A guest-based multiplayer open world inspired by Phnom Penh. Enter a nickname, arrive on foot, explore the city and riverside, and summon a personal car, tuk-tuk or moto when you want to drive. Taxi missions and earnings are no longer part of the active game; jobs will be a separate later feature.
 
@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:5173/ . Choose a nickname of 2–20 characters, gender, mixed outfit and preferred vehicle in the live 3D creator, then join. Open a second tab and join with another nickname to test multiplayer. Guests using the same running server share one town, with a limit of 16 connected players.
+Open http://127.0.0.1:5173/ . The setup screen shows Name, Gender, Outfit and Vehicle, with your chosen character and vehicle together on the right. Choose Male, Female or Prefer not to say. Outfit opens a character-only preview with Outfit set / Customize controls; Back returns to setup and Start game works from either screen. Open a second tab and join with another nickname to test multiplayer. Guests using the same running server share one town, with a limit of 16 connected players.
 
 The development server includes the WebSocket backend through `vite.config.js`; restart Vite when first adding the backend to an already-running older build.
 
@@ -99,4 +99,15 @@ A feathered screen-space cutaway opens through walls, roofs, windows and doors d
 
 Ten optional collections supply independent hair, top, bottom and shoe choices: Casual, Luxury, Street, Old money, Rapper, Punk, Sporty, Bohemian, Workwear and Riverside linen. Any garment can be combined with any other collection and any gender. Choosing a preset changes all four pieces, while changing one piece leaves the others intact. Gender and skin tone remain independent of presets.
 
-`src/wardrobe.js` is the shared catalog and strict whitelist validator. `src/character.js` builds the same 3D character for previews and live guests, including the seated motorcycle pose. `src/wardrobe-ui.js` owns the pre-join/in-town creator and side-by-side vehicle preview. The server accepts validated appearance fields at join and on explicit customization messages, then shares them in normal snapshots. Unsupported IDs and extra fields cannot inject arbitrary content or move the player.
+`src/wardrobe.js` is the shared catalog and strict whitelist validator. `src/character.js` builds the same 3D character for previews and live guests, including the seated motorcycle pose. `src/wardrobe-ui.js` owns the pre-join/in-town creator: the main screen shows the current character and vehicle together, while the outfit editor previews the character alone. The server accepts validated appearance fields at join and on explicit customization messages, then shares them in normal snapshots. Unsupported IDs and extra fields cannot inject arbitrary content or move the player.
+
+### Test on a phone over local Wi-Fi
+
+```sh
+npm run build
+npm run start:lan
+```
+
+The LAN launcher selects the Mac's private IPv4 address (preferring the Wi-Fi adapter), binds only that interface and prints a phone-ready URL on port 5175. Connect the phone to the same Wi-Fi, open that URL, and rotate to landscape. Use the same URL on the computer to share the same multiplayer server with the phone. Keep the process running while testing. This is local network access; no public deployment, port forwarding or firewall changes are made. The usual development server on 127.0.0.1:5173 remains separate.
+
+Male characters have lean athletic shoulders and a tapered waist; female characters have a softly fitted waist and hips. Prefer not to say uses a neutral silhouette. All are fully clothed stylized characters; every collection and hairstyle remains available to every choice.

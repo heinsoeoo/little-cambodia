@@ -34,22 +34,63 @@ export function createCharacter(initial) {
       add(new T.BoxGeometry(w, h, d), material, x, y, z, parent);
     const sphere = (r, x, y, z, material, parent = group) =>
       add(new T.SphereGeometry(r, 12, 9), material, x, y, z, parent);
-    const broad =
-      look.gender === "male" ? 1.08 : look.gender === "female" ? 0.94 : 1;
+    const male = look.gender === "male",
+      female = look.gender === "female";
+    const broad = male ? 1.16 : female ? 0.92 : 1;
     const oversized = ["oversized", "hoodie"].includes(top.topShape);
+    // Fully clothed adult silhouettes: athletic shoulders versus a softer fitted waist/hips.
+    const profile = oversized
+      ? [
+          [0.34, 0.64],
+          [0.37, 0.85],
+          [0.35, 1.24],
+          [0.31, 1.4],
+        ]
+      : male
+        ? [
+            [0.25, 0.64],
+            [0.23, 0.85],
+            [0.34, 1.23],
+            [0.3, 1.4],
+          ]
+        : female
+          ? [
+              [0.32, 0.64],
+              [0.22, 0.88],
+              [0.29, 1.17],
+              [0.24, 1.4],
+            ]
+          : [
+              [0.29, 0.64],
+              [0.26, 0.88],
+              [0.28, 1.23],
+              [0.25, 1.4],
+            ];
     const torso = add(
-      new T.CylinderGeometry(
-        (oversized ? 0.32 : 0.25) * broad,
-        (oversized ? 0.37 : 0.3) * broad,
-        0.78,
-        12,
+      new T.LatheGeometry(
+        profile.map(([r, y]) => new T.Vector2(r, y)),
+        16,
       ),
       cloth,
       0,
-      1.03,
+      0,
       0,
     );
-    sphere(0.25, 0, 1.62, 0, skin);
+    torso.scale.z = female ? 0.8 : 0.85;
+    torso.name = "clothed-torso";
+    if (male && !oversized)
+      for (const x of [-0.23, 0.23]) {
+        const shoulder = sphere(0.14, x, 1.24, 0, cloth);
+        shoulder.scale.set(1.15, 1.15, 0.9);
+      }
+    const face = sphere(0.25, 0, 1.62, 0, skin);
+    face.scale.set(female ? 0.94 : 1, male ? 1.04 : 1, 1);
+    if (female) {
+      for (const x of [-0.14, 0.14]) {
+        const blush = sphere(0.04, x, 1.57, 0.21, mat(0xc58b7b));
+        blush.scale.z = 0.25;
+      }
+    }
     // Small eyes face +Z, so the character also has an unambiguous front.
     for (const x of [-0.085, 0.085]) sphere(0.025, x, 1.65, 0.235, dark);
     const cap = add(
@@ -125,7 +166,7 @@ export function createCharacter(initial) {
           : 0.12;
     for (const side of [-1, 1]) {
       const leg = new T.Group();
-      leg.position.set(side * 0.15, 0.64, 0);
+      leg.position.set(side * (female ? 0.18 : 0.15), 0.64, 0);
       standing.add(leg);
       legs.push(leg);
       const shorts = bottom.bottomShape === "shorts",
@@ -195,6 +236,11 @@ export function createCharacter(initial) {
     riding.visible = false;
     rig = { standing, riding, legs };
     group.userData.appearance = look;
+    group.userData.silhouette = male
+      ? "lean-athletic"
+      : female
+        ? "soft-curved"
+        : "neutral";
   }
   function pose(state) {
     const riding = state.mode === "drive" && state.vehicle?.type === "moto";

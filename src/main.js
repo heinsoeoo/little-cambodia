@@ -137,11 +137,11 @@ const network = new Multiplayer((event) => {
       $("nickname").disabled = false;
       $("wardrobe").disabled = true;
       $("wardrobe-close").hidden = true;
-      $("creator-title").textContent = "Your city. Your style.";
+      wardrobe.show("main");
       $("join-error").textContent = event.status;
       $("start").disabled = event.status === "Connecting…";
       $("start").textContent =
-        event.status === "Connecting…" ? "Joining…" : "Join as guest ↗";
+        event.status === "Connecting…" ? "Joining…" : "Start game ↗";
       syncRoster([]);
       for (const actor of actors.values()) actor.dispose();
       actors.clear();
@@ -225,7 +225,7 @@ const network = new Multiplayer((event) => {
     notify(event.message);
     $("join-error").textContent = event.message;
     $("start").disabled = false;
-    $("start").textContent = joined ? "Save look" : "Join as guest ↗";
+    $("start").textContent = joined ? "Save look" : "Start game ↗";
   }
 });
 resize();
@@ -235,7 +235,14 @@ $("guest-form").onsubmit = (event) => {
   event.preventDefault();
   const name = nickname($("nickname").value);
   if (name.length < 2) {
+    wardrobe.show("main");
     $("join-error").textContent = "Please use 2–20 characters.";
+    return;
+  }
+  if (!$("look-gender").value) {
+    wardrobe.show("main");
+    $("join-error").textContent = "Please choose your gender.";
+    $("look-gender").focus();
     return;
   }
   $("start").disabled = true;
@@ -266,7 +273,7 @@ $("wardrobe").onclick = () => {
   $("pause-overlay").hidden = true;
   $("pause").textContent = "Pause · P";
   $("join-error").textContent = "";
-  $("creator-title").textContent = "Make it your own.";
+  wardrobe.show("outfit");
   $("start").textContent = "Save look";
   $("start").disabled = false;
   $("wardrobe-close").hidden = false;
@@ -295,12 +302,12 @@ $("leave").onclick = () => {
   $("nickname").disabled = false;
   $("wardrobe").disabled = true;
   $("wardrobe-close").hidden = true;
-  $("creator-title").textContent = "Your city. Your style.";
+  wardrobe.show("main");
   $("pause-overlay").hidden = true;
   $("pause").disabled = $("leave").disabled = true;
   $("connection").textContent = "Not connected";
   $("start").disabled = false;
-  $("start").textContent = "Join as guest ↗";
+  $("start").textContent = "Start game ↗";
   $("join-error").textContent = "";
   syncRoster([]);
 };

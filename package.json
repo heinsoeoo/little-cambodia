@@ -1,6 +1,6 @@
 {
   "name": "phnom-drive",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,7 +10,8 @@
     "format": "prettier --write src server test scripts index.html package.json vite.config.js",
     "format:check": "prettier --check src server test scripts index.html package.json vite.config.js",
     "start": "node server/index.js",
-    "map:build": "node scripts/build-map.mjs"
+    "map:build": "node scripts/build-map.mjs",
+    "start:lan": "node scripts/serve-lan.mjs"
   },
   "dependencies": {
     "three": "0.180.0",

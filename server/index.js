@@ -42,7 +42,10 @@ const multiplayer = createMultiplayer(server);
 server.listen(
   Number(process.env.PORT) || 5173,
   process.env.HOST || "127.0.0.1",
-  () => console.log("Little Riverside multiplayer is ready"),
+  () =>
+    console.log(
+      `Phnom Life is ready at http://${process.env.HOST || "127.0.0.1"}:${Number(process.env.PORT) || 5173}/`,
+    ),
 );
 process.on("SIGTERM", () => {
   multiplayer.close();

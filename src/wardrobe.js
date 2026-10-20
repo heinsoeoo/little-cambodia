@@ -1,8 +1,7 @@
 // Every piece is available to every gender; presets are optional starting points.
 export const GENDERS = [
-  { id: "female", name: "Woman" },
-  { id: "male", name: "Man" },
-  { id: "nonbinary", name: "Non-binary" },
+  { id: "male", name: "Male" },
+  { id: "female", name: "Female" },
   { id: "unspecified", name: "Prefer not to say" },
 ];
 export const SKIN_TONES = [

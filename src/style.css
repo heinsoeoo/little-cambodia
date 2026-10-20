@@ -1558,3 +1558,151 @@ footer {
     height: 190px;
   }
 }
+
+/* Simple setup first; outfit choices live one step deeper. */
+.welcome.character-creator {
+  width: min(900px, calc(100vw - 32px));
+}
+.character-creator #guest-form {
+  grid-template-columns: 1fr 1.1fr;
+  align-items: start;
+}
+#setup-main {
+  gap: 18px;
+  align-content: start;
+}
+#setup-main .creator-field {
+  grid-column: 1/-1;
+}
+#outfit-open {
+  width: 100%;
+  padding: 12px;
+  text-align: left;
+  font:
+    13px "Trebuchet MS",
+    sans-serif;
+}
+#outfit-editor {
+  min-width: 0;
+}
+.outfit-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.outfit-tabs button {
+  flex: 1;
+  padding: 10px;
+  font-size: 13px;
+}
+.outfit-tabs button[aria-pressed="true"] {
+  background: #a8b78d;
+  color: #354a35;
+}
+#outfit-set-fields label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+#outfit-set-fields select {
+  width: 100%;
+  height: 40px;
+  padding: 8px;
+  border: 1px solid #cfc3ac;
+  background: #fffaf0;
+  border-radius: 9px;
+  color: #514a3d;
+  font:
+    13px "Trebuchet MS",
+    sans-serif;
+}
+#outfit-set-fields p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+#outfit-custom-fields {
+  gap: 8px;
+}
+.creator-detail #look-preview {
+  height: 320px;
+}
+.character-creator .creator-actions #creator-back {
+  background: #eee4cf;
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .creator-detail #look-preview {
+    height: 245px;
+  }
+  #setup-main {
+    gap: 10px;
+  }
+}
+@media (max-width: 600px) and (orientation: portrait) {
+  .character-creator #guest-form {
+    grid-template-columns: 1fr;
+  }
+  .creator-preview {
+    grid-row: auto;
+  }
+}
+.outfit-tabs button[aria-pressed="false"] {
+  background: #ece3d0;
+  color: #625c4d;
+}
+.outfit-tabs button[aria-pressed="true"] {
+  background: #9dad82;
+  border-color: #7f9266;
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  #setup-main .creator-field {
+    grid-column: auto;
+  }
+  #outfit-custom-fields .creator-field {
+    grid-column: auto;
+  }
+  .outfit-tabs {
+    margin-bottom: 8px;
+  }
+  .character-creator .creator-actions button {
+    padding: 9px 12px;
+  }
+}
+.character-creator button {
+  margin: 0;
+}
+.creator-actions #join-error:empty {
+  display: none;
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .character-creator #guest-form {
+    gap: 10px;
+  }
+  .character-creator #look-preview {
+    height: 150px;
+  }
+  .character-creator.creator-detail #look-preview {
+    height: 175px;
+  }
+  .creator-preview p {
+    font-size: 10px;
+    margin: 4px 0;
+    line-height: 1.4;
+  }
+  .creator-preview strong {
+    font-size: 12px;
+  }
+  .character-creator > small {
+    display: none;
+  }
+  .character-creator .creator-field select,
+  .character-creator .creator-field input {
+    height: 34px;
+  }
+  .character-creator .creator-field label {
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+  #outfit-custom-fields {
+    gap: 6px;
+  }
+}

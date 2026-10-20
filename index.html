@@ -88,14 +88,10 @@
     <section id="welcome" class="welcome character-creator">
       <div class="eyebrow">COME AS YOU ARE. MAKE IT YOURS.</div>
       <h1 id="creator-title">Your city. Your style.</h1>
-      <p>
-        Mix any top, bottom, hairstyle and shoes. Every piece is open to
-        everyone.
-      </p>
-      <form id="guest-form">
-        <div class="creator-fields">
+      <form id="guest-form" novalidate>
+        <div id="setup-main" class="creator-fields">
           <div class="creator-field">
-            <label for="nickname">Your nickname</label
+            <label for="nickname">Name</label
             ><input
               id="nickname"
               name="nickname"
@@ -110,52 +106,65 @@
             <label for="look-gender">Gender</label
             ><select id="look-gender" required></select>
           </div>
-          <div class="creator-field">
-            <label for="look-preset">Start with a style</label
-            ><select id="look-preset"></select>
-          </div>
-          <div class="creator-field">
-            <label for="look-skin">Skin tone</label
-            ><select id="look-skin"></select>
-          </div>
-          <div class="creator-field">
-            <label for="look-hair">Hair</label
-            ><select id="look-hair"></select>
-          </div>
-          <div class="creator-field">
-            <label for="look-top">Top</label
-            ><select id="look-top"></select>
-          </div>
-          <div class="creator-field">
-            <label for="look-bottom">Bottom</label
-            ><select id="look-bottom"></select>
-          </div>
-          <div class="creator-field">
-            <label for="look-shoes">Shoes</label
-            ><select id="look-shoes"></select>
+          <div class="creator-field creator-wide">
+            <label for="outfit-open">Outfit</label
+            ><button id="outfit-open" type="button">
+              Casual set · Choose outfit →
+            </button>
           </div>
           <div class="creator-field creator-wide">
-            <label for="look-vehicle">Your vehicle</label
-            ><select id="look-vehicle"></select
-            ><small
-              >Arrive on foot. Summon your vehicle whenever you like.</small
-            >
+            <label for="look-vehicle">Vehicle</label
+            ><select id="look-vehicle"></select>
           </div>
         </div>
-        <div class="creator-preview">
-          <canvas
-            id="look-preview"
-            aria-label="3D preview of your outfit and selected vehicle"
-          ></canvas
-          ><strong id="look-vehicle-name"></strong>
-          <p id="look-summary" aria-live="polite"></p>
-          <small
-            >Your look is visible to other guests. You can change it after
-            joining.</small
+        <div id="outfit-editor" class="outfit-editor" hidden>
+          <div
+            class="outfit-tabs"
+            role="group"
+            aria-label="Choose outfit editing mode"
           >
+            <button id="outfit-set-tab" type="button" aria-pressed="true">
+              Outfit set</button
+            ><button id="outfit-custom-tab" type="button" aria-pressed="false">
+              Customize
+            </button>
+          </div>
+          <div id="outfit-set-fields">
+            <label for="look-preset">Choose an outfit set</label
+            ><select id="look-preset"></select>
+            <p>Start with a complete look, or customize each piece.</p>
+          </div>
+          <div id="outfit-custom-fields" class="creator-fields" hidden>
+            <div class="creator-field creator-wide">
+              <label for="look-skin">Skin tone</label
+              ><select id="look-skin"></select>
+            </div>
+            <div class="creator-field creator-wide">
+              <label for="look-hair">Hair</label
+              ><select id="look-hair"></select>
+            </div>
+            <div class="creator-field creator-wide">
+              <label for="look-top">Top</label
+              ><select id="look-top"></select>
+            </div>
+            <div class="creator-field creator-wide">
+              <label for="look-bottom">Bottom</label
+              ><select id="look-bottom"></select>
+            </div>
+            <div class="creator-field creator-wide">
+              <label for="look-shoes">Shoes</label
+              ><select id="look-shoes"></select>
+            </div>
+          </div>
+        </div>
+        <div id="creator-preview" class="creator-preview">
+          <canvas id="look-preview" aria-label="3D character preview"></canvas
+          ><strong id="look-vehicle-name" hidden></strong>
+          <p id="look-summary" aria-live="polite"></p>
         </div>
         <div class="creator-actions">
-          <button id="start" type="submit">Join as guest ↗</button
+          <button id="creator-back" type="button" hidden>← Back</button
+          ><button id="start" type="submit">Start game ↗</button
           ><button id="wardrobe-close" type="button" hidden>
             Back to city
           </button>
