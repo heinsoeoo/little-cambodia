@@ -20,3 +20,12 @@
 - Production build passes; source formatted with Prettier.
 - Browser checked new map rendering and initial 45 m pickup route. Existing shared mission, time and mobile behavior is retained.
 - Browser smoke test additionally drove to the first pickup, stopped within 2 m, picked up the passenger and confirmed the Lotus Café destination. Wide zoom and the house markers on the minimap render correctly; no captured browser errors.
+
+## v0.6 guest multiplayer open world — 20 October 2026
+
+- All 26 tests passed. New tests cover nickname normalization, walking direction/diagonal speed, water/home boundaries, summon/enter/drive/exit, occupied parking, two real WebSocket guests, shared movement/vehicle state, disconnect removal and origin rejection.
+- Production build passes. Both Vite integration and a standalone HTTP/WebSocket server are included.
+- Browser: two named guests joined the same town, roster showed both, and avatars/parked vehicles rendered without captured errors. Walked from the riverside to a summoned car, entered, drove, braked, exited and returned to walking. Taxi meters, fares, jobs and mandatory driving were removed from the active UI.
+- Multiplayer is a running-server prototype, not an Internet deployment. Physical-device networking, broad latency/load conditions, persistent accounts and multi-instance hosting have not been verified. Scenery/NPC animation is cosmetic per client; only players and personal vehicle state are synchronized.
+- Standalone production smoke test served the built HTML and completed an actual WebSocket guest join on a temporary loopback port. Phone-sized 844×390 controls were checked with two connected guests; portrait rotation protection remains active.
+- Browser logout was verified: the leaving guest returned to nickname entry, the other client dropped from two guests to one, and the parked vehicle/presence disappeared. Both test guests were disconnected after verification.

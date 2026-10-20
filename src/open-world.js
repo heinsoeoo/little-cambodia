@@ -1,0 +1,152 @@
+import { createTownMap } from "./town-map.js";
+import { insidePolygon } from "./buildings.js";
+import { nearestRoad } from "./geo.js";
+import { stepVehicle } from "./vehicle.js";
+export const VEHICLE_TYPES = ["car", "tuktuk", "moto"];
+export const town = createTownMap();
+export function nickname(value) {
+  if (typeof value !== "string") return "";
+  return [
+    ...value
+      .normalize("NFKC")
+      .replace(/[\p{Cc}\p{Cf}<>]/gu, "")
+      .trim()
+      .replace(/\s+/g, " "),
+  ]
+    .slice(0, 20)
+    .join("");
+}
+export function blocked(x, z, mode = "walk") {
+  if (
+    !Number.isFinite(x) ||
+    !Number.isFinite(z) ||
+    x < -123 ||
+    x > (mode === "drive" ? 78 : 94) ||
+    z < -153 ||
+    z > 153
+  )
+    return true;
+  const radius = mode === "drive" ? 1.1 : 0.35;
+  return town.buildings.some((b) => {
+    if (insidePolygon(x, z, b.points)) return true;
+    return b.points.some((a, i) => {
+      const c = b.points[(i + 1) % b.points.length],
+        dx = c[0] - a[0],
+        dz = c[1] - a[1],
+        t = Math.max(
+          0,
+          Math.min(
+            1,
+            ((x - a[0]) * dx + (z - a[1]) * dz) / (dx * dx + dz * dz || 1),
+          ),
+        );
+      return Math.hypot(x - a[0] - dx * t, z - a[1] - dz * t) < radius;
+    });
+  });
+}
+export function createGuest(id, name, index = 0) {
+  return {
+    id,
+    nickname: name,
+    x: 88,
+    z: 12 + (index % 12) * 3,
+    heading: Math.PI,
+    mode: "walk",
+    speed: 0,
+    vehicle: null,
+  };
+}
+export function stepGuest(player, keys, dt) {
+  if (player.mode === "drive" && player.vehicle) {
+    stepVehicle(player.vehicle, keys, dt, (x, z) => blocked(x, z, "drive"));
+    Object.assign(player, {
+      x: player.vehicle.x,
+      z: player.vehicle.z,
+      heading: player.vehicle.heading,
+      speed: player.vehicle.speed,
+    });
+    return;
+  }
+  let dx =
+    Number(keys.has("d") || keys.has("arrowright")) -
+    Number(keys.has("a") || keys.has("arrowleft"));
+  let dz =
+    Number(keys.has("s") || keys.has("arrowdown")) -
+    Number(keys.has("w") || keys.has("arrowup"));
+  const length = Math.hypot(dx, dz);
+  player.speed = length ? 4.5 : 0;
+  if (!length) return;
+  dx = (dx / length) * 4.5 * dt;
+  dz = (dz / length) * 4.5 * dt;
+  if (!blocked(player.x + dx, player.z)) player.x += dx;
+  if (!blocked(player.x, player.z + dz)) player.z += dz;
+  player.heading = Math.atan2(dx, dz);
+}
+export function guestAction(player, action, type = "car", occupied = []) {
+  if (action === "summon") {
+    if (player.mode === "drive")
+      return "Exit your vehicle before summoning another.";
+    if (!VEHICLE_TYPES.includes(type)) return "Choose a valid vehicle.";
+    const road = nearestRoad([player.x, player.z], town.roads);
+    if (road.distance > 38) return "Walk closer to a road to summon a vehicle.";
+    const candidates = [
+      [0, 0],
+      [0, 5],
+      [0, -5],
+      [3, 0],
+      [-3, 0],
+      [0, 9],
+      [0, -9],
+    ];
+    for (const [dx, dz] of candidates) {
+      const x = road.point[0] + dx,
+        z = road.point[1] + dz;
+      if (
+        !blocked(x, z, "drive") &&
+        occupied.every((v) => Math.hypot(v.x - x, v.z - z) > 4)
+      ) {
+        player.vehicle = { type, x, z, heading: road.heading, speed: 0 };
+        return null;
+      }
+    }
+    return "This spot is busy. Walk a little further along the road.";
+  }
+  if (action === "enter") {
+    if (player.mode === "drive") return null;
+    if (
+      !player.vehicle ||
+      Math.hypot(player.x - player.vehicle.x, player.z - player.vehicle.z) > 4
+    )
+      return "Walk within 4 m of your vehicle to enter.";
+    player.mode = "drive";
+    Object.assign(player, {
+      x: player.vehicle.x,
+      z: player.vehicle.z,
+      heading: player.vehicle.heading,
+      speed: 0,
+    });
+    return null;
+  }
+  if (action === "exit") {
+    if (player.mode !== "drive") return null;
+    const v = player.vehicle;
+    for (const [dx, dz] of [
+      [3, 0],
+      [-3, 0],
+      [0, 3],
+      [0, -3],
+      [4, 4],
+      [-4, -4],
+    ])
+      if (!blocked(v.x + dx, v.z + dz)) {
+        player.mode = "walk";
+        player.x = v.x + dx;
+        player.z = v.z + dz;
+        player.speed = 0;
+        v.speed = 0;
+        return null;
+      }
+    return "Park in an open spot before getting out.";
+  }
+  return "Unknown action.";
+}

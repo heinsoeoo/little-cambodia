@@ -21,3 +21,9 @@ Start with a roughly 1.4 × 1.8 km central Phnom Penh district, a single taxi, c
 4. Add Siem Reap through a second city config + prepared OSM dataset + landmark pack. Keep simulation shared. Multiplayer, accounts and walking are deferred until single-player is stable.
 
 OSM data is ODbL; show attribution and distribute the source extract. Production hosting must preserve attribution and review derivative database obligations: https://www.openstreetmap.org/copyright .
+
+## v0.6 direction — guest multiplayer open world
+
+The product is now Phnom Life, not a mandatory taxi simulator. Guest nickname entry leads to walking in the city and on the riverfront. Optional personal car, tuk-tuk and moto vehicles can be summoned, entered and parked. One Node/WebSocket server owns movement and guest sessions; the first town supports 16 guests.
+
+The former taxi loop is inactive reference code. A future job system should attach an optional job state to a guest and use the existing vehicle type, rather than making vehicle ownership or taxi work a requirement to explore. Hosting the multiplayer server publicly, persistent accounts/world state and private rooms remain separate future work.

@@ -4,26 +4,56 @@ import { makeTownWorld } from "./town-world.js";
 import { palette } from "./pixel-art.js";
 import { CityClock, activityAt } from "./schedule.js";
 import { createStreetLife } from "./street-life.js";
-import { samplePath } from "./riverside.js";
 import { bindHoldControls, needsRotation } from "./mobile.js";
-import { project, nearestRoad } from "./geo.js";
-import { buildGraph, findRoute, approachSpawn } from "./navigation.js";
-import { Missions } from "./missions.js";
-import { stepVehicle } from "./vehicle.js";
-import { taxi, routeRibbon } from "./world.js";
+import { nearestRoad, project } from "./geo.js";
+import { stepGuest, nickname } from "./open-world.js";
+import { Multiplayer } from "./network.js";
+import { createActor, playerColor } from "./actors.js";
 const $ = (id) => document.getElementById(id),
   city = townCity,
-  keys = new Set();
-let started = false,
+  map = createTownMap(),
+  keys = new Set(),
+  actors = new Map();
+let self = null,
+  joined = false,
   paused = false,
-  night = false,
+  portraitBlocked = false,
   highCamera = false,
-  noticeUntil = 0;
-const clock = new CityClock();
-let streetLife,
-  portraitBlocked = false;
-const clearTouch = bindHoldControls(document, keys);
-function checkOrientation() {
+  noticeUntil = 0,
+  sendElapsed = 0,
+  hud = 0;
+const clock = new CityClock(),
+  clearTouch = bindHoldControls(document, keys);
+const notify = (text, seconds = 4) => {
+  $("toast").textContent = text;
+  $("toast").style.opacity = 1;
+  noticeUntil = performance.now() + seconds * 1000;
+};
+const scene = new T.Scene(),
+  renderer = new T.WebGLRenderer({ canvas: $("world"), antialias: false }),
+  camera = new T.OrthographicCamera(-50, 50, 30, -30, 0.1, 2200);
+renderer.setPixelRatio(1);
+renderer.outputColorSpace = T.SRGBColorSpace;
+const ambient = new T.HemisphereLight(0xf8f3d9, 0x45645b, 2.6),
+  sun = new T.DirectionalLight(0xffe2ac, 1.4);
+sun.position.set(-200, 300, -100);
+scene.add(ambient, sun);
+const world = makeTownWorld(scene, map, city),
+  streetLife = createStreetLife(scene, world.path, map);
+camera.position.set(88, 90, 72);
+function resize() {
+  const scale = Math.max(2, Math.ceil(innerHeight / 270)),
+    half = highCamera ? 49 : 30;
+  renderer.setSize(
+    Math.ceil(innerWidth / scale),
+    Math.ceil(innerHeight / scale),
+    false,
+  );
+  camera.left = (-half * innerWidth) / innerHeight;
+  camera.right = (half * innerWidth) / innerHeight;
+  camera.top = half;
+  camera.bottom = -half;
+  camera.updateProjectionMatrix();
   portraitBlocked = needsRotation({
     width: innerWidth,
     height: innerHeight,
@@ -33,416 +63,325 @@ function checkOrientation() {
       innerWidth <= 600,
   });
   $("rotate-overlay").hidden = !portraitBlocked;
-  if (portraitBlocked) {
-    keys.clear();
-    clearTouch();
-  }
+  if (portraitBlocked) stopInput();
 }
-addEventListener("resize", checkOrientation);
-addEventListener("orientationchange", checkOrientation);
-checkOrientation();
-let graph,
-  route = null,
-  routeElapsed = 1;
-const routeLine = new T.Mesh(
-  new T.BufferGeometry(),
-  new T.MeshBasicMaterial({
-    color: 0xddec99,
-    depthTest: true,
-    side: T.DoubleSide,
-    transparent: true,
-    opacity: 0.8,
-  }),
-);
-routeLine.renderOrder = 2;
-const notify = (text, seconds = 4) => {
-  $("toast").textContent = text;
-  $("toast").style.opacity = 1;
-  noticeUntil = performance.now() + seconds * 1000;
-};
-let renderer;
-try {
-  renderer = new T.WebGLRenderer({ canvas: $("world"), antialias: false });
-} catch (e) {
-  $("mission-description").textContent =
-    "WebGL is unavailable. Enable hardware acceleration and reload.";
-  $("toast").textContent = "Your browser could not start the 3D renderer.";
-  throw e;
-}
-renderer.setPixelRatio(1);
-function resizePixelView() {
-  const scale = Math.max(2, Math.ceil(innerHeight / 270));
-  renderer.setSize(
-    Math.ceil(innerWidth / scale),
-    Math.ceil(innerHeight / scale),
-    false,
-  );
-  const half = highCamera ? 49 : 30;
-  camera.left = (-half * innerWidth) / innerHeight;
-  camera.right = (half * innerWidth) / innerHeight;
-  camera.top = half;
-  camera.bottom = -half;
-  camera.updateProjectionMatrix();
-}
-renderer.outputColorSpace = T.SRGBColorSpace;
-renderer.setClearColor(palette.sky);
-const scene = new T.Scene();
-scene.fog = new T.Fog(palette.sky, 350, 1400);
-const camera = new T.OrthographicCamera(-50, 50, 30, -30, 0.1, 2200);
-resizePixelView();
-const ambient = new T.HemisphereLight(0xf8f3d9, 0x45645b, 2.4);
-scene.add(ambient, routeLine);
-const sun = new T.DirectionalLight(0xffe2ac, 2.5);
-sun.position.set(-200, 300, -100);
-scene.add(sun);
-addEventListener("resize", () => {
-  resizePixelView();
-});
-addEventListener("keydown", (e) => {
-  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key))
-    e.preventDefault();
-  keys.add(e.key.toLowerCase());
-  if (!e.repeat) {
-    if (e.key.toLowerCase() === "e") interact();
-    if (e.key.toLowerCase() === "r") reset();
-    if (e.key.toLowerCase() === "c") {
-      highCamera = !highCamera;
-      resizePixelView();
-    }
-    if (e.key.toLowerCase() === "p") togglePause();
-    if (e.key.toLowerCase() === "v") talkToVendor();
-  }
-});
-addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase()));
-addEventListener("blur", () => {
+function stopInput() {
   keys.clear();
   clearTouch();
-  if (started && !paused) togglePause();
-});
-document.addEventListener("visibilitychange", () => {
-  keys.clear();
-  if (document.hidden && started && !paused) togglePause();
-});
-function setLighting(time) {
-  const activity = activityAt(time);
-  night = activity.night;
-  const color = night ? palette.night : palette.sky;
-  renderer.setClearColor(color);
-  scene.fog.color.setHex(color);
-  ambient.intensity = night ? 1.25 : 2.6;
-  sun.intensity = night ? 0.3 : 1.4;
-  world?.facades.setNight(night);
+  network?.input(keys);
 }
-$("time-mode").onchange = () => {
-  clock.setMode($("time-mode").value);
-  routeElapsed = 1;
-};
-$("visit-riverside").onclick = () => {
-  if (!ready || paused || portraitBlocked) return;
-  const point = samplePath(world.path, 0.58).point;
-  const stop = streetLife.access(map.roads) || nearestRoad(point, map.roads);
-  car.x = stop.point[0];
-  car.z = stop.point[1];
-  car.heading = Math.PI / 2;
-  car.speed = 0;
-  camera.position.set(car.x, 90, car.z + 60);
-  routeElapsed = 1;
-  notify("Riverside access · food carts are beside the water");
-};
-$("camera").onclick = () => {
-  highCamera = !highCamera;
-  resizePixelView();
-};
-$("vendor").onclick = talkToVendor;
-function talkToVendor() {
-  if (!ready || paused || portraitBlocked || !started) return;
-  const vendor = streetLife.nearest(car);
-  if (vendor && vendor.distance < 18 && Math.abs(car.speed) < 1.5)
-    notify(`${vendor.food} vendor: “Fresh and ready! Enjoy the riverside.”`, 6);
-}
-function togglePause() {
-  if (!started) return;
+function pause() {
+  if (!joined) return;
   paused = !paused;
-  keys.clear();
-  clearTouch();
+  stopInput();
   $("pause-overlay").hidden = !paused;
   $("pause").textContent = paused ? "Resume · P" : "Pause · P";
 }
-$("pause").onclick = togglePause;
-$("resume").onclick = togglePause;
-let map,
-  world,
-  car,
-  model,
-  stops,
-  mission,
-  stage = "pickup",
-  balance = 0,
-  trips = 0,
-  ready = false;
-try {
-  const saved = JSON.parse(localStorage.getItem("phnom-drive") || "{}");
-  balance = Number(saved.balance) || 0;
-  trips = Number(saved.trips) || 0;
-} catch {}
-const marker = new T.Group();
-const ring = new T.Mesh(
-  new T.TorusGeometry(7, 0.4, 8, 40),
-  new T.MeshBasicMaterial({ color: 0xe4f1a2 }),
-);
-ring.rotation.x = Math.PI / 2;
-marker.add(ring);
-const beam = new T.Mesh(
-  new T.CylinderGeometry(0.25, 0.25, 30, 8),
-  new T.MeshBasicMaterial({ color: 0xe4f1a2, transparent: true, opacity: 0.5 }),
-);
-beam.position.y = 15;
-marker.add(beam);
-scene.add(marker);
-function target() {
-  return mission.target;
+function zoom() {
+  highCamera = !highCamera;
+  resize();
 }
-function updateMission() {
-  const t = target();
-  $("mission-title").textContent =
-    (stage === "pickup" ? "Pick up at " : "Take your passenger to ") + t.name;
-  $("mission-description").textContent =
-    stage === "pickup"
-      ? "Follow the lime route. Stop within 15 m, then use Pick up or E."
-      : "Enjoy the drive. Stop by the destination marker and press E to complete the fare.";
-  marker.position.set(t.point[0], 0.6, t.point[1]);
-  routeElapsed = 1;
-  $("earnings").textContent = balance.toLocaleString();
-  $("trips").textContent = `${trips} trips completed`;
-  $("gear").nextElementSibling.textContent =
-    stage === "pickup" ? "TAXI / FOR HIRE" : "TAXI / ON TRIP";
+function action(name) {
+  if (!self || paused || portraitBlocked || !network.id) return;
+  stopInput();
+  network.action(name, $("vehicle-type").value);
 }
-function interact() {
-  if (!ready || !started || paused || portraitBlocked) return;
-  const result = mission.interact(car);
-  if (!result) return;
-  stage = mission.stage;
-  balance = mission.balance;
-  trips = mission.trips;
-  if (result === "pickup") notify("Passenger aboard. Let’s go!");
-  else {
-    try {
-      localStorage.setItem("phnom-drive", JSON.stringify(mission.save()));
-    } catch {}
-    notify("Fare complete · +៛ 6,000");
-  }
-  updateMission();
+function enterExit() {
+  action(self?.mode === "drive" ? "exit" : "enter");
 }
-function reset() {
-  if (!ready) return;
-  const n = nearestRoad([car.x, car.z], map.roads);
-  car.x = n.point[0];
-  car.z = n.point[1];
-  car.heading = n.heading;
-  car.speed = 0;
-  routeElapsed = 1;
-  notify("Back on the road");
+function talk() {
+  if (!self || paused || portraitBlocked) return;
+  const vendor = streetLife.nearest(self);
+  if (vendor && vendor.distance < 7 && Math.abs(self.speed) < 1.5)
+    notify(`${vendor.food} vendor: “Fresh and ready! Enjoy the riverside.”`, 6);
 }
-$("reset").onclick = reset;
-$("interact").onclick = interact;
-$("start").disabled = true;
-$("start").onclick = () => {
-  started = true;
-  $("pause").disabled = false;
-  $("welcome").hidden = true;
-  notify("Your shift has started. Follow the lime marker.");
-};
-const ctx = $("map").getContext("2d");
-const mapWest = project(city.bounds[0], city.bounds[3], city.origin),
-  mapEast = project(city.bounds[2], city.bounds[1], city.origin),
-  mapScale = 260 / Math.max(mapEast[0] - mapWest[0], mapEast[1] - mapWest[1]),
-  mapCenter = [(mapWest[0] + mapEast[0]) / 2, (mapWest[1] + mapEast[1]) / 2];
-function drawMap() {
-  const c = ctx,
-    s = mapScale,
-    px = (x) => 140 + (x - mapCenter[0]) * s,
-    pz = (z) => 140 + (z - mapCenter[1]) * s;
-  c.fillStyle = "#d3c294";
-  c.fillRect(0, 0, 280, 280);
-  c.lineCap = "round";
-  c.fillStyle = "#75a5ae";
-  for (const w of map.water) {
-    c.beginPath();
-    w.points.forEach((p, i) =>
-      i ? c.lineTo(px(p[0]), pz(p[1])) : c.moveTo(px(p[0]), pz(p[1])),
-    );
-    c.fill();
-  }
-  for (const r of map.roads) {
-    c.strokeStyle = "#8d7656";
-    c.lineWidth = Math.max(1, r.width * s);
-    c.beginPath();
-    r.points.forEach((p, i) =>
-      i ? c.lineTo(px(p[0]), pz(p[1])) : c.moveTo(px(p[0]), pz(p[1])),
-    );
-    c.stroke();
-  }
-  c.fillStyle = "#b77955";
-  for (const building of map.buildings) {
-    c.beginPath();
-    building.points.forEach((p, i) =>
-      i ? c.lineTo(px(p[0]), pz(p[1])) : c.moveTo(px(p[0]), pz(p[1])),
-    );
-    c.fill();
-  }
-  const t = target();
-  c.strokeStyle = "#b45940";
-  c.lineWidth = 2;
-  c.setLineDash(route ? [] : [3, 5]);
-  c.beginPath();
-  const routePoints = route?.points || [[car.x, car.z], t.point];
-  routePoints.forEach((p, i) =>
-    i ? c.lineTo(px(p[0]), pz(p[1])) : c.moveTo(px(p[0]), pz(p[1])),
+function syncRoster(players) {
+  $("online").textContent = `${players.length} / 16 guests online`;
+  $("roster").replaceChildren(
+    ...players.map((p) => {
+      const li = document.createElement("li");
+      li.textContent = `${p.nickname}${p.id === network.id ? " (you)" : ""} · ${p.mode === "drive" ? "driving" : "walking"}`;
+      return li;
+    }),
   );
-  c.stroke();
-  c.setLineDash([]);
-  c.fillStyle = "#e4f1a4";
-  c.beginPath();
-  c.arc(px(t.point[0]), pz(t.point[1]), 5, 0, Math.PI * 2);
-  c.fill();
-  c.save();
-  c.translate(px(car.x), pz(car.z));
-  c.rotate(-car.heading);
-  c.fillStyle = "white";
-  c.beginPath();
-  c.moveTo(0, 7);
-  c.lineTo(-4, -5);
-  c.lineTo(4, -5);
-  c.closePath();
-  c.fill();
-  c.restore();
 }
-async function loadCity() {
-  try {
-    map = createTownMap();
-    world = makeTownWorld(scene, map, city);
-    streetLife = createStreetLife(scene, world.path, map);
-    graph = buildGraph(map.roads);
-    stops = city.landmarks.map((l) => ({
-      ...l,
-      ...nearestRoad(l.point || project(l.lon, l.lat, city.origin), map.roads),
-    }));
-    mission = new Missions(stops, { balance, trips });
-    const spawn = approachSpawn(stops[0]);
-    car = {
-      x: spawn.point[0],
-      z: spawn.point[1],
-      heading: spawn.heading,
-      speed: 0,
-    };
-    model = taxi();
-    scene.add(model);
-    ready = true;
-    updateMission();
-    $("start").disabled = false;
-    notify(`Little Riverside · ${map.buildings.length} homes & shops`, 5);
-    camera.position.set(car.x, 90, car.z + 60);
-  } catch (e) {
-    $("mission-description").textContent = e.message;
-    $("start").textContent = "City unavailable — reload to retry";
-    notify("Could not load the bundled city. Check the local server.", 3600);
-    console.error(e);
-  }
-}
-loadCity();
-let previous = performance.now(),
-  accumulator = 0,
-  hud = 0;
-function animate(now) {
-  requestAnimationFrame(animate);
-  const dt = Math.min((now - previous) / 1000, 0.1);
-  previous = now;
-  if (!ready) {
-    renderer.render(scene, camera);
-    return;
-  }
-  accumulator += dt;
-  while (accumulator >= 1 / 60) {
-    if (started && !paused && !portraitBlocked)
-      stepVehicle(
-        car,
-        keys,
-        1 / 60,
-        (x, z) => world.collides(x, z) || streetLife.collides(x, z),
-      );
-    accumulator -= 1 / 60;
-  }
-  const active = started && !paused && !portraitBlocked;
-  clock.tick(active ? dt : 0);
-  const cityTime = clock.read();
-  streetLife.update(active ? dt : 0, cityTime);
-  setLighting(cityTime);
-  model.position.set(car.x, 0, car.z);
-  model.rotation.y = car.heading;
-  // Fixed diagonal view keeps the map readable like a small pixel-art town.
-  const desired = new T.Vector3(car.x, 90, car.z + 60);
-  camera.position.lerp(desired, 1 - Math.exp(-dt * 7));
-  camera.position.x = Math.round(camera.position.x * 4) / 4;
-  camera.position.z = Math.round(camera.position.z * 4) / 4;
-  camera.lookAt(camera.position.x, 0, camera.position.z - 60);
-  ring.rotation.z += dt * 0.2;
-  if (!paused) {
-    routeElapsed += dt;
-    if (routeElapsed >= 1) {
-      routeElapsed = 0;
-      route = findRoute([car.x, car.z], target().point, map.roads, graph);
-      const geometry = routeRibbon(route?.points || []);
-      routeLine.geometry.dispose();
-      routeLine.geometry = geometry;
-      routeLine.visible = started && Boolean(route);
+const network = new Multiplayer((event) => {
+  if (event.type === "connection") {
+    $("connection").textContent = event.status;
+    if (!network.id) {
+      self = null;
+      joined = false;
+      $("welcome").hidden = false;
+      $("join-error").textContent = event.status;
+      $("start").disabled = false;
+      $("start").textContent = "Join as guest ↗";
+      syncRoster([]);
+      for (const actor of actors.values()) actor.dispose();
+      actors.clear();
     }
   }
+  if (event.type === "welcome") {
+    self = structuredClone(event.player);
+    joined = true;
+    paused = false;
+    $("welcome").hidden = true;
+    $("pause-overlay").hidden = true;
+    $("pause").disabled = $("leave").disabled = false;
+    $("connection").textContent = "● Connected";
+    $("player-name").textContent = self.nickname;
+    camera.position.set(self.x, 90, self.z + 60);
+    try {
+      localStorage.setItem("riverside-nickname", self.nickname);
+    } catch {}
+    notify(`Welcome, ${self.nickname}. The riverside is yours to explore.`);
+  }
+  if (event.type === "state") {
+    const mine = event.players.find((p) => p.id === network.id);
+    if (mine) {
+      if (
+        !self ||
+        mine.mode !== self.mode ||
+        Math.hypot(mine.x - self.x, mine.z - self.z) > 1.5
+      )
+        self = structuredClone(mine);
+      else {
+        self.x += (mine.x - self.x) * 0.2;
+        self.z += (mine.z - self.z) * 0.2;
+        self.vehicle = structuredClone(mine.vehicle);
+        if (self.mode === "drive" && self.vehicle) {
+          self.vehicle.x = self.x;
+          self.vehicle.z = self.z;
+        }
+      }
+    }
+    const ids = new Set(event.players.map((p) => p.id));
+    for (const [id, actor] of actors)
+      if (!ids.has(id)) {
+        actor.dispose();
+        actors.delete(id);
+      }
+    syncRoster(event.players);
+  }
+  if (event.type === "action") {
+    self = structuredClone(event.player);
+    notify(
+      event.action === "summon"
+        ? "Your vehicle is parked nearby. Walk over and press E to enter."
+        : event.action === "enter"
+          ? "Ready to drive. Press E to get out."
+          : "Back on foot. Explore anywhere on land.",
+    );
+  }
+  if (event.type === "error") {
+    notify(event.message);
+    $("join-error").textContent = event.message;
+    $("start").disabled = false;
+    $("start").textContent = "Join as guest ↗";
+  }
+});
+resize();
+addEventListener("resize", resize);
+addEventListener("orientationchange", resize);
+$("guest-form").onsubmit = (event) => {
+  event.preventDefault();
+  const name = nickname($("nickname").value);
+  if (name.length < 2) {
+    $("join-error").textContent = "Please use 2–20 characters.";
+    return;
+  }
+  $("start").disabled = true;
+  $("start").textContent = "Joining…";
+  $("join-error").textContent = "";
+  network.connect(name);
+};
+try {
+  $("nickname").value = localStorage.getItem("riverside-nickname") || "";
+} catch {}
+$("summon").onclick = () => action("summon");
+$("interact").onclick = enterExit;
+$("camera").onclick = zoom;
+$("pause").onclick = $("resume").onclick = pause;
+$("vendor").onclick = talk;
+$("time-mode").onchange = () => clock.setMode($("time-mode").value);
+$("leave").onclick = () => {
+  network.disconnect();
+  self = null;
+  joined = false;
+  paused = false;
+  stopInput();
+  for (const actor of actors.values()) actor.dispose();
+  actors.clear();
+  $("welcome").hidden = false;
+  $("pause-overlay").hidden = true;
+  $("pause").disabled = $("leave").disabled = true;
+  $("connection").textContent = "Not connected";
+  $("start").disabled = false;
+  $("start").textContent = "Join as guest ↗";
+  $("join-error").textContent = "";
+  syncRoster([]);
+};
+addEventListener("keydown", (event) => {
+  if (["INPUT", "SELECT", "TEXTAREA"].includes(event.target.tagName)) return;
+  if (
+    ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key)
+  )
+    event.preventDefault();
+  keys.add(event.key.toLowerCase());
+  if (event.repeat) return;
+  const key = event.key.toLowerCase();
+  if (key === "e") enterExit();
+  if (key === "f") action("summon");
+  if (key === "p") pause();
+  if (key === "c") zoom();
+  if (key === "v") talk();
+});
+addEventListener("keyup", (event) => keys.delete(event.key.toLowerCase()));
+addEventListener("blur", () => {
+  stopInput();
+  if (joined && !paused) pause();
+});
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    stopInput();
+    if (joined && !paused) pause();
+  }
+});
+addEventListener("pagehide", () => network.disconnect());
+const ctx = $("map").getContext("2d"),
+  west = project(city.bounds[0], city.bounds[3], city.origin),
+  east = project(city.bounds[2], city.bounds[1], city.origin),
+  scale = 260 / Math.max(east[0] - west[0], east[1] - west[1]);
+function minimap() {
+  const px = (x) => 140 + x * scale,
+    pz = (z) => 140 + z * scale;
+  ctx.fillStyle = "#d3c294";
+  ctx.fillRect(0, 0, 280, 280);
+  ctx.fillStyle = "#75a5ae";
+  ctx.fillRect(px(96), 0, 280 - px(96), 280);
+  for (const road of map.roads) {
+    ctx.strokeStyle = "#8d7656";
+    ctx.lineWidth = Math.max(1, road.width * scale);
+    ctx.beginPath();
+    road.points.forEach((p, i) =>
+      i ? ctx.lineTo(px(p[0]), pz(p[1])) : ctx.moveTo(px(p[0]), pz(p[1])),
+    );
+    ctx.stroke();
+  }
+  ctx.fillStyle = "#b77955";
+  for (const b of map.buildings) {
+    ctx.beginPath();
+    b.points.forEach((p, i) =>
+      i ? ctx.lineTo(px(p[0]), pz(p[1])) : ctx.moveTo(px(p[0]), pz(p[1])),
+    );
+    ctx.fill();
+  }
+  for (const p of network.players) {
+    const actual = p.id === network.id && self ? self : p;
+    if (p.vehicle) {
+      ctx.fillStyle = "#7a5962";
+      ctx.fillRect(px(p.vehicle.x) - 2, pz(p.vehicle.z) - 2, 4, 4);
+    }
+    ctx.fillStyle =
+      p.id === network.id ? "#fff8d0" : `#${playerColor(p.id).toString(16)}`;
+    ctx.beginPath();
+    ctx.arc(
+      px(actual.x),
+      pz(actual.z),
+      p.id === network.id ? 4 : 3,
+      0,
+      Math.PI * 2,
+    );
+    ctx.fill();
+  }
+}
+let previous = performance.now(),
+  accumulator = 0;
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dt = Math.min((now - previous) / 1000, 0.1);
+  previous = now;
+  const active = joined && network.id && !paused && !portraitBlocked;
+  accumulator += dt;
+  while (accumulator >= 1 / 60) {
+    if (active && self) stepGuest(self, keys, 1 / 60);
+    accumulator -= 1 / 60;
+  }
+  sendElapsed += dt;
+  if (sendElapsed >= 0.05) {
+    sendElapsed = 0;
+    if (network.id) network.input(active ? keys : new Set());
+  }
+  clock.tick(active ? dt : 0);
+  const time = clock.read(),
+    activity = activityAt(time);
+  streetLife.update(dt, time);
+  world.facades.setNight(activity.night);
+  renderer.setClearColor(activity.night ? palette.night : palette.sky);
+  for (const player of network.players) {
+    let actor = actors.get(player.id);
+    if (!actor) {
+      actor = createActor(scene, player);
+      actors.set(player.id, actor);
+    }
+    actor.update(
+      player.id === network.id && self ? self : player,
+      dt,
+      player.id === network.id,
+    );
+  }
+  const focus = self || { x: 88, z: 12 };
+  camera.position.lerp(
+    new T.Vector3(focus.x, 90, focus.z + 60),
+    1 - Math.exp(-dt * 7),
+  );
+  camera.lookAt(camera.position.x, 0, camera.position.z - 60);
   hud += dt;
-  if (hud > 0.1) {
+  if (hud > 0.15) {
     hud = 0;
     $("clock").textContent =
-      `${cityTime.label} · Phnom Penh${clock.mode === "now" ? "" : " · preview"}`;
-    $("activity").textContent =
-      `${streetLife.activity.label} · ${streetLife.activity.people} pedestrians · ${streetLife.activity.vendors} vendors`;
-    const vendor = streetLife.nearest(car);
+      `${time.label} · Phnom Penh${clock.mode === "now" ? "" : " · local preview"}`;
+    $("activity").textContent = `${activity.label} · ${activity.people} locals`;
+    $("player-mode").textContent = self
+      ? self.mode === "walk"
+        ? "On foot · wander the streets, gardens and promenade."
+        : "Driving · park anywhere clear and get out to explore."
+      : "Join the town to explore on foot.";
+    const can = Boolean(active && self),
+      distance = self?.vehicle
+        ? Math.hypot(self.x - self.vehicle.x, self.z - self.vehicle.z)
+        : null;
+    $("summon").disabled = !can || self.mode === "drive";
+    $("interact").disabled =
+      !can || (self.mode === "walk" && (distance === null || distance > 4));
+    $("interact").textContent =
+      self?.mode === "drive" ? "Get out · E" : "Enter vehicle · E";
+    $("vehicle-distance").textContent =
+      distance === null
+        ? "No vehicle summoned. Walking is the default."
+        : self.mode === "drive"
+          ? "Your personal vehicle · not a taxi"
+          : `Your ${self.vehicle.type} · ${Math.round(distance)} m away`;
+    const vendor = self ? streetLife.nearest(self) : null;
     $("vendor").disabled =
-      !active || !vendor || vendor.distance >= 18 || Math.abs(car.speed) >= 1.5;
+      !can || !vendor || vendor.distance >= 7 || Math.abs(self.speed) >= 1.5;
     $("vendor").textContent =
-      vendor && vendor.distance < 18
+      vendor && vendor.distance < 7
         ? `Talk · ${vendor.food}`
         : "Talk to vendor · V";
     $("speed").textContent = String(
-      Math.round(Math.abs(car.speed) * 3.6),
+      Math.round(Math.abs(self?.speed || 0) * 3.6),
     ).padStart(2, "0");
     $("gear").textContent =
-      car.speed < -0.2 ? "R" : car.speed > 0.2 ? "D" : "N";
-    const distance = Math.hypot(
-      car.x - target().point[0],
-      car.z - target().point[1],
-    );
-    $("distance").textContent =
-      `${Math.round(route?.distance ?? distance)} m · ${route ? "by road" : "direct / no route"}`;
-    $("interact").disabled =
-      !started ||
-      paused ||
-      portraitBlocked ||
-      distance > 15 ||
-      Math.abs(car.speed) > 1.5;
-    $("interact").textContent =
-      distance > 15
-        ? "Drive to the marker"
-        : Math.abs(car.speed) > 1.5
-          ? "Stop to interact"
-          : stage === "pickup"
-            ? "Pick up passenger · E"
-            : "Complete fare · E";
-    $("road-name").textContent = nearestRoad(
-      [car.x, car.z],
-      map.roads,
-    ).road.name;
-    drawMap();
+      self?.mode === "drive" ? (self.speed < -0.2 ? "R" : "DRIVE") : "ON FOOT";
+    $("touch-up").textContent = self?.mode === "drive" ? "GO ↑" : "↑";
+    $("touch-down").textContent = self?.mode === "drive" ? "R ↓" : "↓";
+    $("road-name").textContent =
+      self && self.x > 79
+        ? "Riverside promenade"
+        : nearestRoad([focus.x, focus.z], map.roads).road.name;
+    minimap();
   }
   if (now > noticeUntil) $("toast").style.opacity = 0;
   renderer.render(scene, camera);
 }
-requestAnimationFrame(animate);
+requestAnimationFrame(frame);

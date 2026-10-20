@@ -1,36 +1,69 @@
-# Phnom Drive — Little Riverside (v0.5)
+# Phnom Life — Little Riverside (v0.6)
 
-A playable, handcrafted Cambodian town for the pixel-art driving game. This version replaces the default dense geographic city with a compact authored neighbourhood: small homes, shops, garden paths, a market square and a clean riverbank. It is inspired by Phnom Penh, not a street-for-street representation.
+A guest-based multiplayer open world inspired by Phnom Penh. Enter a nickname, arrive on foot, explore the city and riverside, and summon a personal car, tuk-tuk or moto when you want to drive. Taxi missions and earnings are no longer part of the active game; jobs will be a separate later feature.
 
-## Play
+## Run locally
+
+Requires Node.js 22+.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open the local Vite address and choose **Start your shift**. WASD/arrows drive, Space brakes, E picks up/drops off, R resets to the road, C changes zoom and P pauses. Mobile users get steering/accelerator/reverse/brake buttons and a portrait rotation prompt.
+Open http://127.0.0.1:5173/ . Join with a nickname of 2–20 characters. Open a second tab and join with another nickname to test multiplayer. Guests using the same running server share one town, with a limit of 16 connected players.
 
-Follow the route and stop within 15 m to pick up or deliver. Completed fares earn 6,000 fictional riel, saved in the browser. No account is needed.
+The development server includes the WebSocket backend through `vite.config.js`; restart Vite when first adding the backend to an already-running older build.
 
-## New map direction
+## Controls
 
-- 16 original house/shop sprites on an authored, connected neighbourhood street grid.
-- Shingled roofs, short front walls, doors, windows and small garden paths.
-- A market square and flower garden with a fountain.
-- Tree-lined edges and a distinct grass/paving/sand/water riverbank.
-- A flat painted tile-style world, viewed from above, replaces tall extruded buildings.
-- Collisions use the same authored house footprints shown on the map.
+- On foot: WASD/arrows move in screen directions; diagonal movement is normalized.
+- F or **Summon vehicle**: select a car, tuk-tuk or moto and park it near your closest road. You must be reasonably near a road; busy spaces are avoided.
+- Walk within 4 m and use E or **Enter vehicle** to drive.
+- Driving: W/up accelerates, S/down reverses, A/D steer and Space brakes. E or **Get out** returns you to a clear space on foot and parks your vehicle.
+- C changes zoom. P pauses your controls; other guests and the shared world continue.
+- V talks to a nearby vendor. There are no purchases or inventory yet.
+- **Leave town** disconnects your guest and removes your presence and vehicle.
 
-`src/town-map.js` defines the layout and five taxi destinations. `src/town-world.js` paints the original pixel map and supplies collision rules. Both are separate from the shared vehicle, missions, navigation, clock and mobile systems.
+Mobile controls support simultaneous steering/movement and accelerator/reverse buttons, plus a dedicated brake. Summon and enter/exit buttons remain in the guest panel. Portrait phones show a rotate prompt and stop sending movement.
 
-## People and time
+## Multiplayer implementation
 
-The clock defaults to Asia/Phnom_Penh. **City time** offers weekday-noon and weekend-market previews. The weekend market runs Saturday/Sunday 18:00–23:00 with 240 pedestrians and 22 vendors; other periods have fewer characters. Counts and daily seller schedules are illustrative gameplay choices. Previews advance six game seconds per real second while playing and freeze during pause or portrait protection.
+`server/multiplayer.js` runs a server-owned simulation at 30 Hz and sends snapshots at 15 Hz. Clients send movement keys and explicit vehicle actions; they cannot directly set coordinates or control another guest. The browser predicts its own movement and interpolates other guests. Nicknames and parked/driven vehicles are shared, along with an online roster and minimap markers.
 
-**Visit riverside** moves the taxi to a nearby access road. Stop and use **Talk to vendor** or V for ambient dialogue. There is no purchase/inventory system yet.
+The server validates nicknames, actions, collision boundaries, message sizes/rates and WebSocket origins. Guest IDs are random and scoped to the connection. Guests are not authenticated accounts; nicknames are not unique or verified. Reloads, reconnects and server restarts create fresh guests; only the last nickname is saved locally. Vehicles disappear on disconnect. There is no chat, persistent world database, account system, private rooms or cross-server synchronization yet.
 
-## Verification / build
+The current limit is 16 guests per server instance. Characters and vehicles can pass through other guests; this is a social exploration prototype, not competitive physics. NPC animation and scenery previews are cosmetic on each screen. Live Phnom Penh time is the default; the preview selector explicitly changes only your local scenery.
+
+## Production server / playing from other devices
+
+```sh
+npm run build
+npm start
+```
+
+`npm start` serves `dist/` and the same WebSocket endpoint `/multiplayer`, using `127.0.0.1:5173` by default. The app requires this running backend; static file hosting alone cannot provide multiplayer. A second device needs a reachable shared server, not that device's own localhost.
+
+`HOST` and `PORT` configure the listen address. For public hosting, deploy this Node process behind HTTPS with WebSocket upgrade forwarding and the original Host header preserved. One server instance is the current design. No public deployment has been created as part of this update.
+
+## World and future jobs
+
+The default map is the authored pixel neighbourhood from v0.5: 16 homes/shops, connected streets, a garden, market square and riverfront. Guest walking can reach the promenade; vehicles remain on the landward side of the riverbank. Building and water boundaries are checked by the shared simulation.
+
+The old `missions.js` taxi loop, geographic OSM extracts and legacy world builders remain as reference/future-job code, but are not imported by the active open-world client. A future jobs layer can use the existing car/tuk-tuk/moto vehicle type and shared player state without making every guest a taxi driver.
+
+## Main modules
+
+- `src/main.js`: open-world client, UI, camera, scenery and guest rendering.
+- `src/network.js`: connection lifecycle, inputs, actions and reconnects.
+- `src/open-world.js`: shared walking, collision and vehicle state transitions.
+- `src/actors.js`: guest sprites, nickname labels and three personal vehicle models.
+- `server/multiplayer.js`: guest sessions, authoritative simulation and snapshots.
+- `server/index.js`: production HTTP + WebSocket server.
+- `src/town-map.js`, `src/town-world.js`: authored map and pixel scenery.
+- `src/street-life.js`, `src/schedule.js`: cosmetic NPCs, vendors and local time previews.
+
+## Verify
 
 ```sh
 npm test
@@ -38,14 +71,6 @@ npm run format:check
 npm run build
 ```
 
-Serve `dist/` from a static HTTP server; opening index.html directly does not work. Dependencies and generated builds are excluded from Git.
+Tests include real local WebSocket clients for presence, movement, summoned vehicles, disconnects and origin rejection, plus walking and vehicle state transitions. Network tests need permission to listen on loopback. See `VERIFICATION.md` for browser checks and remaining limits.
 
-## Geographic prototype retained
-
-The prior OSM extracts, city configuration, geographic world builder and tests remain in the repository as reference material. They are no longer the default playable map. See `SOURCES.md` and `public/data/ATTRIBUTION.md` for OSM data provenance and ODbL attribution. The authored Little Riverside map is original artwork and geometry; it does not derive its street layout from OSM.
-
-## Limits
-
-A stylized small neighbourhood, not an entire city. No traffic AI, interiors, walking controls, multiplayer, turn restrictions or real-world street closures. Physical-phone performance and long sessions are not fully verified. The NPCs are simple animated sprites. No assets from Harvest Moon or Stardew Valley are included.
-
-The local Git repository uses `main`; no remote is configured.
+The local Git repository uses `main`; no remote is configured. The pixel artwork is original. OSM data is retained with attribution in `SOURCES.md` and `public/data/ATTRIBUTION.md`; the active town street layout is authored rather than geographically exact.
