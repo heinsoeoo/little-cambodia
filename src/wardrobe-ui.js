@@ -1,6 +1,7 @@
 import * as T from "three";
 import {
   GENDERS,
+  hairstyle,
   OUTFIT_CUTS,
   outfitCut,
   SKIN_TONES,
@@ -9,7 +10,7 @@ import {
   preset,
   style,
 } from "./wardrobe.js";
-import { VEHICLES, vehicleSpec } from "./vehicle-catalog.js";
+import { VEHICLES, vehicleSpec, DEFAULT_VEHICLE } from "./vehicle-catalog.js";
 import { createCharacter, disposeMeshes } from "./character.js";
 import { vehicleModel } from "./vehicle-model.js";
 export function createWardrobe() {
@@ -23,7 +24,8 @@ export function createWardrobe() {
   fill("look-skin", SKIN_TONES);
   fill("look-cut", OUTFIT_CUTS);
   fill("look-preset", [{ id: "mix", name: "My own mix" }, ...STYLES]);
-  for (const part of ["hair", "top", "bottom", "shoes"])
+  fill("main-outfit", [{ id: "mix", name: "Custom outfit" }, ...STYLES]);
+  for (const part of ["top", "bottom", "shoes"])
     fill(
       `look-${part}`,
       STYLES.map((s) => ({
@@ -31,6 +33,15 @@ export function createWardrobe() {
         name: `${s.name} · ${part === "hair" ? s.hairShape : part === "top" ? s.topShape : part === "bottom" ? s.bottomShape : s.shoeShape}`,
       })),
     );
+  function hairOptions(gender, selected = "casual") {
+    $("look-hair").replaceChildren();
+    fill(
+      "look-hair",
+      STYLES.map((s) => ({ id: s.id, name: hairstyle(s.id, gender).name })),
+    );
+    $("look-hair").value = selected;
+  }
+  hairOptions("unspecified");
   fill("look-vehicle", VEHICLES);
   const canvas = $("look-preview"),
     renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: true });
@@ -123,15 +134,13 @@ export function createWardrobe() {
       vehicle.visible = mode === "main";
     }
     $("look-summary").textContent =
-      `${outfitCut(look)} fit · ${style(look.top).name} top · ${style(look.bottom).name} bottom · ${style(look.hair).name} hair · ${style(look.shoes).name} shoes`;
+      `${outfitCut(look)} fit · ${style(look.top).name} top · ${style(look.bottom).name} bottom · ${hairstyle(look.hair, look.gender).name} · ${style(look.shoes).name} shoes`;
     $("look-vehicle-name").textContent = vehicleSpec(profile.vehicleType).name;
-    $("outfit-open").textContent =
-      ($("look-preset").value === "mix"
-        ? "Custom outfit"
-        : `${style(look.top).name} set`) + " · Choose outfit →";
+    $("main-outfit").value = $("look-preset").value;
   }
   function load(profile, requireGender = false) {
     const look = appearance(profile?.appearance);
+    hairOptions(look.gender, look.hair);
     for (const [part, value] of Object.entries(look))
       $(`look-${part}`).value = value;
     if (requireGender) $("look-gender").value = "";
@@ -139,7 +148,7 @@ export function createWardrobe() {
       (v) => v.id === profile?.vehicleType,
     )
       ? profile.vehicleType
-      : "corolla";
+      : DEFAULT_VEHICLE;
     $("look-preset").value = ["top", "bottom", "hair", "shoes"].every(
       (part) => look[part] === look.top,
     )
@@ -148,7 +157,10 @@ export function createWardrobe() {
     editorTab($("look-preset").value === "mix");
     update();
   }
-  $("outfit-open").onclick = () => show("outfit");
+  $("outfit-open").onclick = () => {
+    show("outfit");
+    editorTab(true);
+  };
   $("creator-back").onclick = () => show("main");
   $("outfit-set-tab").onclick = () => editorTab(false);
   $("outfit-custom-tab").onclick = () => editorTab(true);
@@ -166,6 +178,15 @@ export function createWardrobe() {
       missing,
     );
   };
+  $("main-outfit").onchange = () => {
+    $("look-preset").value = $("main-outfit").value;
+    if ($("main-outfit").value === "mix") {
+      show("outfit");
+      editorTab(true);
+      return;
+    }
+    $("look-preset").onchange();
+  };
   for (const part of [
     "gender",
     "skin",
@@ -177,6 +198,8 @@ export function createWardrobe() {
     "vehicle",
   ])
     $(`look-${part}`).addEventListener("change", () => {
+      if (part === "gender")
+        hairOptions($("look-gender").value, $("look-hair").value);
       if (["hair", "top", "bottom", "shoes"].includes(part))
         $("look-preset").value = "mix";
       update();
@@ -186,6 +209,8 @@ export function createWardrobe() {
   try {
     saved = JSON.parse(localStorage.getItem("phnom-profile"));
   } catch {}
+  if (saved?.profileVersion !== 2)
+    saved = saved ? { ...saved, vehicleType: DEFAULT_VEHICLE } : undefined;
   load(saved, !saved);
   show("main");
   return {
@@ -194,11 +219,18 @@ export function createWardrobe() {
     show,
     save(profile = read()) {
       try {
-        localStorage.setItem("phnom-profile", JSON.stringify(profile));
+        localStorage.setItem(
+          "phnom-profile",
+          JSON.stringify({ ...profile, profileVersion: 2 }),
+        );
       } catch {}
     },
     render(time) {
-      if ($("welcome").hidden) return;
+      if (
+        $("welcome").hidden ||
+        document.body.classList.contains("intro-active")
+      )
+        return;
       const { width, height } = canvas.getBoundingClientRect();
       if (!width || !height) return;
       if (width !== lastWidth || height !== lastHeight) {

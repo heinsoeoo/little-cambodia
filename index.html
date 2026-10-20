@@ -9,7 +9,7 @@
     <title>Phnom Penh · Phnom Life</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
-  <body>
+  <body class="intro-active">
     <canvas id="world" aria-label="Cozy 3D open world"></canvas>
     <header>
       <a class="brand" href="#"
@@ -139,10 +139,11 @@
             ><select id="look-gender" required></select>
           </div>
           <div class="creator-field creator-wide">
-            <label for="outfit-open">Outfit</label
-            ><button id="outfit-open" type="button">
-              Casual set · Choose outfit →
-            </button>
+            <label for="main-outfit">Outfit</label>
+            <div class="outfit-main-choice">
+              <select id="main-outfit"></select
+              ><button id="outfit-open" type="button">Customize</button>
+            </div>
           </div>
           <div class="creator-field creator-wide">
             <label for="look-vehicle">Vehicle</label
@@ -210,6 +211,9 @@
       <small
         >No account needed · Nickname and look visible to other guests</small
       >
+      <button id="intro-replay" class="intro-replay" type="button">
+        For Claraa · Watch dedication ♡
+      </button>
     </section>
     <section id="pause-overlay" class="pause-overlay" hidden>
       <div class="pause-card panel">
@@ -273,6 +277,52 @@
         </p>
         <small>If the screen stays vertical, turn off rotation lock.</small>
       </div>
+    </section>
+    <section
+      id="intro"
+      class="cinematic-intro"
+      role="dialog"
+      aria-modal="true"
+      aria-label="A dedication to Claraa"
+    >
+      <div class="intro-glow"></div>
+      <div class="intro-letterbox"></div>
+      <div class="intro-cards">
+        <div
+          class="intro-card intro-portrait is-active"
+          data-intro-card="couple"
+        >
+          <img
+            src="/art/hein-claraa-couple.png"
+            alt="Cozy illustrated characters of Hein and Claraa, wearing black and posing together with a peace sign"
+            fetchpriority="high"
+          />
+          <p class="intro-kicker">HEIN &amp; CLARAA</p>
+          <p class="intro-portrait-caption">
+            Every little world begins with someone you love.
+          </p>
+        </div>
+        <div class="intro-card" data-intro-card="0" aria-hidden="true">
+          <p class="intro-kicker">FOR CLARAA</p>
+          <h1>She missed home.<br /><em>So I made her a little world.</em></h1>
+          <p>
+            My Cambodian girlfriend missed her country so much,<br />I made this
+            game to bring a little of it closer.
+          </p>
+        </div>
+        <div class="intro-card" data-intro-card="1" aria-hidden="true">
+          <p class="intro-kicker">A LITTLE PIECE OF CAMBODIA</p>
+          <h1>Love you so much,<br /><em>Claraa.</em></h1>
+        </div>
+        <div class="intro-card" data-intro-card="2" aria-hidden="true">
+          <p class="intro-kicker">A WORLD MADE WITH LOVE</p>
+          <h1>
+            Made with <span class="intro-heart">❤️</span><br /><em>by Hein</em>
+          </h1>
+        </div>
+      </div>
+      <button id="intro-skip" type="button">Skip intro →</button>
+      <div class="intro-progress" aria-hidden="true"></div>
     </section>
     <script type="module" src="/src/main.js"></script>
   </body>

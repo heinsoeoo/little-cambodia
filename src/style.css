@@ -2165,3 +2165,305 @@ body {
     display: none;
   }
 }
+.outfit-main-choice {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.outfit-main-choice select {
+  flex: 1;
+  min-width: 0;
+}
+.outfit-main-choice #outfit-open {
+  width: auto;
+  min-height: 40px;
+  padding: 8px 12px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.character-creator .intro-replay {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: #87765f;
+  font-size: 11px;
+  width: auto;
+  padding: 8px 0 0;
+}
+.cinematic-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  overflow: hidden;
+  isolation: isolate;
+  background: radial-gradient(
+    ellipse at 70% 10%,
+    #35463b 0%,
+    #172723 38%,
+    #101917 75%
+  );
+  color: #f4e7cd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--game-height, 100dvh);
+}
+.intro-active .character-creator,
+.intro-active header,
+.intro-active .touch,
+.intro-active .mobile-context {
+  visibility: hidden;
+}
+.intro-letterbox {
+  position: absolute;
+  inset: 0;
+  border-top: clamp(15px, 6vh, 60px) solid #0a1110;
+  border-bottom: clamp(15px, 6vh, 60px) solid #0a1110;
+  pointer-events: none;
+}
+.intro-glow {
+  position: absolute;
+  width: 70vw;
+  height: 70vw;
+  left: -25vw;
+  top: -40vw;
+  border-radius: 50%;
+  background: #c49a5530;
+  filter: blur(65px);
+  animation: intro-drift 12s ease-in-out infinite alternate;
+}
+.intro-cards {
+  position: relative;
+  width: min(850px, 88vw);
+  height: 310px;
+  text-align: center;
+}
+.intro-card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 850ms ease,
+    transform 1.1s ease;
+  pointer-events: none;
+}
+.intro-card.is-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+.intro-kicker {
+  font:
+    11px "Trebuchet MS",
+    sans-serif;
+  letter-spacing: 5px;
+  color: #c7ad7c;
+  margin: 0 0 24px;
+}
+.intro-card h1 {
+  font:
+    clamp(30px, 4.5vw, 58px) / 1.2 Georgia,
+    serif;
+  font-weight: 400;
+  letter-spacing: -1px;
+  margin: 0;
+  text-shadow: 0 5px 32px #0005;
+}
+.intro-card h1 em {
+  font-weight: 400;
+  color: #d3b58a;
+}
+.intro-card > p:last-child:not(.intro-kicker) {
+  font:
+    clamp(12px, 1.4vw, 16px) / 1.8 "Trebuchet MS",
+    sans-serif;
+  color: #d0c9b7;
+  margin: 28px 0 0;
+}
+.intro-heart {
+  font-size: 0.7em;
+  display: inline-block;
+  animation: intro-heart 2.6s ease-in-out infinite;
+}
+#intro-skip {
+  position: absolute;
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid #c8b89255;
+  border-radius: 24px;
+  color: #e5d8bb;
+  background: #20342c80;
+  font:
+    12px "Trebuchet MS",
+    sans-serif;
+  box-shadow: none;
+}
+.intro-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: #c4a475;
+  animation: intro-progress 15.6s linear forwards;
+}
+.intro-reduced .intro-cards {
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+.intro-reduced .intro-card {
+  position: static;
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+.intro-reduced .intro-card h1 {
+  font-size: clamp(20px, 3vw, 34px);
+}
+.intro-reduced .intro-kicker {
+  margin: 0 0 8px;
+}
+.intro-reduced .intro-card > p:last-child:not(.intro-kicker) {
+  margin: 10px 0 0;
+}
+.intro-reduced .intro-progress {
+  display: none;
+}
+.intro-reduced * {
+  animation: none !important;
+}
+@keyframes intro-drift {
+  to {
+    transform: translate(25vw, 12vh);
+  }
+}
+@keyframes intro-heart {
+  50% {
+    transform: scale(1.08);
+  }
+}
+@keyframes intro-progress {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+@media (max-height: 500px) {
+  .intro-cards {
+    height: 230px;
+  }
+  .intro-kicker {
+    margin-bottom: 15px;
+    font-size: 9px;
+  }
+  .intro-card h1 {
+    font-size: clamp(26px, 4vw, 42px);
+  }
+  .intro-card > p:last-child:not(.intro-kicker) {
+    margin-top: 15px;
+  }
+  .intro-letterbox {
+    border-width: 12px 0;
+  }
+  .intro-reduced .intro-cards {
+    gap: 12px;
+  }
+  .intro-reduced .intro-card h1 {
+    font-size: 18px;
+  }
+  .intro-reduced .intro-kicker {
+    display: none;
+  }
+  .intro-reduced .intro-card > p:last-child {
+    font-size: 11px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-intro * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* The photo-inspired illustration arrives before the dedication. */
+.intro-portrait {
+  height: min(70dvh, 620px);
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-46%);
+}
+.intro-portrait.is-active {
+  transform: translateY(-50%);
+}
+.intro-portrait img {
+  width: min(760px, 90vw);
+  min-height: 0;
+  flex: 1;
+  object-fit: contain;
+  border-radius: 28px;
+  mask-image: radial-gradient(ellipse at center, black 50%, transparent 73%);
+}
+.intro-portrait.is-active img {
+  animation: couple-arrive 4.4s ease-out both;
+}
+.intro-portrait .intro-kicker {
+  margin: 12px 0 0;
+}
+.intro-portrait .intro-portrait-caption {
+  margin: 10px 0 0;
+  font-size: clamp(12px, 2vw, 17px);
+}
+@keyframes couple-arrive {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(14px);
+  }
+  22% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.025) translateY(-3px);
+  }
+}
+.intro-reduced .intro-portrait {
+  height: auto;
+  transform: none;
+}
+.intro-reduced .intro-portrait img {
+  max-height: 24vh;
+  flex: none;
+}
+@media (max-height: 500px) {
+  .intro-portrait {
+    height: 76dvh;
+  }
+  .intro-portrait .intro-kicker {
+    margin-top: 0;
+  }
+  .intro-portrait .intro-portrait-caption {
+    margin-top: 4px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro-portrait.is-active img {
+    animation: none;
+  }
+}
+
+.intro-static * {
+  animation: none !important;
+  transition: none !important;
+}
+.intro-static .intro-progress {
+  display: none;
+}

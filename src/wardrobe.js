@@ -167,3 +167,40 @@ export function appearance(value = {}) {
 export function preset(id, base = {}) {
   return appearance({ ...base, hair: id, top: id, bottom: id, shoes: id });
 }
+
+const genderHair = {
+  male: [
+    ["Textured crop", "short"],
+    ["Slicked back", "sidepart"],
+    ["Curly fade", "fade"],
+    ["Classic side part", "sidepart"],
+    ["Cornrows", "braids"],
+    ["Mohawk", "mohawk"],
+    ["Crew cut", "cropped"],
+    ["Loose quiff", "quiff"],
+    ["Short fade", "fade"],
+    ["Swept fringe", "short"],
+  ],
+  female: [
+    ["Soft bob", "bob"],
+    ["Long waves", "waves"],
+    ["Curly bob", "curls"],
+    ["Side-swept waves", "waves"],
+    ["Long braids", "braids"],
+    ["Pixie cut", "pixie"],
+    ["High ponytail", "ponytail"],
+    ["Long flowing hair", "long"],
+    ["Low bun", "bun"],
+    ["Messy bun", "bun"],
+  ],
+};
+export function hairstyle(id, gender) {
+  const source = style(id),
+    index = STYLES.indexOf(source),
+    variant = genderHair[gender]?.[index];
+  return {
+    ...source,
+    name: variant?.[0] || source.hairShape.replaceAll("-", " "),
+    hairShape: variant?.[1] || source.hairShape,
+  };
+}

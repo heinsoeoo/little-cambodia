@@ -1,3 +1,4 @@
+import { createIntro } from "./intro.js";
 import { createMobileHUD, mobileViewport } from "./mobile-hud.js";
 import { createWardrobe } from "./wardrobe-ui.js";
 import { createPlayerVisibility } from "./player-visibility.js";
@@ -271,6 +272,7 @@ const mobileHUD = createMobileHUD({
     else action("summon");
   },
 });
+const intro = createIntro({ onOpen: stopInput });
 resize();
 window.visualViewport?.addEventListener("resize", resize);
 addEventListener("resize", resize);
@@ -444,7 +446,7 @@ function frame(now) {
   const dt = Math.min((now - previous) / 1000, 0.1);
   previous = now;
   const ready = Boolean(joined && network.id && !paused && !portraitBlocked);
-  const active = ready && !mobileHUD.isOpen;
+  const active = ready && !mobileHUD.isOpen && !intro.active;
   accumulator += dt;
   while (accumulator >= 1 / 60) {
     if (active && self) stepGuest(self, keys, 1 / 60);

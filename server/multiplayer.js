@@ -1,5 +1,5 @@
 import { appearance } from "../src/wardrobe.js";
-import { VEHICLE_TYPES } from "../src/vehicle-catalog.js";
+import { VEHICLE_TYPES, DEFAULT_VEHICLE } from "../src/vehicle-catalog.js";
 import { WebSocketServer, WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
 import {
@@ -113,7 +113,7 @@ export function createMultiplayer(httpServer) {
           message.vehicleType,
         )
           ? message.vehicleType
-          : "corolla";
+          : DEFAULT_VEHICLE;
         clearTimeout(joinTimeout);
         send(ws, {
           type: "welcome",

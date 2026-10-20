@@ -134,6 +134,22 @@ export function vehicleModel(type) {
     box(0.32, 0.25, 0.12, 0, 1.12, front + 0.1, lamp);
     if (!tuk && !rickshaw) box(0.32, 0.15, 0.1, 0, 0.85, -0.95, tail);
   }
+  if (spec.luxuryGrille) {
+    const chrome = material(0xbfc4c3);
+    box(1.13, 0.35, 0.07, 0, 0.91, length / 2 + 0.07, dark);
+    for (const y of [0.79, 0.91, 1.03])
+      box(1.1, 0.035, 0.08, 0, y, length / 2 + 0.11, chrome);
+    const ring = new T.Mesh(new T.TorusGeometry(0.12, 0.02, 6, 16), chrome);
+    ring.position.set(0, 0.91, length / 2 + 0.17);
+    group.add(ring);
+    for (let i = 0; i < 3; i++) {
+      const spoke = box(0.025, 0.13, 0.025, 0, 0.91, length / 2 + 0.17, chrome);
+      spoke.geometry.translate(0, 0.055, 0);
+      spoke.rotation.z = (i * Math.PI * 2) / 3;
+    }
+    for (const x of [-0.99, 0.99])
+      box(0.035, 0.045, length * 0.7, x, 1.15, 0, chrome);
+  }
   group.userData.vehicleType = spec.id;
   return group;
 }

@@ -1,4 +1,4 @@
-# Phnom Life — Central Phnom Penh (v0.10)
+# Phnom Life — Central Phnom Penh (v0.11)
 
 A guest-based multiplayer open world inspired by Phnom Penh. Enter a nickname, arrive on foot, explore the city and riverside, and summon a personal car, tuk-tuk or moto when you want to drive. Taxi missions and earnings are no longer part of the active game; jobs will be a separate later feature.
 
@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:5173/ . The setup screen shows Name, Gender, Outfit and Vehicle, with your chosen character and vehicle together on the right. Choose Male, Female or Prefer not to say. Outfit opens a character-only preview with Outfit set / Customize controls; Back returns to setup and Start game works from either screen. Open a second tab and join with another nickname to test multiplayer. Guests using the same running server share one town, with a limit of 16 connected players.
+Open http://127.0.0.1:5173/ . The setup screen shows Name, Gender, Outfit and Vehicle, with your chosen character and vehicle together on the right. Choose Male, Female or Prefer not to say. Choose an outfit collection directly on setup; Customize opens a character-only preview with Outfit set / Customize controls; Back returns to setup and Start game works from either screen. Open a second tab and join with another nickname to test multiplayer. Guests using the same running server share one town, with a limit of 16 connected players.
 
 The development server includes the WebSocket backend through `vite.config.js`; restart Vite when first adding the backend to an already-running older build.
 
@@ -117,3 +117,9 @@ Male characters have lean athletic shoulders and a tapered waist; female charact
 On touch devices (including wider landscape phones), walking shows a directional pad and contextual Summon/Enter/Get out action. Driving shows steering and pedals plus a compact speed badge. Map is optional; Menu contains vehicle selection, guest/time settings, camera, wardrobe, pause and leave actions. Menu content scrolls when needed, and movement input clears while it is open. Touch controls are hidden while choosing an outfit. The layout respects device safe areas and the visual viewport as Safari's bars change height; mobile form fields use 16px text to avoid automatic input zoom.
 
 Outfit cut defaults to **Match gender**: Male has athletic/tapered tailoring, Female has fitted waist/hem and tapered trouser/shoe proportions, and Prefer not to say uses a relaxed Unisex fit. Customize can explicitly choose Male, Female or Unisex without changing gender, collection or independently selected pieces. Clothing cuts are validated and shared by the multiplayer server.
+
+## Personal opening (v0.11)
+
+The cinematic begins with a photo-inspired cozy illustration of Hein and Claraa, a gentle fade and camera-like push-in, then the dedication, love note and creator credit. Skip is always available; Watch dedication replays it. Reduced-motion devices get a static opening with Continue. The original private photo is not bundled. The generated illustration is in `public/art/hein-claraa-couple.png`; the generation prompt is saved alongside it.
+
+Gender-specific hair labels and shapes preserve existing saved hair IDs. The black Mercedes C 300 is the initial default, with a one-time migration for older saved profiles; later vehicle choices remain saved.

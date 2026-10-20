@@ -74,3 +74,7 @@
 - All 42 tests pass, including wider landscape touch detection, outfit cut defaults/overrides and real WebSocket persistence of a Unisex cut on a female character. Production build and formatting pass.
 - Browser at 1024×348 and 932×300: joined over the Wi-Fi URL, used held directional-pad buttons to reach a summoned car, entered using the contextual action, checked separate driving controls/speed, opened the map without covering the exit/pedals, opened Menu and saved a Unisex fit via Wardrobe. The cut persisted after reload. Saved mobile HUD screenshot documents the 932×300 driving state. The restarted Wi-Fi server remains available at the same local URL.
 - These are viewport and browser checks on the Mac; actual iPhone Safari browser chrome, safe-area values, physical multi-touch and GPU performance still need a device check.
+
+## v0.11 cinematic and setup
+
+Production build passes. Existing 42 tests pass; the added gender-specific hairstyle construction test also passes (43 total tests). Browser checked opening couple art and manual reduced-motion transitions through dedication, love note and credit; replay returns to portrait and Continue returns to setup. Confirmed black C 300 selected for the migrated saved profile, main outfit selector and Customize entry. Couple portrait framing checked at 1280×720 and 1024×348. Browser has reduced motion enabled, so timed fades/push-in are implemented but were not visually exercised in this browser. LAN server restarted with updated vehicle catalog.

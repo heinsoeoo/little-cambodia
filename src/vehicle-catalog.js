@@ -1,5 +1,14 @@
 // Shared identifiers keep the picker, renderer and multiplayer validation aligned.
+export const DEFAULT_VEHICLE = "mercedes-c300";
 export const VEHICLES = [
+  {
+    id: DEFAULT_VEHICLE,
+    name: "Mercedes C 300 · Black",
+    kind: "sedan",
+    color: 0x20242b,
+    length: 4.7,
+    luxuryGrille: true,
+  },
   {
     id: "cedric",
     name: "Nissan Cedric",
@@ -93,6 +102,7 @@ export const VEHICLE_TYPES = ["car", ...VEHICLES.map((v) => v.id)];
 
 // Arcade tuning, not manufacturer specifications. Modest differences stay easy to drive.
 const tuning = {
+  "mercedes-c300": [11, 30, 28, 12],
   moto: [10, 26, 22, 13],
   tuktuk: [6, 18, 18, 10],
   rickshaw: [2.2, 7, 12, 12],

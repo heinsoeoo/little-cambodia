@@ -1,6 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { appearance, preset, STYLES, GENDERS } from "../src/wardrobe.js";
+import {
+  appearance,
+  preset,
+  STYLES,
+  GENDERS,
+  hairstyle,
+} from "../src/wardrobe.js";
 import { createCharacter } from "../src/character.js";
 test("wardrobe keeps pieces independent and bounds every client-controlled field", () => {
   const mixed = {
@@ -123,4 +129,22 @@ test("outfit cuts follow gender by default and can be overridden without changin
   assert.equal(character.group.userData.outfitCut, "unisex");
   assert.equal(appearance({ ...base, cut: "invalid" }).cut, "auto");
   character.dispose();
+});
+
+test("hairstyle collections retain saved IDs while adapting shape and labels to gender", () => {
+  assert.equal(hairstyle("casual", "male").hairShape, "short");
+  assert.equal(hairstyle("casual", "female").hairShape, "bob");
+  for (const collection of STYLES) {
+    for (const gender of GENDERS) {
+      const hair = hairstyle(collection.id, gender.id);
+      assert.equal(hair.id, collection.id);
+      assert.ok(hair.name);
+      const character = createCharacter({
+        gender: gender.id,
+        hair: collection.id,
+      });
+      assert.ok(character.group.children.length);
+      character.dispose();
+    }
+  }
 });

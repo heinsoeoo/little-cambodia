@@ -1,5 +1,11 @@
 import * as T from "three";
-import { appearance, style, SKIN_TONES, outfitCut } from "./wardrobe.js";
+import {
+  appearance,
+  style,
+  SKIN_TONES,
+  outfitCut,
+  hairstyle,
+} from "./wardrobe.js";
 export function createCharacter(initial) {
   const group = new T.Group();
   let key = "",
@@ -14,7 +20,7 @@ export function createCharacter(initial) {
     const top = style(look.top),
       bottom = style(look.bottom),
       shoe = style(look.shoes),
-      hairStyle = style(look.hair);
+      hairStyle = hairstyle(look.hair, look.gender);
     const mat = (color) => new T.MeshLambertMaterial({ color });
     const cloth = mat(top.top),
       pants = mat(bottom.bottom),
@@ -104,14 +110,18 @@ export function createCharacter(initial) {
       1.68,
       0,
     );
-    if (["long", "bob", "braids"].includes(hairStyle.hairShape)) {
+    if (["long", "bob", "braids", "waves"].includes(hairStyle.hairShape)) {
       for (const x of [-0.21, 0.21]) {
         const h = sphere(0.14, x, 1.48, -0.06, hair);
-        h.scale.set(0.8, hairStyle.hairShape === "long" ? 2.6 : 1.5, 1);
+        h.scale.set(
+          0.8,
+          ["long", "waves"].includes(hairStyle.hairShape) ? 2.6 : 1.5,
+          1,
+        );
       }
       box(
         0.42,
-        hairStyle.hairShape === "long" ? 0.65 : 0.32,
+        ["long", "waves"].includes(hairStyle.hairShape) ? 0.65 : 0.32,
         0.12,
         0,
         1.42,
@@ -136,7 +146,30 @@ export function createCharacter(initial) {
           Math.sin((i * Math.PI) / 4) * 0.21,
           hair,
         );
-    if (hairStyle.hairShape === "cropped") cap.scale.y = 0.5;
+    if (["cropped", "fade"].includes(hairStyle.hairShape)) cap.scale.y = 0.5;
+    if (hairStyle.hairShape === "fade")
+      for (let i = 0; i < 5; i++)
+        sphere(0.075, (i - 2) * 0.08, 1.9, 0.08, hair);
+    if (["quiff", "pixie"].includes(hairStyle.hairShape)) {
+      const fringe = sphere(0.2, -0.05, 1.9, 0.08, hair);
+      fringe.scale.set(1, hairStyle.hairShape === "quiff" ? 0.7 : 0.35, 0.8);
+    }
+    if (hairStyle.hairShape === "waves")
+      for (const x of [-0.23, 0.23])
+        for (let i = 0; i < 4; i++) {
+          const wave = sphere(
+            0.13,
+            x,
+            1.65 - i * 0.14,
+            -0.12 + (i % 2) * 0.05,
+            hair,
+          );
+          wave.scale.set(0.9, 1.3, 0.8);
+        }
+    if (hairStyle.hairShape === "braids")
+      for (const x of [-0.2, 0.2])
+        for (let i = 0; i < (female ? 5 : 2); i++)
+          sphere(0.075, x, 1.5 - i * 0.12, -0.15, hair);
     if (hairStyle.hairShape === "sidepart") {
       const sweep = sphere(0.19, -0.08, 1.88, 0.04, hair);
       sweep.scale.set(1, 0.4, 1);
