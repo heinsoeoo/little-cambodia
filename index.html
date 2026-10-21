@@ -12,6 +12,33 @@
   </head>
   <body class="intro-active">
     <section
+      id="language-choice"
+      class="language-choice"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="language-title"
+    >
+      <div class="language-card">
+        <div class="language-mark" aria-hidden="true">◈</div>
+        <span class="eyebrow">LITTLE CAMBODIA</span>
+        <h1 id="language-title">Welcome to your little world.</h1>
+        <p lang="km">សូមស្វាគមន៍មកកាន់ពិភពតូចរបស់អ្នក។</p>
+        <div class="language-options">
+          <button type="button" data-language="en" lang="en">
+            English <span>Welcome home</span></button
+          ><button type="button" data-language="km" lang="km">
+            ខ្មែរ <span>សូមស្វាគមន៍</span>
+          </button>
+        </div>
+        <small
+          >You can change this in the game menu.<br /><span lang="km"
+            >អ្នកអាចប្តូរភាសានៅក្នុងម៉ឺនុយហ្គេម។</span
+          ></small
+        >
+      </div>
+    </section>
+    <section
       id="browser-notice"
       class="browser-notice"
       hidden
@@ -86,6 +113,7 @@
           Done
         </button>
       </div>
+
       <div id="mobile-menu-actions" class="mobile-menu-actions"></div>
       <aside class="mission panel">
         <div class="eyebrow">YOUR LITTLE ADVENTURE</div>
@@ -108,6 +136,13 @@
         </div>
       </aside>
       <aside class="city-life panel" aria-label="City life and time">
+        <label class="language-setting"
+          >Language
+          <select data-language-switch aria-label="Language">
+            <option value="en">English</option>
+            <option value="km">ខ្មែរ</option>
+          </select></label
+        >
         <div class="eyebrow">LIFE ALONG THE TONLÉ SAP</div>
         <strong id="clock">Phnom Penh time</strong>
         <p id="activity">Preparing the riverside…</p>
@@ -273,6 +308,13 @@
           ></small
         >
         <div id="creator-utilities">
+          <label class="language-setting"
+            >Language
+            <select data-language-switch aria-label="Language">
+              <option value="en">English</option>
+              <option value="km">ខ្មែរ</option>
+            </select></label
+          >
           <button id="intro-replay" class="intro-replay" type="button">
             For Claraa ♡
           </button>

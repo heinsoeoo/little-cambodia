@@ -1,5 +1,6 @@
+import { createLanguage, translate } from "./i18n.js";
 import { places, nearestPlace } from "./places.js";
-import { createBrowserNotice, needsBrowserNotice } from "./browser-notice.js";
+import { createBrowserNotice } from "./browser-notice.js";
 import { createAudio } from "./audio.js";
 import { createIntroCouple } from "./intro-couple.js";
 import { createIntro } from "./intro.js";
@@ -179,7 +180,7 @@ function syncRoster(players) {
   $("roster").replaceChildren(
     ...players.map((p) => {
       const li = document.createElement("li");
-      li.textContent = `${p.nickname}${p.id === network.id ? " (you)" : ""} · ${p.mode === "drive" ? "driving" : "walking"}`;
+      li.textContent = `${p.nickname}${p.id === network.id ? translate(" (you)") : ""} · ${translate(p.mode === "drive" ? "driving" : "walking")}`;
       return li;
     }),
   );
@@ -324,14 +325,8 @@ const mobileHUD = createMobileHUD({
     else action("summon");
   },
 });
-let tipStorage;
-try {
-  tipStorage = sessionStorage;
-} catch {
-  tipStorage = { getItem: () => null };
-}
 const intro = createIntro({
-  autoplay: !needsBrowserNotice(navigator.userAgent, tipStorage),
+  autoplay: false,
   onOpen: () => {
     stopInput();
     audio.setIntro(true);
@@ -370,7 +365,12 @@ $("guest-form").onsubmit = (event) => {
     network.connect(name, profile);
   }
 };
-createBrowserNotice({ onContinue: () => intro.play() });
+createLanguage({
+  onReady: () => {
+    const notice = createBrowserNotice({ onContinue: () => intro.play() });
+    if (!notice.visible) intro.play();
+  },
+});
 try {
   $("nickname").value = localStorage.getItem("riverside-nickname") || "";
 } catch {}

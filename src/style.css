@@ -3274,3 +3274,149 @@ header > .feedback-link,
 .intro-static .intro-couple-stage {
   animation: none;
 }
+
+/* Language choice precedes the cinematic and remains comfortable on phones. */
+.language-choice {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: radial-gradient(ellipse at top, #f4d6b9, #d3d9bd 65%, #95b0a0);
+  overflow: auto;
+}
+.language-choice[hidden] {
+  display: none;
+}
+.language-card {
+  width: min(100%, 510px);
+  padding: clamp(24px, 5vw, 48px);
+  border: 1px solid #fff8e7;
+  border-radius: 28px;
+  background: #faf5e8f5;
+  box-shadow: 0 24px 80px #54463525;
+  text-align: center;
+  color: #514a3d;
+}
+.language-mark {
+  font-size: 42px;
+  color: #8b9e69;
+  margin-bottom: 16px;
+}
+.language-card h1 {
+  font-family: Georgia, serif;
+  font-size: clamp(25px, 4vw, 36px);
+  font-weight: 400;
+  line-height: 1.2;
+  margin: 16px 0;
+}
+.language-card p {
+  font-size: 18px;
+  line-height: 1.9;
+}
+.language-card small {
+  display: block;
+  line-height: 1.9;
+  color: #807563;
+  margin-top: 22px;
+}
+.language-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 28px;
+}
+.language-options button {
+  min-height: 92px;
+  font-size: 21px;
+  background: #e6ebda;
+  border: 1px solid #adb994;
+  border-radius: 17px;
+  color: #3d503b;
+}
+.language-options button:hover,
+.language-options button:focus-visible {
+  background: #d2dfbd;
+  outline: 2px solid #73895a;
+  outline-offset: 3px;
+}
+.language-options span {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.9;
+  margin-top: 6px;
+}
+.language-setting {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.language-setting select {
+  width: auto;
+  min-width: 110px;
+  font-size: 16px;
+}
+.choosing-language #rotate-overlay {
+  display: none;
+}
+html:lang(km) body,
+html:lang(km) button,
+html:lang(km) select,
+html:lang(km) input {
+  font-family: "Noto Sans Khmer", "Khmer MN", "Khmer OS", system-ui, sans-serif;
+  letter-spacing: normal;
+}
+html:lang(km) h1,
+html:lang(km) h2 {
+  font-family: "Noto Serif Khmer", "Khmer MN", serif;
+  line-height: 1.65;
+}
+html:lang(km) .eyebrow,
+html:lang(km) small,
+html:lang(km) label {
+  letter-spacing: normal;
+  line-height: 1.8;
+}
+html:lang(km) button {
+  line-height: 1.65;
+}
+@media (max-height: 500px) {
+  .language-choice {
+    padding: 12px;
+  }
+  .language-card {
+    padding: 18px 30px;
+  }
+  .language-mark {
+    display: none;
+  }
+  .language-card h1 {
+    margin: 10px 0;
+  }
+  .language-card p {
+    margin: 6px 0;
+  }
+  .language-options {
+    margin-top: 14px;
+  }
+  .language-options button {
+    min-height: 68px;
+  }
+  .language-card small {
+    margin-top: 12px;
+  }
+}
+
+.city-life > .language-setting {
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+#creator-utilities {
+  flex-wrap: wrap;
+}
+html:lang(km) .game-calendar {
+  font-size: 11px;
+}

@@ -1,3 +1,4 @@
+import { translate } from "./i18n.js";
 export function mobileViewport({ width, height, coarse }) {
   return coarse || width <= 900 || (height <= 500 && width <= 1200);
 }
@@ -61,7 +62,7 @@ export function createMobileHUD({ clearInput, onPrimary, onTalk }) {
       closeMenu();
       if (!mobile) {
         $("camera").textContent = "Zoom · C";
-        $("pause").textContent = $("pause").textContent.includes("Resume")
+        $("pause").textContent = !$("pause-overlay").hidden
           ? "Resume · P"
           : "Pause · P";
       }
@@ -75,13 +76,24 @@ export function createMobileHUD({ clearInput, onPrimary, onTalk }) {
       document.body.classList.toggle("ui-creating", creating);
       document.body.dataset.playMode = state?.mode || "walk";
       if (creating) closeMenu();
+      $("camera").textContent = mobile ? "Zoom" : "Zoom · C";
+      $("pause").textContent = !$("pause-overlay").hidden
+        ? mobile
+          ? "Resume"
+          : "Resume · P"
+        : mobile
+          ? "Pause"
+          : "Pause · P";
+      $("summon").textContent = mobile
+        ? "Summon vehicle"
+        : "Summon vehicle · F";
       if (mobile)
-        for (const id of ["camera", "pause", "summon", "interact", "vendor"]) {
+        for (const id of ["interact", "vendor"]) {
           const element = $(id);
           element.textContent = element.textContent.replace(/ · [A-Z]$/, "");
         }
       $("mobile-status").textContent = state
-        ? `${state.nickname} · ${state.mode === "drive" ? "Driving" : "On foot"}`
+        ? `${state.nickname} · ${translate(state.mode === "drive" ? "Driving" : "On foot")}`
         : "";
       const distance = state?.vehicle
         ? Math.hypot(state.x - state.vehicle.x, state.z - state.vehicle.z)
