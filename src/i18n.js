@@ -323,6 +323,79 @@ Object.assign(KHMER, {
   "Try an activity for a little adventure.": "សាកល្បងសកម្មភាពតូចមួយ។",
   "Taxi jobs are coming later.": "ការងារតាក់ស៊ីនឹងមកដល់ពេលក្រោយ។",
 });
+Object.assign(KHMER, {
+  "Snack bag": "កាបូបអាហារសម្រន់",
+  "Your snack bag": "កាបូបអាហារសម្រន់របស់អ្នក",
+  "Street snack stall": "តូបអាហារតាមផ្លូវ",
+  "Trade kindness stamps at open street stalls. Walk up to a vendor and tap Shop.":
+    "ប្រើត្រាទឹកចិត្តទិញអាហារនៅតូបដែលបើក។ ដើរទៅជិតអ្នកលក់ ហើយចុចទិញអាហារ។",
+  "Packed for later": "ខ្ចប់ទុកសម្រាប់ពេលក្រោយ",
+  "Your bag is empty. Help a neighbour to earn stamps, then visit a street stall.":
+    "កាបូបរបស់អ្នកនៅទទេ។ ជួយអ្នកជិតខាងដើម្បីទទួលត្រា រួចទៅតូបតាមផ្លូវ។",
+  "Buy snack": "ទិញអាហារ",
+  "Enjoy snack": "ញ៉ាំអាហារ",
+  "Snack packed! Enjoy it from your snack bag.":
+    "បានខ្ចប់អាហារហើយ! អ្នកអាចញ៉ាំពីកាបូបអាហាររបស់អ្នក។",
+  "A little snack break. Delicious!": "សម្រាកញ៉ាំអាហារបន្តិច។ ឆ្ងាញ់ណាស់!",
+  "Get out of your vehicle for a snack break.":
+    "សូមចុះពីយានយន្ត ដើម្បីសម្រាកញ៉ាំអាហារ។",
+  "local flavours tried": "រសជាតិក្នុងស្រុកដែលបានសាក",
+  "Grilled skewers": "សាច់អាំងចង្កាក់",
+  "Fresh coconut": "ដូងស្រស់",
+  "Sugarcane juice": "ទឹកអំពៅ",
+  "Nom krok": "នំគ្រក់",
+  "Fruit cart": "ផ្លែឈើស្រស់",
+  "Noodle cart": "មី",
+  "A FRIEND IN THE CITY": "មិត្តម្នាក់ក្នុងទីក្រុង",
+  "A little conversation": "ការសន្ទនាតូចមួយ",
+  "Dara’s little parcel": "កញ្ចប់តូចរបស់ Dara",
+  "The missing scarf": "កន្សែងដែលបាត់",
+  "Flowers for a friend": "ផ្កាសម្រាប់មិត្តភក្តិ",
+  "Help Dara take a fabric parcel from Kandal Market to a friend near Central Market. You can drive between stops; get out to talk.":
+    "ជួយ Dara យកកញ្ចប់ក្រណាត់ពីផ្សារកណ្តាលទៅមិត្តម្នាក់ក្បែរផ្សារធំថ្មី។ អ្នកអាចបើកបររវាងចំណុច ហើយចុះដើម្បីនិយាយ។",
+  "Sophea left a scarf near the Royal Palace. Find it and bring it back to Kandal Market.":
+    "Sophea បានទុកកន្សែងនៅក្បែរព្រះបរមរាជវាំង។ ស្វែងរកវា ហើយយកត្រឡប់មកផ្សារកណ្តាល។",
+  "Pick up a little bouquet near Central Market and bring it to Lina by the palace.":
+    "យកបាច់ផ្កាក្បែរផ្សារធំថ្មី ហើយជូន Lina ក្បែរព្រះបរមរាជវាំង។",
+  "Meet Dara near the riverside": "ជួប Dara ក្បែរមាត់ទន្លេ",
+  "Talk to Dara": "និយាយជាមួយ Dara",
+  "Collect the fabric parcel at Kandal Market": "យកកញ្ចប់ក្រណាត់នៅផ្សារកណ្តាល",
+  "Collect parcel": "យកកញ្ចប់",
+  "Deliver the parcel near Central Market": "ជូនកញ្ចប់ក្បែរផ្សារធំថ្មី",
+  "Hand over parcel": "ជូនកញ្ចប់",
+  "Ask Sophea about her scarf": "សួរ Sophea អំពីកន្សែង",
+  "Talk to Sophea": "និយាយជាមួយ Sophea",
+  "Find the scarf by the palace pavement":
+    "ស្វែងរកកន្សែងលើចិញ្ចើមផ្លូវក្បែរវាំង",
+  "Pick up scarf": "យកកន្សែង",
+  "Return to Sophea at Kandal Market": "ត្រឡប់ទៅជួប Sophea នៅផ្សារកណ្តាល",
+  "Return scarf": "ប្រគល់កន្សែង",
+  "Meet Vanna near Central Market": "ជួប Vanna ក្បែរផ្សារធំថ្មី",
+  "Collect flowers": "យកផ្កា",
+  "Find Lina by the palace pavement": "ស្វែងរក Lina លើចិញ្ចើមផ្លូវក្បែរវាំង",
+  "Give flowers": "ជូនផ្កា",
+  "Dara: Could you collect my fabric parcel at Kandal Market? My friend near Central Market is waiting. Thank you!":
+    "Dara៖ ជួយយកកញ្ចប់ក្រណាត់របស់ខ្ញុំនៅផ្សារកណ្តាលបានទេ? មិត្តខ្ញុំក្បែរផ្សារធំថ្មីកំពុងរង់ចាំ។ អរគុណ!",
+  "Sophea: Here is Dara’s parcel. Please take it to Vanna near Central Market.":
+    "Sophea៖ នេះជាកញ្ចប់របស់ Dara។ សូមយកវាទៅជូន Vanna ក្បែរផ្សារធំថ្មី។",
+  "Vanna: You brought it! This will help me finish today’s sewing. Thank you so much.":
+    "Vanna៖ អ្នកយកវាមកដល់ហើយ! នេះនឹងជួយខ្ញុំបញ្ចប់ការដេរថ្ងៃនេះ។ អរគុណច្រើន។",
+  "Sophea: I left my favourite scarf near the palace. Could you bring it back?":
+    "Sophea៖ ខ្ញុំបានទុកកន្សែងដែលខ្ញុំចូលចិត្តក្បែរវាំង។ ជួយយកវាមកវិញបានទេ?",
+  "A soft scarf is folded beside the bench. This must be Sophea’s.":
+    "មានកន្សែងទន់មួយបត់ទុកក្បែរកៅអី។ នេះប្រាកដជារបស់ Sophea។",
+  "Sophea: My scarf! You made my day. Please take these stamps for a treat.":
+    "Sophea៖ កន្សែងខ្ញុំ! អ្នកធ្វើឱ្យខ្ញុំសប្បាយចិត្តណាស់។ សូមយកត្រាទាំងនេះទៅទិញអាហារញ៉ាំ។",
+  "Vanna: Please bring this little bouquet to Lina by the palace. It is her birthday!":
+    "Vanna៖ សូមយកបាច់ផ្កានេះទៅជូន Lina ក្បែរវាំង។ ថ្ងៃនេះជាថ្ងៃកំណើតរបស់នាង!",
+  "Lina: For me? What a lovely surprise. Thank you for coming all this way!":
+    "Lina៖ សម្រាប់ខ្ញុំមែនទេ? រំភើបណាស់។ អរគុណដែលធ្វើដំណើរមកដល់ទីនេះ!",
+});
+Object.assign(KHMER, {
+  Shop: "ទិញអាហារ",
+  "Shop street stall · V": "ទិញអាហារតាមផ្លូវ · V",
+  "Shop street stall": "ទិញអាហារតាមផ្លូវ",
+});
 export let currentLanguage = "en";
 export function translate(source, language = currentLanguage) {
   if (language !== "km") return source;

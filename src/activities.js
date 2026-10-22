@@ -1,3 +1,4 @@
+import { SNACKS } from "./city-errands.js";
 import { nearestRoad } from "./geo.js";
 
 function along(points, distance) {
@@ -114,6 +115,22 @@ export class Activities {
     this.stamps = Number.isSafeInteger(saved.stamps)
       ? Math.min(999999, Math.max(0, saved.stamps))
       : 0;
+    this.snacks = Object.fromEntries(
+      SNACKS.map((item) => [
+        item.id,
+        Number.isSafeInteger(saved.snacks?.[item.id])
+          ? Math.max(0, Math.min(99, saved.snacks[item.id]))
+          : 0,
+      ]),
+    );
+    this.tasted = Object.fromEntries(
+      SNACKS.map((item) => [
+        item.id,
+        Number.isSafeInteger(saved.tasted?.[item.id])
+          ? Math.max(0, Math.min(9999, saved.tasted[item.id]))
+          : 0,
+      ]),
+    );
     this.current = null;
     this.index = 0;
     const active = catalog.find((item) => item.id === saved.active?.id);
@@ -164,18 +181,42 @@ export class Activities {
       stop = this.target;
     this.index++;
     if (this.index < activity.stops.length)
-      return { type: "step", label: stop.label };
+      return { type: "step", label: stop.label, dialog: stop.dialog };
     this.completed[activity.id] = Math.min(
       9999,
       this.completed[activity.id] + 1,
     );
     this.stamps = Math.min(999999, this.stamps + activity.reward);
     this.cancel();
-    return { type: "complete", title: activity.title, reward: activity.reward };
+    return {
+      type: "complete",
+      title: activity.title,
+      reward: activity.reward,
+      dialog: stop.dialog,
+    };
+  }
+  buy(id, vendorFood) {
+    const snack = SNACKS.find(
+      (item) => item.id === id && item.name === vendorFood,
+    );
+    if (!snack || this.stamps < snack.cost || this.snacks[id] >= 99)
+      return false;
+    this.stamps -= snack.cost;
+    this.snacks[id]++;
+    return true;
+  }
+  eat(id) {
+    if (!SNACKS.some((item) => item.id === id) || !this.snacks[id])
+      return false;
+    this.snacks[id]--;
+    this.tasted[id] = Math.min(9999, this.tasted[id] + 1);
+    return true;
   }
   save() {
     return {
       stamps: this.stamps,
+      snacks: { ...this.snacks },
+      tasted: { ...this.tasted },
       completed: { ...this.completed },
       active: this.current ? { id: this.current.id, index: this.index } : null,
     };

@@ -7,6 +7,7 @@ export function createMobileHUD({ clearInput, onPrimary, onTalk }) {
     header = document.querySelector("header");
   const actions = [
     "activities-open",
+    "snacks-open",
     "camera",
     "pause",
     "wardrobe",
@@ -116,7 +117,7 @@ export function createMobileHUD({ clearInput, onPrimary, onTalk }) {
               : "Bring vehicle here";
       $("mobile-talk").hidden =
         !can || !vendor || vendor.distance >= 7 || Math.abs(state.speed) >= 1.5;
-      $("mobile-talk").textContent = vendor ? `Talk · ${vendor.food}` : "Talk";
+      $("mobile-talk").textContent = vendor ? `Shop · ${vendor.food}` : "Shop";
     },
   };
 }

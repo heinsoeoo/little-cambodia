@@ -3680,3 +3680,41 @@ html:lang(km) .game-calendar {
     font-size: 12px;
   }
 }
+
+#activity-cards {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.snack-board {
+  max-width: 560px;
+}
+#snack-wallet {
+  display: block;
+  margin: 14px 0;
+  color: #71845c;
+}
+#snack-menu > div,
+#snack-inventory > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  background: #eee9da;
+  border-radius: 14px;
+  margin: 10px 0;
+}
+#snack-menu button,
+#snack-inventory button {
+  min-height: 44px;
+  font-size: 13px;
+  background: #7b906c;
+  color: #fff8e7;
+}
+#snack-tasted {
+  color: #8f7552;
+}
+@media (max-width: 650px) {
+  #activity-cards {
+    grid-template-columns: 1fr;
+  }
+}

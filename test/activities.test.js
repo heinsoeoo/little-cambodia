@@ -83,3 +83,22 @@ test("an unfinished activity resumes at the saved stop and rejects invalid saved
     null,
   );
 });
+test("snack purchases charge only the correct vendor, preserve funds on failure, and survive reload", () => {
+  const game = new Activities(catalog, { stamps: 20 });
+  assert.equal(game.buy("coconut", "Nom krok"), false);
+  assert.equal(game.stamps, 20);
+  assert.equal(game.buy("unknown", "Fresh coconut"), false);
+  assert.equal(game.buy("coconut", "Fresh coconut"), true);
+  assert.equal(game.stamps, 12);
+  assert.equal(game.snacks.coconut, 1);
+  const saved = new Activities(catalog, game.save());
+  assert.equal(saved.snacks.coconut, 1);
+  assert.equal(saved.eat("coconut"), true);
+  assert.equal(saved.snacks.coconut, 0);
+  assert.equal(saved.tasted.coconut, 1);
+  assert.equal(saved.eat("coconut"), false);
+  assert.equal(saved.buy("noodles", "Noodle cart"), true);
+  assert.equal(saved.stamps, 0);
+  assert.equal(saved.buy("fruit", "Fruit cart"), false);
+  assert.equal(saved.stamps, 0);
+});

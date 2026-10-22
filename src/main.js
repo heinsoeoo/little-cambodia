@@ -84,6 +84,7 @@ const activities = createActivities({
   path: world.path,
   roads: map.roads,
   spawn,
+  nearbyVendor: () => nearestVendor(),
   onOpen: () => {
     mobileHUD.closeMenu();
     stopInput();
@@ -184,12 +185,19 @@ function action(name) {
 function enterExit() {
   action(self?.mode === "drive" ? "exit" : "enter");
 }
+function nearestVendor() {
+  return (
+    [self ? streetLife.nearest(self) : null, activities.nearestVendor(self)]
+      .filter(Boolean)
+      .sort((a, b) => a.distance - b.distance)[0] || null
+  );
+}
 function talk() {
   if (!self || paused || portraitBlocked) return;
-  const vendor = streetLife.nearest(self);
+  const vendor = nearestVendor();
   if (vendor && vendor.distance < 7 && Math.abs(self.speed) < 1.5) {
     audio.effect("talk");
-    notify(`${vendor.food} vendor: “Fresh and ready! Enjoy the riverside.”`, 6);
+    activities.openShop(vendor);
   }
 }
 function syncRoster(players) {
@@ -560,7 +568,7 @@ function frame(now) {
   const ready = Boolean(joined && network.id && !paused && !portraitBlocked);
   const active =
     ready && !mobileHUD.isOpen && !intro.active && !activities.open;
-  activities.update(self, active, now);
+  activities.update(self, active, now, clock.read().hour);
   const riverDistance = self
     ? nearestRoad([self.x, self.z], [{ points: world.path }]).distance
     : Infinity;
@@ -638,13 +646,13 @@ function frame(now) {
         : self.mode === "drive"
           ? "Your personal vehicle · not a taxi"
           : `Your ${vehicleSpec(self.vehicle.type).name} · ${Math.round(distance)} m away`;
-    const vendor = self ? streetLife.nearest(self) : null;
+    const vendor = nearestVendor();
     $("vendor").disabled =
       !can || !vendor || vendor.distance >= 7 || Math.abs(self.speed) >= 1.5;
     $("vendor").textContent =
       vendor && vendor.distance < 7
-        ? `Talk · ${vendor.food}`
-        : "Talk to vendor · V";
+        ? `Shop · ${vendor.food}`
+        : "Shop street stall · V";
     $("speed").textContent = String(
       Math.round(Math.abs(self?.speed || 0) * 3.6),
     ).padStart(2, "0");
