@@ -190,6 +190,23 @@ export function createCityMap({ map, bounds, path, onOpen, canOpen }) {
       context.stroke();
       context.restore();
     }
+    if (player?.vehicle && player.mode === "walk") {
+      context.fillStyle = "#8cc6bb";
+      context.strokeStyle = "#253b35";
+      context.lineWidth = 2;
+      context.fillRect(
+        px(player.vehicle.x) - 5,
+        pz(player.vehicle.z) - 5,
+        10,
+        10,
+      );
+      context.strokeRect(
+        px(player.vehicle.x) - 5,
+        pz(player.vehicle.z) - 5,
+        10,
+        10,
+      );
+    }
     for (const guest of players) {
       if (guest.id === player?.id) continue;
       context.fillStyle = "#735d90";
