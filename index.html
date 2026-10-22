@@ -146,6 +146,15 @@
             <option value="km">ខ្មែរ</option>
           </select></label
         >
+        <label class="control-size-setting"
+          >Touch controls<select
+            id="control-size"
+            aria-label="Touch control size"
+          >
+            <option value="large">Large</option>
+            <option value="extra">Extra large</option>
+          </select></label
+        >
         <div class="eyebrow">LIFE ALONG THE TONLÉ SAP</div>
         <strong id="clock">Phnom Penh time</strong>
         <p id="activity">Preparing the riverside…</p>
@@ -163,6 +172,7 @@
       </aside>
     </section>
     <div class="mobile-status mobile-only" id="mobile-status"></div>
+    <div id="hud-wallet" class="hud-wallet" hidden></div>
     <div class="mobile-context mobile-only">
       <button id="mobile-talk" hidden>Talk</button
       ><button id="mobile-primary" disabled>Summon vehicle</button>
@@ -423,7 +433,9 @@
       <div>
         <strong id="activity-title"></strong>
         <p id="activity-objective"></p>
-        <button id="activity-action" type="button"></button>
+        <div id="activity-action-home">
+          <button id="activity-action" type="button"></button>
+        </div>
       </div>
     </aside>
     <section id="pause-overlay" class="pause-overlay" hidden>

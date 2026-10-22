@@ -566,6 +566,7 @@ function frame(now) {
   }
   introCouple.render(now, false, false);
   const ready = Boolean(joined && network.id && !paused && !portraitBlocked);
+  document.body.classList.toggle("dialog-open", activities.open);
   const active =
     ready && !mobileHUD.isOpen && !intro.active && !activities.open;
   activities.update(self, active, now, clock.read().hour);

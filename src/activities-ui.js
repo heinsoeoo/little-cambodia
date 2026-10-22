@@ -202,6 +202,9 @@ export function createActivities({
     const visible = Boolean(player && target);
     $("activity-tracker").hidden = !visible;
     marker.visible = visible;
+    $("activity-action").hidden = !visible;
+    $("hud-wallet").hidden = !player;
+    $("hud-wallet").textContent = `✧ ${game.stamps}`;
     if (!visible) return;
     marker.position.set(target.point[0], 0, target.point[1]);
     neighbour.group.visible =
@@ -226,7 +229,7 @@ export function createActivities({
     $("activity-distance").textContent = `${distance} m`;
     const wrongMode = player.mode !== game.current.mode;
     $("activity-action").disabled = !usable || !game.canInteract(player);
-    $("activity-action").textContent = translate(
+    const actionLabel = translate(
       wrongMode
         ? game.current.mode === "walk"
           ? "Get out to continue"
@@ -236,6 +239,15 @@ export function createActivities({
           : distance > 10
             ? "Follow the golden marker"
             : target.action,
+    );
+    $("activity-action").setAttribute("aria-label", actionLabel);
+    $("activity-action").textContent =
+      document.body.classList.contains("mobile-ui") && !game.canInteract(player)
+        ? translate("Quest")
+        : actionLabel;
+    $("activity-action").classList.toggle(
+      "quest-ready",
+      game.canInteract(player),
     );
   }
   function closeDialogue() {

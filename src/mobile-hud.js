@@ -23,6 +23,20 @@ export function createMobileHUD({ clearInput, onPrimary, onTalk }) {
         : header;
     if (sound && target && sound.parentElement !== target) target.append(sound);
   }
+  function controlSize(value) {
+    const size = value === "extra" ? "extra" : "large";
+    document.body.dataset.controlSize = size;
+    $("control-size").value = size;
+    try {
+      localStorage.setItem("little-cambodia-control-size", size);
+    } catch {}
+  }
+  let savedSize;
+  try {
+    savedSize = localStorage.getItem("little-cambodia-control-size");
+  } catch {}
+  controlSize(savedSize);
+  $("control-size").onchange = () => controlSize($("control-size").value);
   let mobile = false,
     menuOpen = false;
   function closeMenu() {
@@ -65,6 +79,10 @@ export function createMobileHUD({ clearInput, onPrimary, onTalk }) {
     resize(value) {
       if (value === mobile) return;
       mobile = value;
+      const questAction = $("activity-action");
+      if (mobile)
+        document.querySelector(".mobile-context").prepend(questAction);
+      else $("activity-action-home").append(questAction);
       placeSound(!$("welcome").hidden);
       document.body.classList.toggle("mobile-ui", mobile);
       closeMenu();
@@ -117,7 +135,15 @@ export function createMobileHUD({ clearInput, onPrimary, onTalk }) {
               : "Bring vehicle here";
       $("mobile-talk").hidden =
         !can || !vendor || vendor.distance >= 7 || Math.abs(state.speed) >= 1.5;
-      $("mobile-talk").textContent = vendor ? `Shop · ${vendor.food}` : "Shop";
+      $("mobile-talk").textContent = "Shop";
+      $("mobile-talk").setAttribute(
+        "aria-label",
+        vendor ? `Shop · ${vendor.food}` : "Shop",
+      );
+      $("mobile-primary").setAttribute(
+        "aria-label",
+        $("mobile-primary").textContent,
+      );
     },
   };
 }

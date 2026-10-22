@@ -396,6 +396,13 @@ Object.assign(KHMER, {
   "Shop street stall · V": "ទិញអាហារតាមផ្លូវ · V",
   "Shop street stall": "ទិញអាហារតាមផ្លូវ",
 });
+Object.assign(KHMER, {
+  Quest: "បេសកកម្ម",
+  "Touch controls": "ប៊ូតុងប៉ះ",
+  "Touch control size": "ទំហំប៊ូតុងប៉ះ",
+  Large: "ធំ",
+  "Extra large": "ធំបន្ថែម",
+});
 export let currentLanguage = "en";
 export function translate(source, language = currentLanguage) {
   if (language !== "km") return source;
