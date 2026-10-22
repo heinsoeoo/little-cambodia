@@ -1,3 +1,4 @@
+import { createCityMap } from "./map-ui.js";
 import { createActivities } from "./activities-ui.js";
 import { createLanguage, translate } from "./i18n.js";
 import { places, nearestPlace } from "./places.js";
@@ -16,7 +17,7 @@ import {
   vehiclePaint,
 } from "./vehicle-catalog.js";
 import * as T from "three";
-import { city, phnomMap, spawn, promenade } from "./phnom-map.js";
+import { city, phnomMap, spawn, promenade, bounds } from "./phnom-map.js";
 import { makeWorld } from "./world.js";
 import { palette } from "./pixel-art.js";
 import { CityClock, activityAt, GAME_TIME_RATE } from "./schedule.js";
@@ -27,10 +28,10 @@ import {
   bindViewportGestures,
   needsRotation,
 } from "./mobile.js";
-import { nearestRoad, project } from "./geo.js";
+import { nearestRoad } from "./geo.js";
 import { stepGuest, nickname } from "./open-world.js";
 import { Multiplayer } from "./network.js";
-import { createActor, playerColor } from "./actors.js";
+import { createActor } from "./actors.js";
 const $ = (id) => document.getElementById(id),
   map = phnomMap,
   keys = new Set(),
@@ -94,6 +95,16 @@ const activities = createActivities({
     notify(text, 5);
   },
   canUse: () => Boolean(joined && !paused && !portraitBlocked && !intro.active),
+});
+const cityMap = createCityMap({
+  map,
+  bounds,
+  path: world.path,
+  onOpen: () => {
+    mobileHUD.closeMenu();
+    stopInput();
+  },
+  canOpen: () => Boolean(joined && !intro.active),
 });
 camera.position.set(spawn[0] + 40, 58, spawn[1] + 90);
 for (const spec of VEHICLES) {
@@ -339,6 +350,7 @@ const network = new Multiplayer((event) => {
 const mobileHUD = createMobileHUD({
   clearInput: stopInput,
   onTalk: talk,
+  onMap: () => cityMap.open(),
   onPrimary: () => {
     if (!self) return;
     if (self.mode === "drive") action("exit");
@@ -432,6 +444,7 @@ $("pause").onclick = $("resume").onclick = pause;
 $("vendor").onclick = talk;
 $("time-mode").onchange = () => clock.setMode($("time-mode").value);
 $("leave").onclick = () => {
+  cityMap.close();
   activities.hide();
   network.disconnect();
   self = null;
@@ -454,7 +467,7 @@ $("leave").onclick = () => {
   syncRoster([]);
 };
 addEventListener("keydown", (event) => {
-  if (!$("welcome").hidden || activities.open) return;
+  if (!$("welcome").hidden || activities.open || cityMap.isOpen) return;
   if (["INPUT", "SELECT", "TEXTAREA"].includes(event.target.tagName)) return;
   if (
     ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key)
@@ -482,75 +495,6 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 addEventListener("pagehide", () => network.disconnect());
-const ctx = $("map").getContext("2d"),
-  west = project(city.bounds[0], city.bounds[3], city.origin),
-  east = project(city.bounds[2], city.bounds[1], city.origin),
-  scale = 260 / Math.max(east[0] - west[0], east[1] - west[1]);
-function minimap() {
-  const px = (x) => 10 + (x - west[0]) * scale,
-    pz = (z) => 10 + (z - west[1]) * scale;
-  ctx.fillStyle = "#d3c294";
-  ctx.fillRect(0, 0, 280, 280);
-  ctx.fillStyle = "#75a5ae";
-  for (const water of map.water) {
-    ctx.beginPath();
-    water.points.forEach((p, i) =>
-      i ? ctx.lineTo(px(p[0]), pz(p[1])) : ctx.moveTo(px(p[0]), pz(p[1])),
-    );
-    ctx.fill();
-  }
-  for (const road of map.roads) {
-    ctx.strokeStyle = "#8d7656";
-    ctx.lineWidth = Math.max(1, road.width * scale);
-    ctx.beginPath();
-    road.points.forEach((p, i) =>
-      i ? ctx.lineTo(px(p[0]), pz(p[1])) : ctx.moveTo(px(p[0]), pz(p[1])),
-    );
-    ctx.stroke();
-  }
-  ctx.fillStyle = "#b77955";
-  for (const b of map.buildings) {
-    ctx.beginPath();
-    b.points.forEach((p, i) =>
-      i ? ctx.lineTo(px(p[0]), pz(p[1])) : ctx.moveTo(px(p[0]), pz(p[1])),
-    );
-    ctx.fill();
-  }
-  for (const place of places.filter(
-    (p) => p.kind !== "restaurant" && p.kind !== "cafe",
-  )) {
-    ctx.fillStyle = place.kind === "palace" ? "#a26438" : "#65856a";
-    ctx.fillRect(px(place.center[0]) - 2, pz(place.center[1]) - 2, 4, 4);
-  }
-  if (activities.game.target && joined) {
-    const point = activities.game.target.point;
-    ctx.fillStyle = "#ffdc85";
-    ctx.beginPath();
-    ctx.arc(px(point[0]), pz(point[1]), 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = "#745d36";
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  }
-  for (const p of network.players) {
-    const actual = p.id === network.id && self ? self : p;
-    if (p.vehicle) {
-      ctx.fillStyle = "#7a5962";
-      ctx.fillRect(px(p.vehicle.x) - 2, pz(p.vehicle.z) - 2, 4, 4);
-    }
-    ctx.fillStyle =
-      p.id === network.id ? "#fff8d0" : `#${playerColor(p.id).toString(16)}`;
-    ctx.beginPath();
-    ctx.arc(
-      px(actual.x),
-      pz(actual.z),
-      p.id === network.id ? 4 : 3,
-      0,
-      Math.PI * 2,
-    );
-    ctx.fill();
-  }
-}
 let previous = performance.now(),
   accumulator = 0,
   streetElapsed = 0;
@@ -566,9 +510,16 @@ function frame(now) {
   }
   introCouple.render(now, false, false);
   const ready = Boolean(joined && network.id && !paused && !portraitBlocked);
-  document.body.classList.toggle("dialog-open", activities.open);
+  document.body.classList.toggle(
+    "dialog-open",
+    activities.open || cityMap.isOpen,
+  );
   const active =
-    ready && !mobileHUD.isOpen && !intro.active && !activities.open;
+    ready &&
+    !mobileHUD.isOpen &&
+    !intro.active &&
+    !activities.open &&
+    !cityMap.isOpen;
   activities.update(self, active, now, clock.read().hour);
   const riverDistance = self
     ? nearestRoad([self.x, self.z], [{ points: world.path }]).distance
@@ -625,7 +576,7 @@ function frame(now) {
     $("clock").textContent =
       `${time.label} · ${clock.mode === "now" ? "Game time · 10×" : "local preview"}`;
     $("game-calendar").textContent =
-      `${time.dateLabel} · ${time.timeLabel} · ${clock.mode === "now" ? `${GAME_TIME_RATE}×` : "Preview"}`;
+      `${document.body.classList.contains("mobile-ui") ? `${time.date}/${time.month}/${time.year}` : time.dateLabel} · ${time.timeLabel} · ${clock.mode === "now" ? `${GAME_TIME_RATE}×` : "Preview"}`;
     $("activity").textContent = `${activity.label} · ${activity.people} locals`;
     $("player-mode").textContent = self
       ? self.mode === "walk"
@@ -676,7 +627,7 @@ function frame(now) {
         ? "Riverside promenade"
         : nearestRoad([focus.x, focus.z], map.roads).road.name;
     mobileHUD.update(self, can, !$("welcome").hidden, vendor);
-    minimap();
+    cityMap.update(self, activities.game.target, network.players, now);
   }
   if (now > noticeUntil) $("toast").style.opacity = 0;
   sun.position.set(focus.x - 120, 180, focus.z - 80);

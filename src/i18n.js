@@ -403,6 +403,28 @@ Object.assign(KHMER, {
   Large: "ធំ",
   "Extra large": "ធំបន្ថែម",
 });
+Object.assign(KHMER, {
+  "City map": "ផែនទីទីក្រុង",
+  "Back to game": "ត្រឡប់ទៅហ្គេម",
+  "Explore the city": "រុករកទីក្រុង",
+  "Open full city map": "បើកផែនទីទីក្រុងពេញអេក្រង់",
+  "Tap for city map": "ចុចមើលផែនទីទីក្រុង",
+  "Follow the gold route": "តាមផ្លូវពណ៌មាស",
+  "Destination direction": "ទិសដៅទៅគោលដៅ",
+  "Full city map with player and quest route":
+    "ផែនទីទីក្រុងជាមួយអ្នកលេង និងផ្លូវបេសកកម្ម",
+  "▲ You · ◆ Destination · Gold route": "▲ អ្នក · ◆ គោលដៅ · ផ្លូវពណ៌មាស",
+});
+Object.assign(KHMER, {
+  "Lovely! Follow the map to your next stop.":
+    "ល្អណាស់! តាមផែនទីទៅកាន់ចំណុចបន្ទាប់។",
+  "Dashed line · destination direction": "បន្ទាត់ដាច់ៗ · ទិសដៅទៅគោលដៅ",
+});
+Object.assign(KHMER, {
+  Overview: "មើលទាំងមូល",
+  "Zoom in map": "ពង្រីកផែនទី",
+  "Zoom out map": "បង្រួមផែនទី",
+});
 export let currentLanguage = "en";
 export function translate(source, language = currentLanguage) {
   if (language !== "km") return source;

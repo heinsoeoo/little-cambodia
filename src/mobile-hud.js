@@ -2,7 +2,7 @@ import { translate } from "./i18n.js";
 export function mobileViewport({ width, height, coarse }) {
   return coarse || width <= 900 || (height <= 500 && width <= 1200);
 }
-export function createMobileHUD({ clearInput, onPrimary, onTalk }) {
+export function createMobileHUD({ clearInput, onPrimary, onTalk, onMap }) {
   const $ = (id) => document.getElementById(id),
     header = document.querySelector("header");
   const actions = [
@@ -58,8 +58,7 @@ export function createMobileHUD({ clearInput, onPrimary, onTalk }) {
   };
   $("mobile-map-toggle").onclick = () => {
     closeMenu();
-    const open = document.body.classList.toggle("mobile-map-open");
-    $("mobile-map-toggle").setAttribute("aria-pressed", String(open));
+    onMap();
   };
   $("mobile-primary").onclick = () => {
     clearInput();

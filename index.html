@@ -95,8 +95,7 @@
       <button
         id="mobile-map-toggle"
         class="mobile-only"
-        aria-label="Show map"
-        aria-pressed="false"
+        aria-label="Open full city map"
       >
         Map</button
       ><button
@@ -177,7 +176,12 @@
       <button id="mobile-talk" hidden>Talk</button
       ><button id="mobile-primary" disabled>Summon vehicle</button>
     </div>
-    <aside class="map panel">
+    <aside
+      class="map panel"
+      role="button"
+      tabindex="0"
+      aria-label="Open full city map"
+    >
       <div class="map-heading">PHNOM PENH <span>N ↑</span></div>
       <canvas
         id="map"
@@ -185,6 +189,7 @@
         height="280"
         aria-label="Town map showing guests and your vehicle"
       ></canvas>
+      <small id="map-navigation-hint">Tap for city map</small>
       <div class="map-footer">
         <i></i><span id="road-name">Riverside promenade</span>
       </div>
@@ -335,6 +340,34 @@
       </div>
     </section>
     <section
+      id="full-map-overlay"
+      class="full-map-overlay"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="full-map-title"
+    >
+      <div class="full-map-bar">
+        <div>
+          <h2 id="full-map-title">City map</h2>
+          <p id="full-map-objective"></p>
+        </div>
+        <button id="full-map-close" type="button">Back to game</button>
+      </div>
+      <canvas
+        id="full-map"
+        aria-label="Full city map with player and quest route"
+      ></canvas>
+      <div class="full-map-zoom">
+        <button id="full-map-minus" type="button" aria-label="Zoom out map">
+          −</button
+        ><button id="full-map-plus" type="button" aria-label="Zoom in map">
+          +</button
+        ><button id="full-map-overview" type="button">Overview</button>
+      </div>
+      <div class="full-map-legend">▲ You · ◆ Destination · Gold route</div>
+    </section>
+    <section
       id="errand-dialog"
       class="activities-overlay"
       role="dialog"
@@ -427,8 +460,7 @@
       aria-label="Current activity"
     >
       <div class="activity-direction">
-        <span id="activity-compass" aria-hidden="true">↑</span
-        ><small id="activity-distance"></small>
+        <small id="activity-distance"></small>
       </div>
       <div>
         <strong id="activity-title"></strong>

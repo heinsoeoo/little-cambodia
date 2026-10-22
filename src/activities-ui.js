@@ -191,9 +191,7 @@ export function createActivities({
         `${translate("Activity complete")} · +${result.reward} ${translate("kindness stamps")}`,
       );
     } else if (!result.dialog)
-      onReward(
-        translate("Lovely! Follow the golden marker to your next stop."),
-      );
+      onReward(translate("Lovely! Follow the map to your next stop."));
     render();
   }
   $("activity-action").onclick = interact;
@@ -215,17 +213,6 @@ export function createActivities({
     $("activity-objective").textContent =
       (target.npc ? target.npc + " · " : "") + translate(target.label);
     const distance = Math.round(game.distance(player));
-    const screenTarget = new T.Vector3(
-      target.point[0],
-      0,
-      target.point[1],
-    ).project(camera);
-    const screenPlayer = new T.Vector3(player.x, 0, player.z).project(camera);
-    const bearing = Math.atan2(
-      (screenTarget.x - screenPlayer.x) * innerWidth,
-      (screenTarget.y - screenPlayer.y) * innerHeight,
-    );
-    $("activity-compass").style.transform = `rotate(${bearing}rad)`;
     $("activity-distance").textContent = `${distance} m`;
     const wrongMode = player.mode !== game.current.mode;
     $("activity-action").disabled = !usable || !game.canInteract(player);
@@ -237,7 +224,7 @@ export function createActivities({
         : Math.abs(player.speed || 0) >= 1.5
           ? "Slow down to interact"
           : distance > 10
-            ? "Follow the golden marker"
+            ? "Follow the gold route"
             : target.action,
     );
     $("activity-action").setAttribute("aria-label", actionLabel);
