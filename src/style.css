@@ -3420,3 +3420,231 @@ html:lang(km) button {
 html:lang(km) .game-calendar {
   font-size: 11px;
 }
+
+.activities-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: #403f3566;
+  backdrop-filter: blur(8px);
+  padding: 24px;
+  display: grid;
+  place-items: center;
+}
+.activities-overlay[hidden],
+.activity-tracker[hidden] {
+  display: none;
+}
+.activities-board {
+  width: min(820px, 100%);
+  max-height: calc(var(--game-height, 100dvh) - 48px);
+  overflow: auto;
+  background: #faf5e8;
+  border: 1px solid #fff8e9;
+  border-radius: 24px;
+  padding: 28px;
+  color: #554c3e;
+  box-shadow: 0 20px 80px #332a3633;
+}
+.activities-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.activities-heading h2 {
+  margin: 8px 0;
+  font:
+    30px Georgia,
+    serif;
+}
+.activities-heading button {
+  min-height: 44px;
+}
+.activities-board > p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #817562;
+}
+#activity-rewards {
+  display: block;
+  margin: 16px 0;
+  color: #6d8057;
+}
+#activity-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+#activity-cards article {
+  background: #f0ebdc;
+  border: 1px solid #ded6c2;
+  border-radius: 18px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+#activity-cards h3 {
+  font:
+    21px Georgia,
+    serif;
+  margin: 0;
+}
+#activity-cards p {
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 0;
+  flex: 1;
+}
+#activity-cards small {
+  font-size: 11px;
+  line-height: 1.8;
+  color: #7b765f;
+}
+#activity-cards button {
+  min-height: 44px;
+  background: #7b906c;
+  color: #fffaf0;
+  border-color: #7b906c;
+}
+#activity-cancel {
+  margin-top: 18px;
+}
+.activity-tracker {
+  position: fixed;
+  left: 50%;
+  top: 88px;
+  transform: translateX(-50%);
+  z-index: 7;
+  width: 300px;
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  background: #faf4e7ef;
+  border: 1px solid #fff9ea;
+  border-radius: 18px;
+  box-shadow: 0 6px 24px #40382322;
+  color: #5d5342;
+}
+.activity-tracker strong {
+  font-size: 13px;
+}
+.activity-tracker p {
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 6px 0;
+}
+.activity-tracker button {
+  font-size: 12px;
+  padding: 6px 10px;
+  min-height: 36px;
+  width: 100%;
+}
+.activity-direction {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 45px;
+}
+.activity-direction span {
+  display: block;
+  font-size: 32px;
+  color: #9e7d3d;
+}
+.activity-direction small {
+  white-space: nowrap;
+  font-size: 11px;
+}
+.mobile-ui .activity-tracker {
+  top: calc(var(--hud-top) + 48px);
+  left: auto;
+  right: var(--hud-right);
+  transform: none;
+  width: 250px;
+  padding: 10px;
+}
+.mobile-ui .activity-tracker strong {
+  font-size: 11px;
+}
+.mobile-ui .activity-tracker p {
+  font-size: 11px;
+  margin: 3px 0;
+}
+.mobile-ui .activity-tracker button {
+  min-height: 32px;
+  font-size: 11px;
+  padding: 4px 7px;
+}
+.mobile-ui.mobile-menu-open .activity-tracker,
+.mobile-ui.ui-creating .activity-tracker {
+  display: none;
+}
+@media (max-width: 650px) {
+  #activity-cards {
+    grid-template-columns: 1fr;
+  }
+  .activities-board {
+    padding: 20px;
+  }
+  .activities-heading h2 {
+    font-size: 23px;
+  }
+}
+@media (max-height: 500px) {
+  .activities-overlay {
+    padding: 12px;
+  }
+  .activities-board {
+    max-height: calc(var(--game-height) - 24px);
+    padding: 18px;
+  }
+  .activities-heading h2 {
+    font-size: 24px;
+  }
+  #activity-cards article {
+    padding: 12px;
+  }
+  #activity-cards h3 {
+    font-size: 18px;
+  }
+}
+
+.postcard-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.postcard-row figure {
+  margin: 0;
+  background: #fffaf0;
+  border: 1px solid #ddd4be;
+  padding: 8px;
+  transform: rotate(-2deg);
+}
+.postcard-row figure:nth-child(2) {
+  transform: rotate(2deg);
+}
+.postcard-art {
+  height: 80px;
+  display: grid;
+  place-items: center;
+  color: #ffe3a0;
+  font-size: 32px;
+  background: linear-gradient(#dac4b0 50%, #739d9c 51%, #bad0bb 90%);
+}
+.postcard-boats {
+  background: linear-gradient(#c4d5c8 45%, #79a2ab 46%, #acc7bd);
+  color: #fff3d7;
+}
+.postcard-home {
+  background: linear-gradient(#dfb2a1 48%, #8b9e7b 49%, #b6bc95);
+  color: #f9e9d4;
+}
+.postcard-row figcaption {
+  text-align: center;
+  font-size: 11px;
+  padding: 8px 0;
+  line-height: 1.7;
+}

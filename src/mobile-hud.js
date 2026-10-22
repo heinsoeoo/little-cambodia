@@ -5,7 +5,14 @@ export function mobileViewport({ width, height, coarse }) {
 export function createMobileHUD({ clearInput, onPrimary, onTalk }) {
   const $ = (id) => document.getElementById(id),
     header = document.querySelector("header");
-  const actions = ["camera", "pause", "wardrobe", "leave", "feedback"].map($);
+  const actions = [
+    "activities-open",
+    "camera",
+    "pause",
+    "wardrobe",
+    "leave",
+    "feedback",
+  ].map($);
   function placeSound(creating) {
     const sound = $("game-sound");
     const target = creating

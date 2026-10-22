@@ -1,3 +1,4 @@
+import { createActivities } from "./activities-ui.js";
 import { createLanguage, translate } from "./i18n.js";
 import { places, nearestPlace } from "./places.js";
 import { createBrowserNotice } from "./browser-notice.js";
@@ -77,6 +78,22 @@ const wardrobe = createWardrobe();
 const introCouple = createIntroCouple($("intro-couple"));
 const world = makeWorld(scene, map, city, { visibility: playerVisibility }),
   streetLife = createStreetLife(scene, world.path, map);
+const activities = createActivities({
+  scene,
+  camera,
+  path: world.path,
+  roads: map.roads,
+  spawn,
+  onOpen: () => {
+    mobileHUD.closeMenu();
+    stopInput();
+  },
+  onReward: (text) => {
+    audio.effect("talk");
+    notify(text, 5);
+  },
+  canUse: () => Boolean(joined && !paused && !portraitBlocked && !intro.active),
+});
 camera.position.set(spawn[0] + 40, 58, spawn[1] + 90);
 for (const spec of VEHICLES) {
   const option = document.createElement("option");
@@ -407,6 +424,7 @@ $("pause").onclick = $("resume").onclick = pause;
 $("vendor").onclick = talk;
 $("time-mode").onchange = () => clock.setMode($("time-mode").value);
 $("leave").onclick = () => {
+  activities.hide();
   network.disconnect();
   self = null;
   joined = false;
@@ -428,7 +446,7 @@ $("leave").onclick = () => {
   syncRoster([]);
 };
 addEventListener("keydown", (event) => {
-  if (!$("welcome").hidden) return;
+  if (!$("welcome").hidden || activities.open) return;
   if (["INPUT", "SELECT", "TEXTAREA"].includes(event.target.tagName)) return;
   if (
     ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key)
@@ -442,6 +460,7 @@ addEventListener("keydown", (event) => {
   if (key === "p") pause();
   if (key === "c") zoom();
   if (key === "v") talk();
+  if (key === "q") activities.interact();
 });
 addEventListener("keyup", (event) => keys.delete(event.key.toLowerCase()));
 addEventListener("blur", () => {
@@ -495,6 +514,16 @@ function minimap() {
     ctx.fillStyle = place.kind === "palace" ? "#a26438" : "#65856a";
     ctx.fillRect(px(place.center[0]) - 2, pz(place.center[1]) - 2, 4, 4);
   }
+  if (activities.game.target && joined) {
+    const point = activities.game.target.point;
+    ctx.fillStyle = "#ffdc85";
+    ctx.beginPath();
+    ctx.arc(px(point[0]), pz(point[1]), 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#745d36";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
   for (const p of network.players) {
     const actual = p.id === network.id && self ? self : p;
     if (p.vehicle) {
@@ -529,7 +558,9 @@ function frame(now) {
   }
   introCouple.render(now, false, false);
   const ready = Boolean(joined && network.id && !paused && !portraitBlocked);
-  const active = ready && !mobileHUD.isOpen && !intro.active;
+  const active =
+    ready && !mobileHUD.isOpen && !intro.active && !activities.open;
+  activities.update(self, active, now);
   const riverDistance = self
     ? nearestRoad([self.x, self.z], [{ points: world.path }]).distance
     : Infinity;

@@ -276,6 +276,53 @@ Object.assign(KHMER, {
   "Open in browser": "Open in browser",
   "Reconnect to join again.": "សូមភ្ជាប់ម្ដងទៀតដើម្បីចូលលេង។",
 });
+Object.assign(KHMER, {
+  "Activities ✧": "សកម្មភាព ✧",
+  "A LITTLE SOMETHING TO DO": "សកម្មភាពតូចៗសម្រាប់អ្នក",
+  "Your riverside journal": "កំណត់ហេតុមាត់ទន្លេរបស់អ្នក",
+  "Little adventures, at your own pace. Progress is saved on this device.":
+    "ដំណើរផ្សងព្រេងតូចៗ តាមល្បឿនរបស់អ្នក។ វឌ្ឍនភាពត្រូវបានរក្សាទុកលើឧបករណ៍នេះ។",
+  "A little kindness": "ទឹកចិត្តតូចមួយ",
+  "Pick up a picnic basket and deliver it to two riverside neighbours.":
+    "យកកន្ត្រកអាហារ ហើយចែកអាហារដល់អ្នកជិតខាងពីរនាក់នៅមាត់ទន្លេ។",
+  "Riverside postcard walk": "ដើរប្រមូលកាតអនុស្សាវរីយ៍មាត់ទន្លេ",
+  "Find three quiet viewpoints and collect illustrated postcards for your journal.":
+    "ស្វែងរកកន្លែងមើលទេសភាពបី ហើយប្រមូលកាតរូបភាពសម្រាប់កំណត់ហេតុរបស់អ្នក។",
+  "Sunday little drive": "បើកបរកម្សាន្តថ្ងៃអាទិត្យ",
+  "Summon any vehicle and cruise through three checkpoints. No rush, just enjoy the city.":
+    "ហៅយានយន្ត ហើយបើកតាមចំណុចបី។ មិនបាច់ប្រញាប់ សូមរីករាយនឹងទីក្រុង។",
+  "Start activity": "ចាប់ផ្តើមសកម្មភាព",
+  "Restart activity": "ចាប់ផ្តើមសកម្មភាពឡើងវិញ",
+  "End current activity": "បញ្ចប់សកម្មភាពបច្ចុប្បន្ន",
+  "kindness stamps": "ត្រាទឹកចិត្ត",
+  stamps: "ត្រា",
+  completed: "បានបញ្ចប់",
+  "Collect the picnic basket": "យកកន្ត្រកអាហារ",
+  "Pick up basket": "យកកន្ត្រក",
+  "Bring a snack to the garden neighbour": "ជូនអាហារដល់អ្នកជិតខាងក្នុងសួន",
+  "Share the last snack by the water": "ចែកអាហារចុងក្រោយនៅមាត់ទន្លេ",
+  "Deliver snack": "ជូនអាហារ",
+  Postcard: "កាតអនុស្សាវរីយ៍",
+  "River breeze": "ខ្យល់មាត់ទន្លេ",
+  "Passing boats": "ទូកកំពុងឆ្លងកាត់",
+  "A little closer to home": "កាន់តែជិតផ្ទះបន្តិច",
+  "Collect postcard": "ប្រមូលកាត",
+  "Reach the first checkpoint": "ទៅដល់ចំណុចទីមួយ",
+  "Cruise to the next checkpoint": "បើកទៅចំណុចបន្ទាប់",
+  "Park at the final checkpoint": "ចតនៅចំណុចចុងក្រោយ",
+  "Stamp checkpoint": "ទទួលត្រា",
+  "Activity complete": "បានបញ្ចប់សកម្មភាព",
+  "Lovely! Follow the golden marker to your next stop.":
+    "ល្អណាស់! តាមសញ្ញាមាសទៅកាន់ចំណុចបន្ទាប់។",
+  "Get out to continue": "ចុះពីយានយន្តដើម្បីបន្ត",
+  "Enter a vehicle to continue": "ឡើងយានយន្តដើម្បីបន្ត",
+  "Slow down to interact": "បន្ថយល្បឿនដើម្បីធ្វើសកម្មភាព",
+  "Follow the golden marker": "តាមសញ្ញាមាស",
+  "Your postcard collection": "កាតអនុស្សាវរីយ៍របស់អ្នក",
+  "Current activity": "សកម្មភាពបច្ចុប្បន្ន",
+  "Try an activity for a little adventure.": "សាកល្បងសកម្មភាពតូចមួយ។",
+  "Taxi jobs are coming later.": "ការងារតាក់ស៊ីនឹងមកដល់ពេលក្រោយ។",
+});
 export let currentLanguage = "en";
 export function translate(source, language = currentLanguage) {
   if (language !== "km") return source;
