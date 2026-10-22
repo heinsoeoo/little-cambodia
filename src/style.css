@@ -3648,3 +3648,35 @@ html:lang(km) .game-calendar {
   padding: 8px 0;
   line-height: 1.7;
 }
+@media (max-height: 500px) and (min-width: 651px) {
+  .activities-board > p {
+    margin: 6px 0;
+    font-size: 12px;
+  }
+  .activities-heading h2 {
+    margin: 4px 0;
+    font-size: 22px;
+  }
+  #activity-rewards {
+    margin: 8px 0;
+    font-size: 13px;
+  }
+  #activity-cards article {
+    gap: 8px;
+  }
+  #activity-cards p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  #activity-cards button {
+    min-height: 40px;
+    padding: 7px;
+    font-size: 12px;
+  }
+  #activity-cancel {
+    margin-top: 10px;
+    min-height: 36px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
