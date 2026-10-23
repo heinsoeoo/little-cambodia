@@ -1174,6 +1174,6 @@ body.mobile-menu-open::after {
 .mobile-ui.in-town #mobile-primary.vehicle-door::before {
   content: "";
   background: currentColor;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M7 28V5h18v23M11 28V9l10-3v22M16 17v3' fill='none' stroke='black' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M5 27V14l7-10h13l3 10v13zM7 14h19M10 11l4-5h9l2 5M21 18h4' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
     center/contain no-repeat;
 }
