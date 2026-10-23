@@ -68,9 +68,22 @@ $("graphics-quality").onchange = () => {
   resize();
 };
 bindViewportGestures(document);
+let joystickSprinting = false;
 const clock = new CityClock(),
   clearTouch = bindHoldControls(document, keys),
-  clearJoystick = bindWalkingJoystick($("walk-joystick"), keys);
+  clearJoystick = bindWalkingJoystick($("walk-joystick"), keys, {
+    onSprint: (value) => {
+      joystickSprinting = value;
+    },
+    onLock: (value) => {
+      $("sprint-lock").setAttribute("aria-pressed", String(value));
+      $("sprint-lock").setAttribute(
+        "aria-label",
+        value ? "Unlock running" : "Lock running",
+      );
+    },
+  });
+$("sprint-lock").onclick = () => clearJoystick.setLocked(!clearJoystick.locked);
 const notify = (text, seconds = 4) => {
   $("toast").textContent = text;
   $("toast").style.opacity = 1;
@@ -558,7 +571,7 @@ function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min((now - previous) / 1000, 0.1);
   previous = now;
-  cameraZoom.tick(dt);
+  cameraZoom.tick(dt, self?.mode === "drive" ? self.speed : 0);
   if (intro.active) {
     audio.update(dt, self, keys, false);
     clock.tick(dt);
@@ -590,7 +603,8 @@ function frame(now) {
   if (
     active &&
     self?.mode === "walk" &&
-    $("run-toggle").getAttribute("aria-pressed") === "true"
+    ($("run-toggle").getAttribute("aria-pressed") === "true" ||
+      joystickSprinting)
   )
     movementKeys.add("shift");
   while (accumulator >= INPUT_STEP) {
@@ -694,6 +708,11 @@ function frame(now) {
           : self?.speed > 4.6
             ? "RUNNING"
             : "ON FOOT";
+    $("touch-drift").hidden =
+      self?.mode !== "drive" ||
+      ["bike", "rickshaw", "tuktuk"].includes(
+        vehicleSpec(self?.vehicle?.type).kind,
+      );
     $("run-toggle").hidden = !can || self?.mode !== "walk";
     const seat = nearestBench(self, BENCHES);
     $("sit-action").hidden =
@@ -705,8 +724,7 @@ function frame(now) {
     const place = self ? nearestPlace(self.x, self.z) : null;
     $("place-label").textContent = place?.name || "";
     $("place-label").hidden = !place || !joined;
-    $("touch-up").textContent = self?.mode === "drive" ? "GO ↑" : "↑";
-    $("touch-down").textContent = self?.mode === "drive" ? "R ↓" : "↓";
+
     $("road-name").textContent =
       self &&
       nearestRoad([self.x, self.z], [{ points: promenade }]).distance < 10

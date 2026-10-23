@@ -239,6 +239,7 @@ export function buildCarDesign(group, spec, materials) {
   const wheelRadius = tall ? 0.45 : 0.35;
   for (const side of [-1, 1])
     for (const z of [-length * 0.31, length * 0.3]) {
+      const start = group.children.length;
       const x = side * width * 0.49;
       const tire = mesh(
         new T.CylinderGeometry(wheelRadius, wheelRadius, 0.25, 16),
@@ -273,6 +274,8 @@ export function buildCarDesign(group, spec, materials) {
         );
         detail.rotation.x = angle;
       }
+      for (const part of group.children.slice(start))
+        part.userData.wheel = { x, z, r: wheelRadius };
       const arch = mesh(
         new T.TorusGeometry(wheelRadius + 0.045, 0.045, 4, 12, Math.PI),
         tall ? dark : body,

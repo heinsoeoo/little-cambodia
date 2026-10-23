@@ -10,6 +10,7 @@ import {
 export function createCharacter(initial) {
   const group = new T.Group();
   let key = "",
+    gait = 0,
     rig;
   function rebuild(value) {
     const look = appearance(value),
@@ -410,6 +411,7 @@ export function createCharacter(initial) {
       );
     const arms = [],
       legs = [],
+      knees = [],
       elbows = [],
       snacks = [];
     function hand(parent, x, y, z) {
@@ -509,6 +511,7 @@ export function createCharacter(initial) {
         leg,
         "trouser-thigh",
       );
+      const lowerStart = leg.children.length;
       limb(
         [0, -0.39, 0.025],
         [0, -0.77, 0],
@@ -548,6 +551,15 @@ export function createCharacter(initial) {
         for (const z of [0.06, 0.09, 0.12])
           box(0.075, 0.008, 0.009, 0, -0.751, z, sole, leg, "shoe-lace");
       }
+      const knee = new T.Group();
+      knee.position.set(0, -0.39, 0.025);
+      knee.name = "running-knee";
+      for (const part of leg.children.slice(lowerStart)) {
+        part.position.sub(knee.position);
+        knee.add(part);
+      }
+      leg.add(knee);
+      knees.push(knee);
       if (skirt) continue;
       // A subtle crease gives tailored trousers a clearer cloth silhouette.
       if (bottom.bottomShape === "tailored")
@@ -634,7 +646,17 @@ export function createCharacter(initial) {
     }
     seated.visible = false;
     riding.visible = false;
-    rig = { upper, standing, riding, seated, arms, legs, elbows, snacks };
+    rig = {
+      upper,
+      standing,
+      riding,
+      seated,
+      arms,
+      legs,
+      knees,
+      elbows,
+      snacks,
+    };
     group.userData.appearance = look;
     group.userData.outfitCut = cut;
     group.userData.proportions = "illustrated-adult";
@@ -645,7 +667,7 @@ export function createCharacter(initial) {
           ? "soft-curved"
           : "neutral";
   }
-  function pose(state) {
+  function pose(state, dt = 1 / 60) {
     const riding =
       state.mode === "drive" &&
       ["moto", "vespa", "scoopy", "offroad-moto", "racing-moto"].includes(
@@ -672,22 +694,29 @@ export function createCharacter(initial) {
     rig.upper.rotation.x =
       riding && state.vehicle.type === "racing-moto" ? 0.12 : 0;
     const moving = !riding && !sitting && state.speed > 0.1;
-    const running = state.speed > 4.6,
-      pace = running ? 95 : 150;
+    const running = state.speed > 4.6;
+    gait += moving ? Math.abs(state.speed) * dt * (running ? 2.5 : 2) : 0;
+    rig.upper.position.y += running ? Math.abs(Math.sin(gait)) * 0.035 : 0;
+    if (running && moving) rig.upper.rotation.x = 0.1;
     rig.legs.forEach(
       (leg, i) =>
         (leg.rotation.x = moving
-          ? Math.sin(performance.now() / pace + i * Math.PI) *
-            (running ? 0.55 : 0.34)
+          ? Math.sin(gait + i * Math.PI) * (running ? 0.55 : 0.34)
           : 0),
+    );
+    rig.knees.forEach(
+      (knee, i) =>
+        (knee.rotation.x =
+          running && moving
+            ? Math.max(0, Math.sin(gait + i * Math.PI)) * 1.05
+            : 0),
     );
     rig.arms.forEach((arm, i) => {
       arm.rotation.z = 0;
       rig.elbows[i].rotation.x = running ? -0.6 : 0;
       rig.snacks[i].visible = false;
       arm.rotation.x = moving
-        ? Math.sin(performance.now() / pace + i * Math.PI + Math.PI) *
-          (running ? 0.42 : 0.2)
+        ? Math.sin(gait + i * Math.PI + Math.PI) * (running ? 0.42 : 0.2)
         : 0;
     });
     if (state.gesture === "eat" && state.gestureSeconds > 0 && !riding) {

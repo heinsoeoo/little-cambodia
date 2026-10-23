@@ -53,6 +53,7 @@ export function buildSmallVehicle(
     return object;
   }
   function wheel(x, z, r = 0.33, wide = 0.17, spokes = false, knobby = false) {
+    const start = group.children.length;
     const object = mesh(
       new T.CylinderGeometry(r, r, wide, 16),
       tire,
@@ -108,6 +109,8 @@ export function buildSmallVehicle(
       parts.forEach((part) => part.dispose());
       mesh(g, tire, 0, 0, 0, "knobby-tread");
     }
+    for (const part of group.children.slice(start))
+      part.userData.wheel = { x, z, r };
   }
   if (spec.kind === "tuktuk") {
     // Enclosed auto-rickshaw: motorised front cowl and curved black canopy.

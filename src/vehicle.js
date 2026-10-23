@@ -39,10 +39,11 @@ export function stepVehicle(car, input, dt, collides) {
   const steer =
     Number(input.has("a") || input.has("arrowleft")) -
     Number(input.has("d") || input.has("arrowright"));
-  car.heading +=
+  car.steering = steer;
+  car.turnRate =
     ((steer * car.speed) / (5 + Math.abs(car.speed) * 0.35)) *
-    dt *
     (handbrake ? 1.4 : 1);
+  car.heading += car.turnRate * dt;
   const forward =
     car.vx * Math.sin(car.heading) + car.vz * Math.cos(car.heading);
   let lateral = car.vx * Math.cos(car.heading) - car.vz * Math.sin(car.heading);

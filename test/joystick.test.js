@@ -38,3 +38,54 @@ test("walking joystick supports diagonals, dead zone, pointer ownership and canc
   handlers.get("pointermove")(event(100, 100));
   assert.equal(keys.size, 0);
 });
+
+test("outer joystick edge sprints, upward drag locks running, and cancellation always stops", () => {
+  const handlers = new Map(),
+    keys = new Set();
+  let sprint = false,
+    locked = false;
+  const element = {
+    addEventListener: (name, fn) => handlers.set(name, fn),
+    setPointerCapture() {},
+    getBoundingClientRect: () => ({ left: 0, top: 0, width: 100, height: 100 }),
+    style: { setProperty() {} },
+    classList: { add() {}, remove() {} },
+  };
+  const clear = bindWalkingJoystick(element, keys, {
+    onSprint: (value) => (sprint = value),
+    onLock: (value) => (locked = value),
+  });
+  const event = (x, y, id = 1) => ({
+    clientX: x,
+    clientY: y,
+    pointerId: id,
+    preventDefault() {},
+  });
+  handlers.get("pointerdown")(event(50, 35));
+  assert.equal(sprint, false);
+  handlers.get("pointermove")(event(50, 20));
+  assert.equal(sprint, true);
+  assert.equal(locked, false);
+  handlers.get("pointerup")(event(50, 20));
+  assert.equal(keys.size, 0);
+  assert.equal(sprint, false);
+  handlers.get("pointerdown")(event(50, 20));
+  handlers.get("pointermove")(event(50, -30));
+  assert.equal(locked, true);
+  handlers.get("pointerup")(event(50, -30));
+  assert.deepEqual([...keys], ["arrowup"]);
+  assert.equal(sprint, true);
+  clear();
+  assert.equal(locked, false);
+  assert.equal(keys.size, 0);
+  clear.setLocked(true);
+  assert.equal(clear.locked, true);
+  assert.ok(keys.has("arrowup"));
+  clear.setLocked(false);
+  assert.equal(keys.size, 0);
+  handlers.get("pointerdown")(event(50, -30));
+  handlers.get("pointercancel")(event(50, -30));
+  assert.equal(sprint, false);
+  assert.equal(locked, false);
+  assert.equal(keys.size, 0);
+});

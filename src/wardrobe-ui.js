@@ -1,3 +1,4 @@
+import { createGenderPicker } from "./gender-picker.js";
 import { createColorSwatches } from "./color-swatches.js";
 import { createShowcases } from "./showcase.js";
 import * as T from "three";
@@ -28,6 +29,7 @@ export function createWardrobe() {
     for (const item of items) select.add(new Option(item.name, item.id));
   }
   fill("look-gender", GENDERS, "Choose your gender");
+  const genderPicker = createGenderPicker($("look-gender"));
   fill("look-skin", SKIN_TONES);
   fill("look-cut", OUTFIT_CUTS);
   fill("look-preset", [{ id: "mix", name: "My own mix" }, ...STYLES]);
@@ -129,6 +131,7 @@ export function createWardrobe() {
     }
   }
   function update() {
+    genderPicker.sync();
     const profile = read(),
       look = profile.appearance;
     character.setAppearance(look);

@@ -1,6 +1,13 @@
 // UI text is translated without changing form values or player-created names.
 export const LANGUAGE_KEY = "little-cambodia-language";
 export const KHMER = {
+  "Lock running": "ចាក់សោការរត់",
+  "Unlock running": "បញ្ឈប់ការរត់ជាប់",
+  "Slow down then reverse": "បន្ថយល្បឿន រួចថយក្រោយ",
+  Accelerate: "បង្កើនល្បឿន",
+  "Open game menu": "បើកម៉ឺនុយហ្គេម",
+  "Steer left": "បត់ឆ្វេង",
+  "Steer right": "បត់ស្តាំ",
   RUNNING: "កំពុងរត់",
   SITTING: "កំពុងអង្គុយ",
   "run / handbrake": "រត់ / ហ្វ្រាំងដៃ",

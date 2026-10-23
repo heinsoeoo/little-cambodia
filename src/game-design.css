@@ -951,3 +951,138 @@ body.mobile-menu-open::after {
   font-size: 12px;
   line-height: 1.4;
 }
+
+/* Compact, labelled-for-assistive-technology gender choices. */
+.character-creator .gender-icons {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  width: max-content;
+}
+.character-creator .gender-icons button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px !important;
+  min-width: 44px;
+  min-height: 44px;
+  height: 44px;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #eeddbb66;
+  border-radius: 12px;
+  background: #fff7e91c;
+  color: #f1e1be;
+  font-family: system-ui, sans-serif;
+  font-size: 26px;
+}
+.character-creator .gender-icons button[aria-checked="true"] {
+  background: #e6c782;
+  border-color: #fff0c7;
+  color: #263c33;
+}
+.gender-icons button:focus-visible {
+  outline: 2px solid #fff2ca;
+  outline-offset: 3px;
+}
+
+.mobile-ui.in-town .touch button svg {
+  width: 30px;
+  height: 30px;
+  pointer-events: none;
+}
+.mobile-ui.in-town .touch .steering button {
+  border: 2px solid #f4e4b87a;
+  background: #20372fbf;
+  box-shadow: 0 2px 5px #142a2933;
+}
+.mobile-ui.in-town .touch .pedals button {
+  border: 2px solid #f4e4b87a;
+  background: #20372fcf;
+  box-shadow: 0 2px 5px #142a2933;
+}
+.mobile-ui.in-town .touch .pedals #touch-down {
+  position: static;
+  right: auto;
+  bottom: auto;
+  width: var(--touch-unit);
+  min-width: var(--touch-unit);
+  height: var(--touch-unit);
+  min-height: var(--touch-unit);
+  font-size: 25px;
+  font-weight: 600;
+}
+.mobile-ui.in-town .touch .pedals .accelerate {
+  background: #889c63db;
+}
+.mobile-ui.in-town .touch .pedals .accelerate svg {
+  height: 42px;
+  width: 34px;
+}
+.mobile-ui.in-town #mobile-map-toggle svg,
+.mobile-ui.in-town #mobile-menu-toggle svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+  margin: auto;
+}
+.mobile-ui .life-actions #run-toggle {
+  display: none;
+}
+#sprint-lock {
+  display: none;
+}
+.mobile-ui.in-town .touch #sprint-lock {
+  display: grid;
+  place-items: center;
+  position: fixed;
+  left: calc(var(--hud-left) + (var(--touch-unit) + 60px) / 2 - 12px);
+  bottom: calc(var(--hud-bottom) + var(--touch-unit) + 72px);
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  min-height: 48px;
+  padding: 7px;
+  border: 1px solid #f4e4b88a;
+  background: #20372fbf;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px #142a2933;
+}
+.mobile-ui.in-town[data-play-mode="drive"] .touch #sprint-lock {
+  display: none;
+}
+.mobile-ui.in-town .touch #sprint-lock[aria-pressed="true"] {
+  background: #e6c782;
+  color: #253c33;
+  border-color: #fff0c7;
+}
+.mobile-ui.in-town .walk-pad.sprinting {
+  border-color: #e6c782;
+  box-shadow: 0 0 0 4px #e6c78233;
+}
+.sprint-lock-mark {
+  display: none;
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 50%;
+  background: #e6c782;
+  color: #253c33;
+  width: 18px;
+  height: 18px;
+}
+#sprint-lock[aria-pressed="true"] .sprint-lock-mark {
+  display: grid;
+  place-items: center;
+}
+.mobile-ui.in-town .touch #sprint-lock .sprint-lock-mark svg {
+  width: 12px;
+  height: 12px;
+}
+#mobile-map-toggle svg,
+#mobile-menu-toggle svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+  margin: auto;
+}

@@ -47,3 +47,59 @@ test("motorcycle mounting keeps the rider above the seat through turns and resto
     globalThis.document = previous;
   }
 });
+
+test("leaning motorcycle and rider stay aligned while rotating tires clear the road", () => {
+  const previous = globalThis.document;
+  globalThis.document = {
+    createElement: () => ({ style: {}, remove() {} }),
+    body: { append() {} },
+  };
+  try {
+    const scene = new T.Scene();
+    const state = {
+      id: "lean",
+      nickname: "Rider",
+      x: 0,
+      z: 0,
+      heading: 0.8,
+      mode: "drive",
+      speed: 14,
+      vehicle: {
+        type: "offroad-moto",
+        x: 0,
+        z: 0,
+        heading: 0.8,
+        speed: 14,
+        turnRate: 0.9,
+        steering: 1,
+      },
+    };
+    const actor = createActor(scene, state);
+    for (let i = 0; i < 45; i++) actor.update(state, 1 / 30, true, true);
+    const avatar = scene.children[0].children[0],
+      model = scene.children.find((object) => object.userData.vehicleType);
+    assert.ok(model.rotation.z < -0.2);
+    assert.equal(avatar.rotation.z, model.rotation.z);
+    scene.updateMatrixWorld(true);
+    let minimum = Infinity;
+    model.traverse((object) => {
+      if (object.userData.wheel) {
+        const vertices = object.geometry.attributes.position;
+        for (let i = 0; i < vertices.count; i++)
+          minimum = Math.min(
+            minimum,
+            new T.Vector3()
+              .fromBufferAttribute(vertices, i)
+              .applyMatrix4(object.matrixWorld).y,
+          );
+      }
+    });
+    assert.ok(minimum > 0.11, `leaning tire bottom ${minimum}`);
+    state.vehicle.speed = state.speed = state.vehicle.turnRate = 0;
+    for (let i = 0; i < 60; i++) actor.update(state, 1 / 30, true, true);
+    assert.ok(Math.abs(model.rotation.z) < 0.001);
+    actor.dispose();
+  } finally {
+    globalThis.document = previous;
+  }
+});

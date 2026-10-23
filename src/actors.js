@@ -1,3 +1,8 @@
+import {
+  prepareVehicleMotion,
+  animateVehicle,
+  roadHeight,
+} from "./vehicle-motion.js";
 import { createCharacter } from "./character.js";
 import { vehicleModel, repaintVehicle } from "./vehicle-model.js";
 import * as T from "three";
@@ -31,7 +36,9 @@ export function createActor(scene, player) {
       group.position.x += (state.x - group.position.x) * factor;
       group.position.z += (state.z - group.position.z) * factor;
       character.setAppearance(state.appearance);
-      character.pose(state);
+      character.pose(state, dt);
+      group.position.y = 0.075;
+      avatar.rotation.z = 0;
       if ((state.vehicle?.type || null) !== type) {
         if (vehicle) {
           scene.remove(vehicle);
@@ -42,7 +49,10 @@ export function createActor(scene, player) {
         }
         type = state.vehicle?.type || null;
         vehicle = type ? vehicleModel(type, state.vehicle.paint) : null;
-        if (vehicle) scene.add(vehicle);
+        if (vehicle) {
+          prepareVehicleMotion(vehicle);
+          scene.add(vehicle);
+        }
       }
       if (vehicle) {
         repaintVehicle(vehicle, state.vehicle.paint);
@@ -53,10 +63,32 @@ export function createActor(scene, player) {
         });
         vehicle.position.set(
           state.mode === "drive" ? group.position.x : state.vehicle.x,
-          0,
+          roadHeight(type),
           state.mode === "drive" ? group.position.z : state.vehicle.z,
         );
         vehicle.rotation.y = state.vehicle.heading;
+        const lean = animateVehicle(
+          vehicle,
+          state.vehicle,
+          dt,
+          state.mode === "drive",
+        );
+        const lift =
+          Math.abs(Math.sin(lean)) * (type === "racing-moto" ? 0.15 : 0.105);
+        vehicle.position.y += lift;
+        vehicle.userData.lighting.root.rotation.z = -lean;
+        vehicle.userData.lighting.root.position.y = -roadHeight(type) - lift;
+        if (state.mode === "drive") {
+          group.position.y = roadHeight(type) + lift;
+          avatar.rotation.order = "YXZ";
+          avatar.rotation.z = lean;
+          const height = avatar.position.y;
+          avatar.position.x -=
+            Math.cos(state.heading) * Math.sin(lean) * height;
+          avatar.position.z +=
+            Math.sin(state.heading) * Math.sin(lean) * height;
+          avatar.position.y = height * Math.cos(lean);
+        }
       }
     },
     projectLabel(camera, width, height) {
