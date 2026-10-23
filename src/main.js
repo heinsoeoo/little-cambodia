@@ -136,6 +136,7 @@ for (const spec of VEHICLES) {
   option.textContent = spec.name;
   $("vehicle-type").append(option);
 }
+wardrobe.mountGarage();
 for (const paint of VEHICLE_PAINTS)
   $("vehicle-paint").add(new Option(paint.name, paint.id));
 $("vehicle-paint").addEventListener("change", () => {
@@ -143,6 +144,7 @@ $("vehicle-paint").addEventListener("change", () => {
     network.send({ type: "paint", vehiclePaint: $("vehicle-paint").value });
 });
 function vehicleStats() {
+  wardrobe.syncShowcases();
   const spec = vehiclePhysics($("vehicle-type").value);
   $("vehicle-stats").textContent =
     `${spec.power >= 11 ? "Lively" : spec.power >= 8 ? "Balanced" : "Gentle"} power · ${spec.braking >= 27 ? "Strong" : spec.braking >= 20 ? "Firm" : "Gentle"} brakes`;

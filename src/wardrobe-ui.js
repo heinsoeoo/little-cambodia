@@ -1,3 +1,4 @@
+import { createShowcases } from "./showcase.js";
 import * as T from "three";
 import {
   GENDERS,
@@ -73,6 +74,7 @@ export function createWardrobe() {
     lastHeight = 0,
     mode = "main",
     custom = false;
+  let rails = [];
   function read() {
     return {
       appearance: appearance(
@@ -145,6 +147,7 @@ export function createWardrobe() {
       `${style(look.top).name} ${look.top === look.bottom && look.top === look.shoes ? "outfit" : "mix"} · ${hairstyle(look.hair, look.gender).name}`;
     $("look-vehicle-name").textContent = vehicleSpec(profile.vehicleType).name;
     $("main-outfit").value = $("look-preset").value;
+    rails.forEach((rail) => rail.sync());
   }
   function load(profile, requireGender = false) {
     const look = appearance(profile?.appearance);
@@ -215,6 +218,26 @@ export function createWardrobe() {
       update();
     });
 
+  const showcases = createShowcases(() => read().appearance);
+  rails = [
+    showcases.attach($("look-vehicle"), "vehicle"),
+    showcases.attach($("main-outfit"), "outfit"),
+    showcases.attach($("look-preset"), "outfit"),
+    ...["top", "bottom", "hair", "shoes"].map((part) =>
+      showcases.attach($(`look-${part}`), part),
+    ),
+  ].filter(Boolean);
+  $("look-gender").addEventListener("change", () =>
+    rails.forEach((rail) => rail.refresh()),
+  );
+  for (const select of document.querySelectorAll("select[data-showcase]"))
+    select.addEventListener("change", () =>
+      rails.forEach((rail) => rail.sync()),
+    );
+  for (const id of ["look-skin", "look-cut"])
+    $(id).addEventListener("change", () =>
+      rails.forEach((rail) => rail.refresh()),
+    );
   let saved;
   try {
     saved = JSON.parse(localStorage.getItem("phnom-profile"));
@@ -225,6 +248,12 @@ export function createWardrobe() {
   show("main");
   return {
     read,
+    syncShowcases() {
+      rails.forEach((rail) => rail.sync());
+    },
+    mountGarage() {
+      rails.push(showcases.attach($("vehicle-type"), "vehicle"));
+    },
     load,
     show,
     save(profile = read()) {

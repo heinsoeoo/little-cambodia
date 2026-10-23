@@ -12,7 +12,26 @@ export function vehicleModel(type, paint = "factory") {
   const lamp = new T.MeshBasicMaterial({ color: 0xfff2b6 }),
     tail = new T.MeshBasicMaterial({ color: 0xe46159 });
   function box(w, h, d, x, y, z, mat) {
-    const mesh = new T.Mesh(new T.BoxGeometry(w, h, d), mat);
+    let geometry = new T.BoxGeometry(w, h, d);
+    if (mat === body && w > 1.4 && h > 0.4 && d > 2) {
+      geometry.dispose();
+      const shape = new T.Shape();
+      shape.moveTo(-w / 2 + 0.06, -h / 2 + 0.06);
+      shape.lineTo(w / 2 - 0.06, -h / 2 + 0.06);
+      shape.lineTo(w / 2 - 0.06, h / 2 - 0.06);
+      shape.lineTo(-w / 2 + 0.06, h / 2 - 0.06);
+      shape.closePath();
+      geometry = new T.ExtrudeGeometry(shape, {
+        depth: d - 0.12,
+        bevelEnabled: true,
+        bevelSize: 0.06,
+        bevelThickness: 0.06,
+        bevelSegments: 1,
+        steps: 1,
+      });
+      geometry.center();
+    }
+    const mesh = new T.Mesh(geometry, mat);
     mesh.position.set(x, y, z);
     mesh.castShadow = mesh.receiveShadow = true;
     group.add(mesh);
@@ -162,6 +181,71 @@ export function vehicleModel(type, paint = "factory") {
     }
     box(0.32, 0.25, 0.12, 0, 1.12, front + 0.1, lamp);
     if (!tuk && !rickshaw) box(0.32, 0.15, 0.1, 0, 0.85, -0.95, tail);
+  }
+  if (car) {
+    const chrome = material(0xbac1bd);
+    const tall = spec.kind === "suv" || spec.kind === "pickup";
+    const sill = tall ? 1.44 : 1.12;
+    // Sloping glass and body pillars give each cabin a readable front and rear.
+    const windshield = box(
+      tall ? 1.65 : 1.53,
+      0.52,
+      0.06,
+      0,
+      tall ? 1.94 : 1.43,
+      tall ? 1.22 : 0.68,
+      glass,
+    );
+    windshield.name = "sloped-windscreen";
+    windshield.rotation.x = -0.32;
+    for (const side of [-1, 1]) {
+      box(0.18, 0.15, 0.34, side * 1.06, tall ? 1.83 : 1.4, 0.65, body).name =
+        "side-mirror";
+      box(
+        0.025,
+        0.035,
+        length * 0.72,
+        side * (tall ? 1.065 : 0.985),
+        sill,
+        -0.08,
+        chrome,
+      );
+      for (const z of spec.kind === "coupe" ? [-0.25] : [-0.75, 0.4]) {
+        box(
+          0.035,
+          0.055,
+          0.22,
+          side * (tall ? 1.065 : 0.985),
+          sill - 0.16,
+          z,
+          chrome,
+        );
+      }
+      box(
+        0.08,
+        0.52,
+        0.09,
+        side * (tall ? 0.92 : 0.85),
+        tall ? 1.88 : 1.43,
+        -0.35,
+        body,
+      );
+    }
+    box(1.5, 0.09, 0.1, 0, tall ? 0.84 : 0.55, length / 2 + 0.06, chrome);
+    box(
+      0.52,
+      0.15,
+      0.07,
+      0,
+      tall ? 1.05 : 0.72,
+      length / 2 + 0.12,
+      cream,
+    ).name = "front-plate";
+    box(0.13, 0.13, 0.3, 0.65, 0.45, -length / 2 - 0.1, dark);
+    if (spec.kind === "coupe") {
+      const hood = box(1.7, 0.08, 1.12, 0, 1.16, length / 2 - 0.65, body);
+      hood.rotation.x = -0.06;
+    }
   }
   if (spec.luxuryGrille) {
     const chrome = material(0xbfc4c3);

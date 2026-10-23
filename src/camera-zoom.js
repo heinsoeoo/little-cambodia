@@ -27,8 +27,6 @@ export function createCameraZoom({ camera, canvas, viewport }) {
     } catch {}
   }
   $("camera-distance").oninput = () => set($("camera-distance").value);
-  $("camera-closer").onclick = () => set(target / 1.25);
-  $("camera-farther").onclick = () => set(target * 1.25);
   canvas.addEventListener(
     "wheel",
     (event) => {

@@ -103,6 +103,30 @@ export function createCharacter(initial) {
     }
     // Small eyes face +Z, so the character also has an unambiguous front.
     for (const x of [-0.085, 0.085]) sphere(0.025, x, 1.65, 0.235, dark);
+    // Small sculpted features stay readable at portrait distance.
+    for (const x of [-0.235, 0.235]) {
+      const ear = sphere(0.052, x, 1.62, 0, skin);
+      ear.scale.set(0.5, 1, 0.65);
+    }
+    const nose = sphere(0.035, 0, 1.605, 0.245, skin);
+    nose.scale.set(0.7, 1.1, 1);
+    box(0.075, 0.014, 0.018, 0, 1.535, 0.235, mat(0x996f61)).name =
+      "subtle-smile";
+    for (const x of [-0.085, 0.085]) {
+      const brow = box(0.065, 0.014, 0.018, x, 1.695, 0.225, hair);
+      brow.rotation.z = x < 0 ? 0.08 : -0.08;
+    }
+    const collar = add(
+      new T.TorusGeometry(0.105, 0.025, 5, 14, Math.PI),
+      trim,
+      0,
+      1.375,
+      0.19,
+    );
+    collar.rotation.z = Math.PI;
+    collar.scale.y = 0.6;
+    if (["polo", "blouse", "jacket", "vest"].includes(top.topShape))
+      for (const y of [1.12, 1.22, 1.32]) sphere(0.016, 0, y, 0.265, trim);
     const cap = add(
       new T.SphereGeometry(0.265, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.43),
       hair,
