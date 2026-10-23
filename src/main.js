@@ -1,3 +1,4 @@
+import { createVoiceChat } from "./voice-chat.js";
 import { BENCHES } from "./open-world.js";
 import { nearestBench } from "./benches.js";
 import { createPwa } from "./pwa.js";
@@ -260,7 +261,9 @@ function syncRoster(players) {
     }),
   );
 }
+let voice;
 const network = new Multiplayer((event) => {
+  voice?.event(event);
   if (event.type === "connection") {
     $("connection").textContent = event.status;
     if (!network.id) {
@@ -389,6 +392,8 @@ const network = new Multiplayer((event) => {
     $("start").textContent = joined ? "Save look" : "Start game ↗";
   }
 });
+voice = createVoiceChat({ network, button: $("voice-toggle"), notify });
+
 const mobileHUD = createMobileHUD({
   clearInput: stopInput,
   onTalk: talk,
@@ -505,6 +510,7 @@ $("time-mode").onchange = () => clock.setMode($("time-mode").value);
 $("leave").onclick = () => {
   cityMap.close();
   activities.hide();
+  voice.stop();
   network.disconnect();
   self = null;
   joined = false;
@@ -555,7 +561,10 @@ document.addEventListener("visibilitychange", () => {
     if (joined && !paused) pause();
   }
 });
-addEventListener("pagehide", () => network.disconnect());
+addEventListener("pagehide", () => {
+  voice.stop();
+  network.disconnect();
+});
 let previous = performance.now(),
   accumulator = 0,
   streetElapsed = 0;
@@ -585,6 +594,7 @@ function frame(now) {
     !activities.open &&
     !cityMap.isOpen &&
     !pwa.open;
+  voice.update(self, network.players, Boolean(network.id && !network.stale));
   activities.update(self, active, now, clock.read().hour);
   const riverDistance = self
     ? nearestRoad([self.x, self.z], [{ points: world.path }]).distance

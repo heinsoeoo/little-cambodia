@@ -1177,3 +1177,42 @@ body.mobile-menu-open::after {
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M5 27V14l7-10h13l3 10v13zM7 14h19M10 11l4-5h9l2 5M21 18h4' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
     center/contain no-repeat;
 }
+
+#voice-toggle {
+  position: fixed;
+  z-index: 26;
+  right: 32px;
+  top: 82px;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #f9e7b76b;
+  border-radius: 50%;
+  color: #fff0c6;
+  background: #192b26d9;
+  touch-action: manipulation;
+}
+#voice-toggle[hidden] {
+  display: none;
+}
+#voice-toggle svg {
+  width: 23px;
+  height: 23px;
+}
+#voice-toggle[aria-pressed="true"] {
+  background: #a3bb79;
+  color: #192b26;
+}
+#voice-toggle[aria-pressed="true"] .mic-slash {
+  display: none;
+}
+.mobile-ui.in-town #voice-toggle {
+  top: var(--hud-top);
+  right: calc(var(--hud-right) + 204px);
+}
+body.dialog-open #voice-toggle,
+body.mobile-menu-open #voice-toggle {
+  visibility: hidden;
+}

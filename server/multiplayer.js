@@ -1,3 +1,4 @@
+import { createVoiceHub } from "./voice.js";
 import { sharedGameTime } from "../src/schedule.js";
 import { appearance } from "../src/wardrobe.js";
 import {
@@ -17,7 +18,7 @@ import {
 export function createMultiplayer(httpServer) {
   const wss = new WebSocketServer({
     noServer: true,
-    maxPayload: 2048,
+    maxPayload: 16384,
     perMessageDeflate: false,
   });
   const clients = new Map();
@@ -26,6 +27,7 @@ export function createMultiplayer(httpServer) {
     if (ws.readyState === WebSocket.OPEN && ws.bufferedAmount < 65536)
       ws.send(JSON.stringify(data));
   };
+  const voice = createVoiceHub(clients, send);
   const snapshot = (client) => ({
     type: "state",
     time: Date.now(),
@@ -85,7 +87,7 @@ export function createMultiplayer(httpServer) {
         client.window = now;
         client.messages = 0;
       }
-      if (++client.messages > 80) {
+      if (++client.messages > (client.voice ? 180 : 80)) {
         ws.close(1008, "Too many messages");
         return;
       }
@@ -139,6 +141,7 @@ export function createMultiplayer(httpServer) {
         return;
       }
       if (!client.player) return;
+      if (voice.handle(ws, client, message)) return;
       if (message.type === "ping" && Number.isFinite(message.sent)) {
         send(ws, { type: "pong", sent: message.sent });
         return;
@@ -279,6 +282,7 @@ export function createMultiplayer(httpServer) {
           stepGuest(c.player, c.keys, 1 / 30);
         }
       }
+    if (tick % 9 === 0) voice.tick();
     if (++tick % 3 === 0) {
       for (const [ws, c] of clients)
         if (c.player && ws.bufferedAmount < 8192) send(ws, snapshot(c));

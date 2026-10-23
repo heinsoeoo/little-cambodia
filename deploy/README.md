@@ -27,3 +27,11 @@ journalctl -u littlecambodia -n 100
 certbot renew --dry-run
 
 To roll back manually, replace current with a symlink to a known healthy release then restart littlecambodia.service. Use root to manage service/proxy configuration; CI intentionally cannot change those files. Bootstrap/install-release scripts document the initial server setup; do not blindly rerun them over existing production configuration.
+
+## Nearby voice
+
+Audio-only WebRTC is opt-in through the small mic button on the main game screen. Both players must enable voice. Server-authoritative proximity permits signaling within 40 m; clients fade voices between 5 m and 40 m and close peer connections when out of range. Turning voice off, leaving, disconnecting, or hiding the page stops microphone tracks and incoming audio. No recording is implemented. Media travels directly between players where possible, with coturn as fallback. At most 15 peers are possible within the existing 16-guest cap.
+
+Production uses Ubuntu coturn on the same host. `setup-voice-relay.sh 149.28.153.104` documents the root-only setup after `apt-get install coturn`; do not rerun against an unrelated relay. The secret stays in `/etc/littlecambodia/voice.env` and `/etc/turnserver.conf`, outside Git and release archives. The app gets its environment through a systemd drop-in and issues time-limited HMAC credentials only to joined guests enabling voice. UDP/TCP 3478 and UDP 49160–49415 are allowed in UFW. A Vultr firewall, if added separately, must allow the same ports. Relay allocation quotas and private-network peer restrictions are configured. Voice traffic consumes the existing server transfer allowance. Local development falls back to STUN without relay environment variables.
+
+Verify `systemctl is-active coturn`, then test two devices using different networks, both with the mic enabled: voice nearby, gradual fade on separation, silence beyond 40 m, and immediate stop with mic off. A browser permission denial leaves voice off. In-app Facebook browsers may require opening Safari or Chrome.

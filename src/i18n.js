@@ -1,6 +1,15 @@
 // UI text is translated without changing form values or player-created names.
 export const LANGUAGE_KEY = "little-cambodia-language";
 export const KHMER = {
+  "Turn on nearby voice chat": "បើកការជជែកជាសំឡេងនៅក្បែរ",
+  "Turn off nearby voice chat": "បិទការជជែកជាសំឡេងនៅក្បែរ",
+  "Voice on · nearby players within 40 m can hear you.":
+    "បានបើកសំឡេង · អ្នកលេងនៅក្បែរក្នុងចម្ងាយ ៤០ ម៉ែត្រអាចឮអ្នក។",
+  "Microphone unavailable. Allow microphone access and try again.":
+    "មិនអាចប្រើមីក្រូហ្វូនបានទេ។ សូមអនុញ្ញាតឱ្យប្រើមីក្រូហ្វូន ហើយព្យាយាមម្ដងទៀត។",
+  "Voice chat needs Safari or Chrome with microphone access.":
+    "ការជជែកជាសំឡេងត្រូវការ Safari ឬ Chrome និងការអនុញ្ញាតមីក្រូហ្វូន។",
+
   "Brake, then reverse": "ហ្វ្រាំង រួចថយក្រោយ",
   "Lock running": "ចាក់សោការរត់",
   "Unlock running": "បញ្ឈប់ការរត់ជាប់",

@@ -248,3 +248,44 @@ test("sequenced movement commands are acknowledged only after authoritative simu
   a.ws.send(JSON.stringify({ type: "ping", sent: 123 }));
   assert.equal((await pong).sent, 123);
 });
+
+test("nearby voice membership and signaling follow authoritative positions over WebSocket", async (t) => {
+  const server = createServer(),
+    hub = createMultiplayer(server);
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  const url = `ws://127.0.0.1:${server.address().port}/multiplayer`;
+  const a = await client(url, "Voice One"),
+    b = await client(url, "Voice Two");
+  t.after(async () => {
+    a.ws.terminate();
+    b.ws.terminate();
+    hub.close();
+    await new Promise((resolve) => server.close(resolve));
+  });
+  const config = waitMessage(a.ws, (m) => m.type === "voice-config");
+  a.ws.send(JSON.stringify({ type: "voice-toggle", enabled: true }));
+  assert.ok((await config).iceServers.length);
+  const nearby = waitMessage(
+    a.ws,
+    (m) => m.type === "voice-peers" && m.ids.includes(b.id),
+  );
+  b.ws.send(JSON.stringify({ type: "voice-toggle", enabled: true }));
+  await nearby;
+  const signal = waitMessage(b.ws, (m) => m.type === "voice-signal");
+  a.ws.send(
+    JSON.stringify({
+      type: "voice-signal",
+      to: b.id,
+      from: "spoof",
+      signal: { description: { type: "offer", sdp: "v=0" } },
+    }),
+  );
+  assert.equal((await signal).from, a.id);
+  hub.snapshot().players.find((p) => p.id === b.id).x += 100;
+  const far = await waitMessage(
+    a.ws,
+    (m) => m.type === "voice-peers" && !m.ids.length,
+  );
+  assert.deepEqual(far.ids, []);
+});
