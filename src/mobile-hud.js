@@ -3,8 +3,7 @@ export function mobileViewport({ width, height, coarse }) {
   return coarse || width <= 900 || (height <= 500 && width <= 1200);
 }
 export function createMobileHUD({ clearInput, onPrimary, onTalk, onMap }) {
-  const $ = (id) => document.getElementById(id),
-    header = document.querySelector("header");
+  const $ = (id) => document.getElementById(id);
   const actions = [
     "activities-open",
     "snacks-open",
@@ -14,13 +13,13 @@ export function createMobileHUD({ clearInput, onPrimary, onTalk, onMap }) {
     "leave",
     "feedback",
   ].map($);
+  for (const button of actions) {
+    const launcher = ["activities-open", "snacks-open"].includes(button.id);
+    $(launcher ? "guide-launchers" : "mobile-menu-actions").append(button);
+  }
   function placeSound(creating) {
     const sound = $("game-sound");
-    const target = creating
-      ? $("creator-utilities")
-      : mobile
-        ? $("mobile-menu-actions")
-        : header;
+    const target = creating ? $("creator-utilities") : $("mobile-menu-actions");
     if (sound && target && sound.parentElement !== target) target.append(sound);
   }
   function controlSize(value) {
@@ -50,6 +49,7 @@ export function createMobileHUD({ clearInput, onPrimary, onTalk, onMap }) {
     menuOpen = open;
     document.body.classList.toggle("mobile-menu-open", open);
     $("mobile-menu-toggle").setAttribute("aria-expanded", String(open));
+    if (open) $("mobile-menu-close").focus();
   }
   $("mobile-menu-toggle").onclick = () => setMenu(!menuOpen);
   $("mobile-menu-close").onclick = () => {
@@ -67,12 +67,30 @@ export function createMobileHUD({ clearInput, onPrimary, onTalk, onMap }) {
   $("mobile-talk").onclick = onTalk;
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeMenu();
+    if (e.key === "Tab" && menuOpen) {
+      const controls = [
+        ...$("game-menu").querySelectorAll("button,select,a,input"),
+      ].filter(
+        (el) =>
+          !el.disabled && el.getClientRects().length && el.tabIndex !== -1,
+      );
+      if (!controls.length) return;
+      const first = controls[0],
+        last = controls.at(-1);
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
   });
   document.body.classList.toggle("ui-creating", !$("welcome").hidden);
   placeSound(!$("welcome").hidden);
   return {
     get isOpen() {
-      return mobile && menuOpen;
+      return menuOpen;
     },
     closeMenu,
     resize(value) {
@@ -91,9 +109,6 @@ export function createMobileHUD({ clearInput, onPrimary, onTalk, onMap }) {
           ? "Resume · P"
           : "Pause · P";
       }
-      for (const button of actions)
-        if (mobile) $("mobile-menu-actions").append(button);
-        else header.insertBefore(button, $("mobile-map-toggle"));
     },
     update(state, can, creating, vendor) {
       placeSound(creating);

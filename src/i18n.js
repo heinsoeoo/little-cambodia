@@ -425,6 +425,25 @@ Object.assign(KHMER, {
   "Zoom in map": "ពង្រីកផែនទី",
   "Zoom out map": "បង្រួមផែនទី",
 });
+Object.assign(KHMER, {
+  "City guide": "មគ្គុទ្ទេសក៍ទីក្រុង",
+  "LITTLE CAMBODIA / CITY GUIDE": "LITTLE CAMBODIA / មគ្គុទ្ទេសក៍ទីក្រុង",
+  "Make yourself at home.": "មានអារម្មណ៍ដូចនៅផ្ទះ។",
+  "YOUR STORY": "រឿងរ៉ាវរបស់អ្នក",
+  "adventures completed": "ដំណើរផ្សងព្រេងដែលបានបញ្ចប់",
+  "City guide sections": "ផ្នែកនៃមគ្គុទ្ទេសក៍ទីក្រុង",
+  Explore: "រុករក",
+  Garage: "យានដ្ឋាន",
+  Settings: "ការកំណត់",
+  "The city is yours.": "ទីក្រុងនេះសម្រាប់អ្នក។",
+  "Find a little adventure, meet a neighbour, or take the long way home.":
+    "ស្វែងរកដំណើរផ្សងព្រេង ជួបអ្នកជិតខាង ឬដើរកម្សាន្តតាមចិត្ត។",
+  "Your city. Your pace.": "ទីក្រុងរបស់អ្នក តាមល្បឿនរបស់អ្នក។",
+  "Make the game comfortable for you.": "កែតម្រូវហ្គេមឱ្យងាយស្រួលសម្រាប់អ្នក។",
+  "Explore. Help. Make memories.": "រុករក។ ជួយគ្នា។ បង្កើតអនុស្សាវរីយ៍។",
+  "YOUR NEXT CHAPTER": "ជំពូកបន្ទាប់របស់អ្នក",
+});
+Object.assign(KHMER, { Activities: "សកម្មភាព" });
 export let currentLanguage = "en";
 export function translate(source, language = currentLanguage) {
   if (language !== "km") return source;
@@ -517,7 +536,7 @@ export function createLanguage({ onReady }) {
   const overlay = document.getElementById("language-choice");
   const protectedText = (node) =>
     node.parentElement?.closest(
-      "#language-choice,#player-name,#roster,#mobile-status,.player-nameplate,.intro-khmer,script,style",
+      "#language-choice,#player-name,#guide-player,#roster,#mobile-status,.player-nameplate,.intro-khmer,script,style",
     );
   function localize(root = document.body) {
     if (!root) return;

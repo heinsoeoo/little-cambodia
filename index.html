@@ -7,8 +7,9 @@
       name="viewport"
       content="width=device-width,initial-scale=1,viewport-fit=cover"
     />
-    <title>Phnom Penh · Phnom Life</title>
+    <title>Little Cambodia · Your city, your story</title>
     <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="/src/game-design.css" />
   </head>
   <body class="intro-active">
     <section
@@ -75,7 +76,7 @@
     <canvas id="world" aria-label="Cozy 3D open world"></canvas>
     <header>
       <a class="brand" href="#"
-        >◈ PHNOM <b>LIFE</b><small>PHNOM PENH / OPEN WORLD</small></a
+        >◈ LITTLE <b>CAMBODIA</b><small>PHNOM PENH / OPEN WORLD</small></a
       >
       <div class="city" id="connection">Not connected</div>
       <button id="snacks-open" disabled>Snack bag</button
@@ -92,31 +93,97 @@
         rel="noopener noreferrer"
         >Feedback ↗</a
       >
-      <button
-        id="mobile-map-toggle"
-        class="mobile-only"
-        aria-label="Open full city map"
-      >
-        Map</button
+      <button id="mobile-map-toggle" aria-label="Open full city map">Map</button
       ><button
         id="mobile-menu-toggle"
-        class="mobile-only"
         aria-controls="game-menu"
         aria-expanded="false"
       >
         Menu
       </button>
     </header>
-    <section id="game-menu" class="game-menu" aria-label="Game menu">
-      <div class="mobile-menu-heading mobile-only">
-        <strong>Take a moment</strong
-        ><button id="mobile-menu-close" aria-label="Close game menu">
-          Done
+    <section id="game-menu" class="game-menu" aria-label="City guide">
+      <div class="guide-heading">
+        <div>
+          <span class="eyebrow">LITTLE CAMBODIA / CITY GUIDE</span>
+          <h2>Make yourself at home.</h2>
+        </div>
+        <button id="mobile-menu-close" aria-label="Close game menu">
+          Back to city
         </button>
       </div>
-
-      <div id="mobile-menu-actions" class="mobile-menu-actions"></div>
-      <aside class="mission panel">
+      <div class="guide-profile">
+        <div><small>YOUR STORY</small><strong id="guide-player"></strong></div>
+        <div>
+          <strong id="guide-stamps">0</strong><small>kindness stamps</small>
+        </div>
+        <div>
+          <strong id="guide-completed">0</strong
+          ><small>adventures completed</small>
+        </div>
+      </div>
+      <nav class="guide-tabs" role="tablist" aria-label="City guide sections">
+        <button
+          id="guide-tab-explore"
+          role="tab"
+          data-guide-tab="explore"
+          aria-controls="guide-explore"
+          aria-selected="true"
+        >
+          Explore</button
+        ><button
+          id="guide-tab-garage"
+          role="tab"
+          data-guide-tab="garage"
+          aria-controls="guide-garage"
+          aria-selected="false"
+        >
+          Garage</button
+        ><button
+          id="guide-tab-settings"
+          role="tab"
+          data-guide-tab="settings"
+          aria-controls="guide-settings"
+          aria-selected="false"
+        >
+          Settings
+        </button>
+      </nav>
+      <div
+        id="guide-explore"
+        data-guide-panel="explore"
+        role="tabpanel"
+        aria-labelledby="guide-tab-explore"
+      >
+        <div class="guide-section-heading">
+          <h3>The city is yours.</h3>
+          <p>
+            Find a little adventure, meet a neighbour, or take the long way
+            home.
+          </p>
+        </div>
+        <div id="guide-launchers" class="guide-launchers">
+          <button id="guide-map" type="button">City map</button>
+        </div>
+        <div class="guide-city-strip">
+          <div>
+            <span class="eyebrow">LIFE ALONG THE TONLÉ SAP</span
+            ><strong id="clock">Phnom Penh time</strong>
+            <p id="activity">Preparing the riverside…</p>
+          </div>
+          <button id="vendor" disabled>Shop street stall · V</button>
+        </div>
+        <div class="online-heading" id="online">0 guests online</div>
+        <ul id="roster" aria-label="Guests in town"></ul>
+      </div>
+      <aside
+        id="guide-garage"
+        class="mission panel"
+        role="tabpanel"
+        data-guide-panel="garage"
+        aria-labelledby="guide-tab-garage"
+        hidden
+      >
         <div class="eyebrow">YOUR LITTLE ADVENTURE</div>
         <h2 id="player-name">Welcome, guest</h2>
         <p id="player-mode">Join the town to explore on foot.</p>
@@ -137,7 +204,18 @@
           later.
         </div>
       </aside>
-      <aside class="city-life panel" aria-label="City life and time">
+      <aside
+        id="guide-settings"
+        class="city-life panel"
+        data-guide-panel="settings"
+        role="tabpanel"
+        aria-labelledby="guide-tab-settings"
+        hidden
+      >
+        <div class="guide-section-heading">
+          <h3>Your city. Your pace.</h3>
+          <p>Make the game comfortable for you.</p>
+        </div>
         <label class="language-setting"
           >Language
           <select data-language-switch aria-label="Language">
@@ -154,21 +232,17 @@
             <option value="extra">Extra large</option>
           </select></label
         >
-        <div class="eyebrow">LIFE ALONG THE TONLÉ SAP</div>
-        <strong id="clock">Phnom Penh time</strong>
-        <p id="activity">Preparing the riverside…</p>
         <label for="time-mode">City clock and scenery</label
         ><select id="time-mode">
           <option value="now">Shared game time · 10×</option>
           <option value="day">Preview · weekday noon</option>
           <option value="market">Preview · weekend market</option>
         </select>
-        <div class="life-actions">
-          <button id="vendor" disabled>Talk to vendor · V</button>
-        </div>
-        <div class="online-heading" id="online">0 guests online</div>
-        <ul id="roster" aria-label="Guests in town"></ul>
       </aside>
+      <div
+        id="mobile-menu-actions"
+        class="mobile-menu-actions guide-toolbar"
+      ></div>
     </section>
     <div class="mobile-status mobile-only" id="mobile-status"></div>
     <div id="hud-wallet" class="hud-wallet" hidden></div>
@@ -219,6 +293,7 @@
       <div class="creator-heading">
         <div class="eyebrow">LITTLE CAMBODIA <span>· PHNOM PENH</span></div>
         <h1 id="creator-title">A little world, all yours.</h1>
+        <p class="creator-tagline">Explore. Help. Make memories.</p>
       </div>
       <form id="guest-form" novalidate>
         <div id="setup-main" class="creator-fields">
@@ -298,7 +373,7 @@
         </div>
         <div id="creator-preview" class="creator-preview">
           <div class="preview-heading">
-            <span>YOUR LITTLE ADVENTURE</span
+            <span>YOUR NEXT CHAPTER</span
             ><span class="preview-location">Phnom Penh</span>
           </div>
           <canvas id="look-preview" aria-label="3D character preview"></canvas

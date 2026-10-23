@@ -1,3 +1,4 @@
+import { createCityGuide } from "./city-guide.js";
 import { createCityMap } from "./map-ui.js";
 import { createActivities } from "./activities-ui.js";
 import { createLanguage, translate } from "./i18n.js";
@@ -362,6 +363,12 @@ const mobileHUD = createMobileHUD({
     else action("summon");
   },
 });
+const guide = createCityGuide({
+  onMap: () => {
+    mobileHUD.closeMenu();
+    cityMap.open();
+  },
+});
 const intro = createIntro({
   autoplay: false,
   onOpen: () => {
@@ -627,6 +634,7 @@ function frame(now) {
         ? "Riverside promenade"
         : nearestRoad([focus.x, focus.z], map.roads).road.name;
     mobileHUD.update(self, can, !$("welcome").hidden, vendor);
+    guide.update(self, activities.game);
     cityMap.update(self, activities.game.target, network.players, now);
   }
   if (now > noticeUntil) $("toast").style.opacity = 0;
