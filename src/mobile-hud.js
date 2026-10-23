@@ -144,6 +144,10 @@ export function createMobileHUD({ clearInput, onPrimary, onTalk, onMap }) {
             : distance <= 4
               ? "Enter vehicle"
               : "Bring vehicle here";
+      $("mobile-primary").classList.toggle(
+        "vehicle-door",
+        state?.mode === "drive" || Boolean(state?.vehicle && distance <= 4),
+      );
       $("mobile-talk").hidden =
         !can || !vendor || vendor.distance >= 7 || Math.abs(state.speed) >= 1.5;
       $("mobile-talk").textContent = "Shop";

@@ -653,11 +653,16 @@ function frame(now) {
     );
   }
   const focus = self || { x: spawn[0], z: spawn[1] };
+  const cameraOffset = cameraZoom.offset();
   camera.position.lerp(
-    new T.Vector3(focus.x + 40, 58, focus.z + 90),
+    new T.Vector3(
+      focus.x + cameraOffset.x,
+      cameraOffset.y,
+      focus.z + cameraOffset.z,
+    ),
     1 - Math.exp(-dt * 7),
   );
-  camera.lookAt(camera.position.x - 40, 0, camera.position.z - 90);
+  camera.lookAt(focus.x, 0, focus.z);
   hud += dt;
   if (hud > 0.15) {
     hud = 0;

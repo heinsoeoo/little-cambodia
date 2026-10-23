@@ -1170,3 +1170,10 @@ body.mobile-menu-open::after {
 .mobile-ui.in-town header {
   justify-content: flex-end;
 }
+
+.mobile-ui.in-town #mobile-primary.vehicle-door::before {
+  content: "";
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M7 28V5h18v23M11 28V9l10-3v22M16 17v3' fill='none' stroke='black' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    center/contain no-repeat;
+}
