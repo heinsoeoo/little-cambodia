@@ -88,7 +88,7 @@ export function createGuest(id, name, index = 0, look) {
     vehicle: null,
   };
 }
-export function stepGuest(player, keys, dt) {
+export function stepGuest(player, keys, dt, cameraYaw = 0) {
   if (player.gestureSeconds > 0) {
     player.gestureSeconds = Math.max(0, player.gestureSeconds - dt);
     if (!player.gestureSeconds) player.gesture = null;
@@ -109,6 +109,11 @@ export function stepGuest(player, keys, dt) {
   let dz =
     Number(keys.has("s") || keys.has("arrowdown")) -
     Number(keys.has("w") || keys.has("arrowup"));
+  const angle = Number.isFinite(cameraYaw) ? cameraYaw : 0;
+  [dx, dz] = [
+    dx * Math.cos(angle) + dz * Math.sin(angle),
+    dz * Math.cos(angle) - dx * Math.sin(angle),
+  ];
   const length = Math.hypot(dx, dz);
   if (player.posture === "sit" && !length) {
     player.speed = 0;

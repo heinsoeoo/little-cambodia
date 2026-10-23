@@ -75,15 +75,7 @@ const clock = new CityClock(),
     onSprint: (value) => {
       joystickSprinting = value;
     },
-    onLock: (value) => {
-      $("sprint-lock").setAttribute("aria-pressed", String(value));
-      $("sprint-lock").setAttribute(
-        "aria-label",
-        value ? "Unlock running" : "Lock running",
-      );
-    },
   });
-$("sprint-lock").onclick = () => clearJoystick.setLocked(!clearJoystick.locked);
 const notify = (text, seconds = 4) => {
   $("toast").textContent = text;
   $("toast").style.opacity = 1;
@@ -609,8 +601,11 @@ function frame(now) {
     movementKeys.add("shift");
   while (accumulator >= INPUT_STEP) {
     if (self && network.id && !network.stale)
-      prediction.advance(self, movementKeys, (command) =>
-        network.command(command),
+      prediction.advance(
+        self,
+        movementKeys,
+        (command) => network.command(command),
+        cameraZoom.yaw(),
       );
     accumulator -= INPUT_STEP;
   }

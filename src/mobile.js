@@ -94,10 +94,9 @@ export function bindViewportGestures(root) {
 export function bindWalkingJoystick(
   element,
   keys,
-  { onSprint = () => {}, onLock = () => {} } = {},
+  { onSprint = () => {} } = {},
 ) {
   let pointer = null,
-    locked = false,
     sprinting = false;
   const directions = ["arrowleft", "arrowright", "arrowup", "arrowdown"];
   function sprint(value) {
@@ -107,11 +106,6 @@ export function bindWalkingJoystick(
     }
     element.classList[value ? "add" : "remove"]("sprinting");
   }
-  function lock(value) {
-    locked = value;
-    onLock(value);
-    element.classList[value ? "add" : "remove"]("sprint-locked");
-  }
   const clear = () => {
     pointer = null;
     directions.forEach((key) => keys.delete(key));
@@ -119,7 +113,6 @@ export function bindWalkingJoystick(
     element.style.setProperty("--stick-y", "0px");
     element.classList.remove("active");
     sprint(false);
-    lock(false);
   };
   const move = (event) => {
     if (event.pointerId !== pointer) return;
@@ -129,7 +122,6 @@ export function bindWalkingJoystick(
     let x = event.clientX - rect.left - rect.width / 2,
       y = event.clientY - rect.top - rect.height / 2;
     const length = Math.hypot(x, y);
-    const locking = y < -radius * 1.8 && Math.abs(x) < radius;
     if (length > radius) {
       x *= radius / length;
       y *= radius / length;
@@ -141,14 +133,12 @@ export function bindWalkingJoystick(
       if (y < -radius * 0.3) keys.add("arrowup");
       if (y > radius * 0.3) keys.add("arrowdown");
     }
-    if (locking) lock(true);
-    sprint(locked || length >= radius * 0.88);
+    sprint(length >= radius * 0.88);
     element.style.setProperty("--stick-x", `${x}px`);
     element.style.setProperty("--stick-y", `${y}px`);
   };
   element.addEventListener("pointerdown", (event) => {
     if (pointer !== null) return;
-    lock(false);
     pointer = event.pointerId;
     element.setPointerCapture(pointer);
     element.classList.add("active");
@@ -157,29 +147,12 @@ export function bindWalkingJoystick(
   element.addEventListener("pointermove", move);
   element.addEventListener("pointerup", (event) => {
     if (event.pointerId !== pointer) return;
-    if (locked) {
-      pointer = null;
-      directions.forEach((key) => keys.delete(key));
-      keys.add("arrowup");
-      sprint(true);
-    } else clear();
+    clear();
   });
   for (const type of ["pointercancel", "lostpointercapture"])
     element.addEventListener(type, (event) => {
       if (event.pointerId === pointer) clear();
     });
   element.addEventListener("contextmenu", (event) => event.preventDefault());
-  clear.setLocked = (value) => {
-    if (!value) {
-      clear();
-      return;
-    }
-    lock(true);
-    directions.forEach((key) => keys.delete(key));
-    keys.add("arrowup");
-    sprint(true);
-    element.style.setProperty("--stick-y", "-32px");
-  };
-  Object.defineProperty(clear, "locked", { get: () => locked });
   return clear;
 }

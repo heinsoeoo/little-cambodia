@@ -10,13 +10,18 @@ test("delayed snapshots replay unacknowledged inputs without pulling the local p
   const incoming = [];
   for (let frame = 0; frame < 120; frame++) {
     const keys = new Set(frame < 60 ? ["w"] : frame < 90 ? ["d"] : []);
-    prediction.advance(local, keys, (command) => {
-      incoming.push({ command, arrival: frame + 12 });
-      return true;
-    });
+    prediction.advance(
+      local,
+      keys,
+      (command) => {
+        incoming.push({ command, arrival: frame + 12 });
+        return true;
+      },
+      frame / 60,
+    );
     while (incoming.length && incoming[0].arrival <= frame) {
       const { command } = incoming.shift();
-      stepGuest(server, new Set(command.keys), INPUT_STEP);
+      stepGuest(server, new Set(command.keys), INPUT_STEP, command.cameraYaw);
       ack = command.sequence;
     }
     if (frame % 3 === 0) {

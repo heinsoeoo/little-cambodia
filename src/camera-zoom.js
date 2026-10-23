@@ -79,6 +79,7 @@ export function createCameraZoom({ camera, canvas, viewport }) {
   apply();
   return {
     resize: apply,
+    yaw: () => yaw,
     offset() {
       const radius = Math.hypot(40, 58, 90);
       return {

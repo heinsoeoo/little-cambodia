@@ -6,17 +6,18 @@ export class LocalPrediction {
   reset() {
     this.pending = [];
   }
-  advance(player, keys, send) {
+  advance(player, keys, send, cameraYaw = 0) {
     if (this.pending.length >= 90) return false;
     const command = {
       type: "command",
       sequence: this.sequence + 1,
       keys: [...keys],
+      cameraYaw,
     };
     if (!send(command)) return false;
     this.sequence++;
     this.pending.push(command);
-    stepGuest(player, new Set(command.keys), INPUT_STEP);
+    stepGuest(player, new Set(command.keys), INPUT_STEP, command.cameraYaw);
     return true;
   }
   reconcile(authoritative, acknowledged) {
@@ -27,7 +28,12 @@ export class LocalPrediction {
     );
     const predicted = structuredClone(authoritative);
     for (const command of this.pending)
-      stepGuest(predicted, new Set(command.keys), INPUT_STEP);
+      stepGuest(
+        predicted,
+        new Set(command.keys),
+        INPUT_STEP,
+        command.cameraYaw,
+      );
     return predicted;
   }
 }

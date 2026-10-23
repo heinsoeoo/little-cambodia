@@ -171,6 +171,9 @@ export function createMultiplayer(httpServer) {
         client.lastInput = now;
         client.commands.push({
           sequence,
+          cameraYaw: Number.isFinite(message.cameraYaw)
+            ? message.cameraYaw % (Math.PI * 2)
+            : 0,
           keys: new Set(
             message.keys.filter((key) => allowed.has(key)).slice(0, 11),
           ),
@@ -266,7 +269,7 @@ export function createMultiplayer(httpServer) {
           let steps = 0;
           while (c.commands.length && c.credit >= 1 / 30 && steps++ < 6) {
             const command = c.commands.shift();
-            stepGuest(c.player, command.keys, 1 / 30);
+            stepGuest(c.player, command.keys, 1 / 30, command.cameraYaw);
             c.sequence = command.sequence;
             c.credit -= 1 / 30;
           }

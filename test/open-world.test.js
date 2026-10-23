@@ -72,3 +72,12 @@ test("summoning checks vehicle type and occupied parking spots", () => {
   assert.equal(guestAction(q, "summon", "car", [first]), null);
   assert.ok(Math.hypot(first.x - q.vehicle.x, first.z - q.vehicle.z) > 4);
 });
+
+test("walking follows camera orientation without changing speed", () => {
+  const p = createGuest("orbit", "Traveller");
+  const x = p.x,
+    z = p.z;
+  stepGuest(p, new Set(["arrowup"]), 0.1, Math.PI / 2);
+  assert.ok(Math.abs(p.x - (x - 0.45)) < 1e-8);
+  assert.ok(Math.abs(p.z - z) < 1e-8);
+});
