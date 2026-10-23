@@ -1086,3 +1086,87 @@ body.mobile-menu-open::after {
   display: block;
   margin: auto;
 }
+
+/* Keep the mobile horizon clear: a small radar and two compact readouts. */
+.mobile-ui.in-town {
+  --radar-size: 112px;
+  --status-start: calc(var(--hud-left) + var(--radar-size) + 9px);
+}
+.mobile-ui.in-town header .brand,
+.mobile-ui.in-town .mobile-status {
+  display: none !important;
+}
+.mobile-ui.in-town .map {
+  padding: 4px;
+  border-width: 1px;
+  border-radius: 9px;
+  background: #192b26bc;
+  box-shadow: none;
+}
+.mobile-ui.in-town .map #map {
+  display: block;
+  border-radius: 5px;
+}
+.mobile-ui.in-town #map-navigation-hint,
+.mobile-ui.in-town .map-footer {
+  display: none;
+}
+.mobile-ui.in-town.quest-on-map #map-navigation-hint {
+  display: block;
+  margin-top: 3px;
+  font-size: 9px;
+}
+.mobile-ui.in-town .game-calendar {
+  left: var(--status-start);
+  top: var(--hud-top);
+  max-width: 174px;
+  padding: 5px 7px;
+  border: 1px solid #f9e7b74d;
+  border-radius: 6px;
+  box-shadow: none;
+  background: #192b26b8;
+  font-size: 9px;
+  line-height: 1.4;
+}
+.mobile-ui.in-town .dash {
+  left: var(--status-start);
+  top: calc(var(--hud-top) + 29px);
+  padding: 4px 7px;
+  gap: 7px;
+  border: 1px solid #f9e7b74d;
+  border-radius: 6px;
+  box-shadow: none;
+  background: #192b26b8;
+}
+.mobile-ui.in-town .dash #speed {
+  font-size: 22px;
+  line-height: 1;
+}
+.mobile-ui.in-town .dash > div > small {
+  font-size: 8px;
+}
+.mobile-ui.in-town .dash .gear {
+  padding-left: 7px;
+}
+.mobile-ui.in-town .dash .gear b {
+  font-size: 10px;
+}
+.mobile-ui.in-town .dash .gear small {
+  display: none;
+}
+.character-creator .gender-icons button svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  flex: none;
+}
+.character-creator .gender-icons button {
+  line-height: 1;
+  align-items: center;
+  justify-items: center;
+}
+
+.mobile-ui.in-town header {
+  justify-content: flex-end;
+}

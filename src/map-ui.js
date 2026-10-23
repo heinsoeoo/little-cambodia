@@ -284,7 +284,11 @@ export function createCityMap({ map, bounds, path, onOpen, canOpen }) {
           280,
           280,
           [state.x, state.z],
-          state.mode === "drive" ? 600 : 340,
+          state.mode === "drive"
+            ? document.body.classList.contains("mobile-ui")
+              ? 440
+              : 600
+            : 340,
         );
       else
         paint(

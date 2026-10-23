@@ -4,7 +4,20 @@ export function createGenderPicker(select) {
   group.className = "gender-icons";
   group.setAttribute("role", "radiogroup");
   group.setAttribute("aria-label", "Gender");
-  const symbols = ["♂", "♀", "○"];
+  const shapes = [
+    [
+      ["circle", { cx: 9, cy: 15, r: 5 }],
+      ["path", { d: "m12.5 11.5 7-7M14 4.5h5.5V10" }],
+    ],
+    [
+      ["circle", { cx: 12, cy: 8.5, r: 5 }],
+      ["path", { d: "M12 13.5v7M8.5 17h7" }],
+    ],
+    [
+      ["circle", { cx: 12, cy: 7.5, r: 3.5 }],
+      ["path", { d: "M5 20v-2a7 6 0 0 1 14 0v2" }],
+    ],
+  ];
   const buttons = choices.map((option, index) => {
     const button = document.createElement("button");
     button.type = "button";
@@ -12,9 +25,23 @@ export function createGenderPicker(select) {
     button.setAttribute("aria-label", option.textContent);
     button.title = option.textContent;
     button.dataset.gender = option.value;
-    const icon = document.createElement("span");
-    icon.textContent = symbols[index];
-    icon.setAttribute("aria-hidden", "true");
+    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    for (const [name, value] of Object.entries({
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      "stroke-width": "1.8",
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+      "aria-hidden": "true",
+    }))
+      icon.setAttribute(name, value);
+    for (const [tag, attributes] of shapes[index]) {
+      const shape = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      for (const [name, value] of Object.entries(attributes))
+        shape.setAttribute(name, String(value));
+      icon.append(shape);
+    }
     button.append(icon);
     button.onclick = () => {
       select.value = option.value;

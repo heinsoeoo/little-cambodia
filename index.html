@@ -289,7 +289,7 @@
         class="mobile-menu-actions guide-toolbar"
       ></div>
     </section>
-    <div class="mobile-status mobile-only" id="mobile-status"></div>
+    <div class="mobile-status mobile-only" id="mobile-status" hidden></div>
     <div class="life-actions">
       <button id="run-toggle" type="button" aria-pressed="false" hidden>
         Run</button
@@ -707,9 +707,26 @@
         <button
           data-key="arrowdown"
           id="touch-down"
-          aria-label="Slow down then reverse"
+          aria-label="Brake, then reverse"
         >
-          R
+          <svg viewBox="0 0 32 32" aria-hidden="true">
+            <circle
+              cx="16"
+              cy="16"
+              r="8"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            />
+            <path
+              d="M6 6Q0 16 6 26M26 6q6 10 0 20M16 11v6"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+            />
+            <circle cx="16" cy="21" r="1.2" fill="currentColor" />
+          </svg>
         </button>
         <button
           data-key="arrowup"

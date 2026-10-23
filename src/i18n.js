@@ -1,6 +1,7 @@
 // UI text is translated without changing form values or player-created names.
 export const LANGUAGE_KEY = "little-cambodia-language";
 export const KHMER = {
+  "Brake, then reverse": "ហ្វ្រាំង រួចថយក្រោយ",
   "Lock running": "ចាក់សោការរត់",
   "Unlock running": "បញ្ឈប់ការរត់ជាប់",
   "Slow down then reverse": "បន្ថយល្បឿន រួចថយក្រោយ",

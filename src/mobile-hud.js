@@ -132,9 +132,6 @@ export function createMobileHUD({ clearInput, onPrimary, onTalk, onMap }) {
           const element = $(id);
           element.textContent = element.textContent.replace(/ · [A-Z]$/, "");
         }
-      $("mobile-status").textContent = state
-        ? `${state.nickname} · ${translate(state.mode === "drive" ? "Driving" : "On foot")}`
-        : "";
       const distance = state?.vehicle
         ? Math.hypot(state.x - state.vehicle.x, state.z - state.vehicle.z)
         : Infinity;
