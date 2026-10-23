@@ -27,6 +27,7 @@ export function createActor(scene, player) {
     type = null;
   group.position.set(player.x, 0, player.z);
   return {
+    position: group.position,
     update(state, dt, local = false, night = false) {
       const distance = Math.hypot(
         group.position.x - state.x,

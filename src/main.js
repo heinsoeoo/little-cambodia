@@ -1,3 +1,4 @@
+import { followCamera } from "./camera-follow.js";
 import { createVoiceChat } from "./voice-chat.js";
 import { BENCHES } from "./open-world.js";
 import { nearestBench } from "./benches.js";
@@ -85,6 +86,7 @@ const notify = (text, seconds = 4) => {
 const scene = new T.Scene(),
   renderer = new T.WebGLRenderer({ canvas: $("world"), antialias: true }),
   camera = new T.OrthographicCamera(-50, 50, 30, -30, 0.1, 2200);
+const orbitOffset = new T.Vector3(40, 58, 90);
 const cameraZoom = createCameraZoom({
   camera,
   canvas: $("world"),
@@ -572,7 +574,7 @@ function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min((now - previous) / 1000, 0.1);
   previous = now;
-  cameraZoom.tick(dt, self?.mode === "drive" ? self.speed : 0);
+  cameraZoom.tick(dt);
   if (intro.active) {
     audio.update(dt, self, keys, false);
     clock.tick(dt);
@@ -657,17 +659,10 @@ function frame(now) {
       activity.night,
     );
   }
-  const focus = self || { x: spawn[0], z: spawn[1] };
-  const cameraOffset = cameraZoom.offset();
-  camera.position.lerp(
-    new T.Vector3(
-      focus.x + cameraOffset.x,
-      cameraOffset.y,
-      focus.z + cameraOffset.z,
-    ),
-    1 - Math.exp(-dt * 7),
-  );
-  camera.lookAt(focus.x, 0, focus.z);
+  const focus = actors.get(network.id)?.position ||
+    self || { x: spawn[0], z: spawn[1] };
+  followCamera(camera, focus, cameraZoom.offset(), orbitOffset, dt);
+
   hud += dt;
   if (hud > 0.15) {
     hud = 0;

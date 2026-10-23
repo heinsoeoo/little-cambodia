@@ -1216,3 +1216,50 @@ body.dialog-open #voice-toggle,
 body.mobile-menu-open #voice-toggle {
   visibility: hidden;
 }
+
+.update-notice {
+  position: fixed;
+  z-index: 160;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 28px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #e9bf6280;
+  border-radius: 14px;
+  color: #fff0c6;
+  background: #192b26f5;
+  box-shadow: 0 6px 24px #0004;
+  font-size: 12px;
+}
+.update-notice[hidden] {
+  display: none;
+}
+.update-notice button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 9px;
+  font-size: 12px;
+}
+.update-notice #update-now {
+  background: #e9bf62;
+  color: #192b26;
+}
+.update-notice #update-later {
+  background: transparent;
+  color: #fff0c6;
+}
+@media (max-width: 420px) {
+  .update-notice {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .update-notice span {
+    width: 100%;
+    text-align: center;
+  }
+}

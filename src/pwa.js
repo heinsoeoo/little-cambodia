@@ -1,3 +1,4 @@
+import { watchGameUpdates } from "./pwa-updates.js";
 export function createPwa({ onOpen = () => {}, onClose = () => {} } = {}) {
   const $ = (id) => document.getElementById(id),
     buttons = [...document.querySelectorAll("[data-install]")];
@@ -55,22 +56,22 @@ export function createPwa({ onOpen = () => {}, onClose = () => {} } = {}) {
     navigator.serviceWorker
       .register("/sw.js", { updateViaCache: "none" })
       .then((registration) => {
-        const show = () => {
-          $("pwa-update").hidden = !registration.waiting;
-        };
-        show();
-        registration.addEventListener("updatefound", () =>
-          registration.installing?.addEventListener("statechange", show),
-        );
-        $("pwa-update").onclick = () => {
-          if (registration.waiting)
-            registration.waiting.postMessage({ type: "ACTIVATE_UPDATE" });
-        };
-        let controller = navigator.serviceWorker.controller;
-        navigator.serviceWorker.addEventListener("controllerchange", () => {
-          if (controller) location.reload();
-          controller = navigator.serviceWorker.controller;
+        const updates = watchGameUpdates({
+          registration,
+          serviceWorker: navigator.serviceWorker,
+          events: window,
+          page: document,
+          isOnline: () => navigator.onLine,
+          onAvailable(available) {
+            $("pwa-update").hidden = !available;
+            $("update-notice").hidden = !available;
+          },
+          reload: () => location.reload(),
         });
+        $("pwa-update").onclick = $("update-now").onclick = updates.apply;
+        $("update-later").onclick = () => {
+          $("update-notice").hidden = true;
+        };
       })
       .catch(() => {});
   }

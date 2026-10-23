@@ -88,8 +88,8 @@ export function createCameraZoom({ camera, canvas, viewport }) {
         z: Math.cos(yaw) * Math.cos(pitch) * radius,
       };
     },
-    tick(dt, speed = 0) {
-      const desired = target * (1 + Math.min(Math.abs(speed) / 30, 1) * 0.12);
+    tick(dt) {
+      const desired = target;
       if (Math.abs(current - desired) < 0.001) return;
       current += (desired - current) * (1 - Math.exp(-dt * 6));
       apply();

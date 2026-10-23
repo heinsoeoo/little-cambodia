@@ -1,6 +1,11 @@
 // UI text is translated without changing form values or player-created names.
 export const LANGUAGE_KEY = "little-cambodia-language";
 export const KHMER = {
+  "Game update": "បច្ចុប្បន្នភាពហ្គេម",
+  "New update available": "មានបច្ចុប្បន្នភាពថ្មី",
+  "Update now": "ធ្វើបច្ចុប្បន្នភាពឥឡូវនេះ",
+  Later: "ពេលក្រោយ",
+
   "Turn on nearby voice chat": "បើកការជជែកជាសំឡេងនៅក្បែរ",
   "Turn off nearby voice chat": "បិទការជជែកជាសំឡេងនៅក្បែរ",
   "Voice on · nearby players within 40 m can hear you.":
