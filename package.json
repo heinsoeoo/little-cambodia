@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "vite build",
+    "build": "vite build && node scripts/build-pwa.mjs",
     "test": "node --test",
     "format": "prettier --write src server test scripts index.html package.json vite.config.js",
     "format:check": "prettier --check src server test scripts index.html package.json vite.config.js",

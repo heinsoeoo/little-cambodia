@@ -26,7 +26,7 @@ export function createActor(scene, player) {
         group.position.x - state.x,
         group.position.z - state.z,
       );
-      const factor = local || distance > 15 ? 1 : 1 - Math.exp(-dt * 12);
+      const factor = distance > 15 ? 1 : 1 - Math.exp(-dt * (local ? 24 : 10));
       group.position.x += (state.x - group.position.x) * factor;
       group.position.z += (state.z - group.position.z) * factor;
       character.setAppearance(state.appearance);

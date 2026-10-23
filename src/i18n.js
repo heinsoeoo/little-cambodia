@@ -444,6 +444,33 @@ Object.assign(KHMER, {
   "YOUR NEXT CHAPTER": "ជំពូកបន្ទាប់របស់អ្នក",
 });
 Object.assign(KHMER, { Activities: "សកម្មភាព" });
+Object.assign(KHMER, {
+  "Install game ↗": "ដំឡើងហ្គេម ↗",
+  "Update game · reload": "ធ្វើបច្ចុប្បន្នភាពហ្គេម · បើកឡើងវិញ",
+  "Take your little world with you.": "យកពិភពតូចរបស់អ្នកទៅជាមួយ។",
+  "Game files are saved for faster visits. Joining the shared city still needs internet.":
+    "ឯកសារហ្គេមត្រូវបានរក្សាទុក ដើម្បីបើកលឿនជាងមុន។ ការចូលទីក្រុងរួមនៅតែត្រូវការអ៊ីនធឺណិត។",
+  "In Safari, tap Share, then Add to Home Screen. Open the game from its new icon.":
+    "ក្នុង Safari ចុច Share រួច Add to Home Screen។ បើកហ្គេមពីរូបតំណាងថ្មី។",
+  "Open your browser menu and choose Install app or Add to Home screen. Use Safari or Chrome outside Facebook’s browser.":
+    "បើកម៉ឺនុយកម្មវិធីរុករក ហើយជ្រើស Install app ឬ Add to Home screen។ ប្រើ Safari ឬ Chrome ក្រៅកម្មវិធី Facebook។",
+  "You’re offline. Reconnect to join the city.":
+    "អ្នកមិនមានអ៊ីនធឺណិត។ សូមភ្ជាប់ម្ដងទៀតដើម្បីចូលទីក្រុង។",
+  "Connection interrupted · waiting for the city…":
+    "ការភ្ជាប់ផ្អាក · កំពុងរង់ចាំទីក្រុង…",
+  "Slow connection · smoothing movement": "ការភ្ជាប់យឺត · កំពុងសម្រួលចលនា",
+  "Camera distance": "ចម្ងាយកាមេរ៉ា",
+  "Pinch the game view or use the mouse wheel to zoom.":
+    "ប្រើម្រាមដៃពីរពង្រីក ឬបង្រួមទិដ្ឋភាពហ្គេម ឬប្រើកង់កណ្តុរ។",
+  "Camera zoom": "ពង្រីកទិដ្ឋភាព",
+  "Zoom closer": "ពង្រីកជិត",
+  "Zoom farther": "បង្រួមឆ្ងាយ",
+});
+Object.assign(KHMER, {
+  "Graphics quality": "គុណភាពក្រាហ្វិក",
+  Standard: "ស្តង់ដារ",
+  Performance: "ល្បឿនលឿន",
+});
 export let currentLanguage = "en";
 export function translate(source, language = currentLanguage) {
   if (language !== "km") return source;

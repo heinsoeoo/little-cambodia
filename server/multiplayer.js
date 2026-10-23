@@ -26,10 +26,11 @@ export function createMultiplayer(httpServer) {
     if (ws.readyState === WebSocket.OPEN && ws.bufferedAmount < 65536)
       ws.send(JSON.stringify(data));
   };
-  const snapshot = () => ({
+  const snapshot = (client) => ({
     type: "state",
     time: Date.now(),
     gameTime: sharedGameTime(),
+    acknowledged: client?.sequence,
     players: [...clients.values()].filter((c) => c.player).map((c) => c.player),
   });
   function upgrade(request, socket, head) {
@@ -64,11 +65,17 @@ export function createMultiplayer(httpServer) {
       window: Date.now(),
       messages: 0,
       alive: true,
+      sequence: 0,
+      receivedSequence: 0,
+      commands: [],
+      commandMode: false,
+      credit: 0,
+      steppedAt: Date.now(),
     };
     clients.set(ws, client);
     const joinTimeout = setTimeout(() => {
       if (!client.player) ws.close(1008, "Join timeout");
-    }, 10000);
+    }, 25000);
     ws.on("pong", () => {
       client.alive = true;
     });
@@ -132,6 +139,44 @@ export function createMultiplayer(httpServer) {
         return;
       }
       if (!client.player) return;
+      if (message.type === "ping" && Number.isFinite(message.sent)) {
+        send(ws, { type: "pong", sent: message.sent });
+        return;
+      }
+      if (message.type === "command") {
+        const sequence = message.sequence;
+        if (
+          !Number.isSafeInteger(sequence) ||
+          sequence <= client.receivedSequence ||
+          sequence > client.receivedSequence + 120 ||
+          !Array.isArray(message.keys) ||
+          client.commands.length >= 90
+        )
+          return;
+        const allowed = new Set([
+          "w",
+          "a",
+          "s",
+          "d",
+          "arrowup",
+          "arrowdown",
+          "arrowleft",
+          "arrowright",
+          " ",
+          "shift",
+          "b",
+        ]);
+        client.commandMode = true;
+        client.receivedSequence = sequence;
+        client.lastInput = now;
+        client.commands.push({
+          sequence,
+          keys: new Set(
+            message.keys.filter((key) => allowed.has(key)).slice(0, 11),
+          ),
+        });
+        return;
+      }
       if (message.type === "customize") {
         if (now - client.lastAction <= 250) {
           send(ws, {
@@ -141,6 +186,8 @@ export function createMultiplayer(httpServer) {
           return;
         }
         client.keys.clear();
+        client.commands = [];
+        client.sequence = client.receivedSequence;
         client.lastAction = now;
         client.player.appearance = appearance(message.appearance);
         if (VEHICLE_TYPES.includes(message.vehicleType))
@@ -179,6 +226,8 @@ export function createMultiplayer(httpServer) {
       } else if (message.type === "action" && now - client.lastAction > 250) {
         client.lastAction = now;
         client.keys.clear();
+        client.commands = [];
+        client.sequence = client.receivedSequence;
         const occupied = [...clients.values()]
           .filter(
             (c) => c.player && c.player !== client.player && c.player.vehicle,
@@ -209,12 +258,26 @@ export function createMultiplayer(httpServer) {
   const interval = setInterval(() => {
     for (const c of clients.values())
       if (c.player) {
-        if (Date.now() - c.lastInput > 350) c.keys.clear();
-        stepGuest(c.player, c.keys, 1 / 30);
+        const now = Date.now();
+        if (c.commandMode) {
+          c.credit = Math.min(0.5, c.credit + (now - c.steppedAt) / 1000);
+          c.steppedAt = now;
+          let steps = 0;
+          while (c.commands.length && c.credit >= 1 / 30 && steps++ < 6) {
+            const command = c.commands.shift();
+            stepGuest(c.player, command.keys, 1 / 30);
+            c.sequence = command.sequence;
+            c.credit -= 1 / 30;
+          }
+        } else {
+          c.steppedAt = now;
+          if (now - c.lastInput > 350) c.keys.clear();
+          stepGuest(c.player, c.keys, 1 / 30);
+        }
       }
-    if (++tick % 2 === 0) {
-      const state = snapshot();
-      for (const [ws, c] of clients) if (c.player) send(ws, state);
+    if (++tick % 3 === 0) {
+      for (const [ws, c] of clients)
+        if (c.player && ws.bufferedAmount < 8192) send(ws, snapshot(c));
     }
   }, 1000 / 30);
   const heartbeat = setInterval(() => {

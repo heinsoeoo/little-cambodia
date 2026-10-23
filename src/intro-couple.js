@@ -161,7 +161,9 @@ export function createIntroCouple(canvas) {
       } catch {
         failed = true;
         canvas.hidden = true;
-        document.getElementById("intro-couple-fallback").hidden = false;
+        const fallback = document.getElementById("intro-couple-fallback");
+        if (!fallback.getAttribute("src")) fallback.src = fallback.dataset.src;
+        fallback.hidden = false;
       }
     },
   };

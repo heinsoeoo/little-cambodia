@@ -1,3 +1,6 @@
+import { createPwa } from "./pwa.js";
+import { createCameraZoom } from "./camera-zoom.js";
+import { LocalPrediction, INPUT_STEP } from "./prediction.js";
 import { createCityGuide } from "./city-guide.js";
 import { createCityMap } from "./map-ui.js";
 import { createActivities } from "./activities-ui.js";
@@ -30,7 +33,7 @@ import {
   needsRotation,
 } from "./mobile.js";
 import { nearestRoad } from "./geo.js";
-import { stepGuest, nickname } from "./open-world.js";
+import { nickname } from "./open-world.js";
 import { Multiplayer } from "./network.js";
 import { createActor } from "./actors.js";
 const $ = (id) => document.getElementById(id),
@@ -43,11 +46,25 @@ let self = null,
   joined = false,
   paused = false,
   portraitBlocked = false,
-  highCamera = false,
   noticeUntil = 0,
-  sendElapsed = 0,
   hud = 0;
 const audio = createAudio();
+const prediction = new LocalPrediction();
+let graphicsMode = "standard";
+try {
+  graphicsMode =
+    localStorage.getItem("little-cambodia-graphics") === "performance"
+      ? "performance"
+      : "standard";
+} catch {}
+$("graphics-quality").value = graphicsMode;
+$("graphics-quality").onchange = () => {
+  graphicsMode = $("graphics-quality").value;
+  try {
+    localStorage.setItem("little-cambodia-graphics", graphicsMode);
+  } catch {}
+  resize();
+};
 bindViewportGestures(document);
 const clock = new CityClock(),
   clearTouch = bindHoldControls(document, keys),
@@ -60,6 +77,11 @@ const notify = (text, seconds = 4) => {
 const scene = new T.Scene(),
   renderer = new T.WebGLRenderer({ canvas: $("world"), antialias: true }),
   camera = new T.OrthographicCamera(-50, 50, 30, -30, 0.1, 2200);
+const cameraZoom = createCameraZoom({
+  camera,
+  canvas: $("world"),
+  viewport: () => ({ width: viewportWidth, height: viewportHeight }),
+});
 renderer.setPixelRatio(1);
 renderer.outputColorSpace = T.SRGBColorSpace;
 const ambient = new T.HemisphereLight(0xf8f3d9, 0x45645b, 1.7),
@@ -149,16 +171,16 @@ function resize() {
     mobileViewport({ width: viewportWidth, height: viewportHeight, coarse }),
   );
   // Touch screens render at native CSS resolution and avoid a second shadow pass.
-  renderer.setPixelRatio(Math.min(devicePixelRatio, coarse ? 1 : 1.5));
-  renderer.shadowMap.enabled = !coarse;
-  sun.castShadow = !coarse;
+  renderer.setPixelRatio(
+    Math.min(
+      devicePixelRatio,
+      graphicsMode === "performance" ? 0.8 : coarse ? 1 : 1.5,
+    ),
+  );
+  renderer.shadowMap.enabled = !coarse && graphicsMode !== "performance";
+  sun.castShadow = !coarse && graphicsMode !== "performance";
   renderer.setSize(viewportWidth, viewportHeight, false);
-  const half = highCamera ? 50 : 25;
-  camera.left = (-half * viewportWidth) / viewportHeight;
-  camera.right = (half * viewportWidth) / viewportHeight;
-  camera.top = half;
-  camera.bottom = -half;
-  camera.updateProjectionMatrix();
+  cameraZoom.resize();
   portraitBlocked = needsRotation({
     width: viewportWidth,
     height: viewportHeight,
@@ -185,8 +207,7 @@ function pause() {
   $("pause").textContent = paused ? "Resume · P" : "Pause · P";
 }
 function zoom() {
-  highCamera = !highCamera;
-  resize();
+  cameraZoom.cycle();
 }
 function action(name) {
   if (!self || paused || portraitBlocked || !network.id) return;
@@ -255,6 +276,7 @@ const network = new Multiplayer((event) => {
     $("vehicle-paint").value = self.preferredPaint;
   }
   if (event.type === "customized") {
+    prediction.reset();
     self.appearance = event.player.appearance;
     self.preferredVehicle = event.player.preferredVehicle;
     self.preferredPaint = event.player.preferredPaint;
@@ -275,6 +297,8 @@ const network = new Multiplayer((event) => {
     notify("Your new look is ready. Everyone in town can see it.");
   }
   if (event.type === "welcome") {
+    prediction.reset();
+    prediction.sequence = 0;
     clock.sync(event.gameTime);
     self = structuredClone(event.player);
     $("vehicle-paint").value = vehiclePaint(self.preferredPaint);
@@ -299,24 +323,7 @@ const network = new Multiplayer((event) => {
   if (event.type === "state") {
     clock.sync(event.gameTime);
     const mine = event.players.find((p) => p.id === network.id);
-    if (mine) {
-      if (
-        !self ||
-        mine.mode !== self.mode ||
-        Math.hypot(mine.x - self.x, mine.z - self.z) > 1.5
-      )
-        self = structuredClone(mine);
-      else {
-        self.appearance = structuredClone(mine.appearance);
-        self.x += (mine.x - self.x) * 0.2;
-        self.z += (mine.z - self.z) * 0.2;
-        self.vehicle = structuredClone(mine.vehicle);
-        if (self.mode === "drive" && self.vehicle) {
-          self.vehicle.x = self.x;
-          self.vehicle.z = self.z;
-        }
-      }
-    }
+    if (mine) self = prediction.reconcile(mine, event.acknowledged);
     const ids = new Set(event.players.map((p) => p.id));
     for (const [id, actor] of actors)
       if (!ids.has(id)) {
@@ -326,6 +333,7 @@ const network = new Multiplayer((event) => {
     syncRoster(event.players);
   }
   if (event.type === "action") {
+    prediction.reset();
     self = structuredClone(event.player);
     $("vehicle-paint").value = vehiclePaint(self.preferredPaint);
     audio.effect(event.action);
@@ -369,6 +377,12 @@ const guide = createCityGuide({
     cityMap.open();
   },
 });
+const pwa = createPwa({
+  onOpen: () => {
+    mobileHUD.closeMenu();
+    stopInput();
+  },
+});
 const intro = createIntro({
   autoplay: false,
   onOpen: () => {
@@ -384,6 +398,10 @@ addEventListener("resize", resize);
 addEventListener("orientationchange", resize);
 $("guest-form").onsubmit = (event) => {
   event.preventDefault();
+  if (!navigator.onLine) {
+    $("join-error").textContent = "You’re offline. Reconnect to join the city.";
+    return;
+  }
   const name = nickname($("nickname").value);
   if (name.length < 2) {
     wardrobe.show("main");
@@ -474,7 +492,8 @@ $("leave").onclick = () => {
   syncRoster([]);
 };
 addEventListener("keydown", (event) => {
-  if (!$("welcome").hidden || activities.open || cityMap.isOpen) return;
+  if (!$("welcome").hidden || activities.open || cityMap.isOpen || pwa.open)
+    return;
   if (["INPUT", "SELECT", "TEXTAREA"].includes(event.target.tagName)) return;
   if (
     ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key)
@@ -509,6 +528,7 @@ function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min((now - previous) / 1000, 0.1);
   previous = now;
+  cameraZoom.tick(dt);
   if (intro.active) {
     audio.update(dt, self, keys, false);
     clock.tick(dt);
@@ -519,29 +539,37 @@ function frame(now) {
   const ready = Boolean(joined && network.id && !paused && !portraitBlocked);
   document.body.classList.toggle(
     "dialog-open",
-    activities.open || cityMap.isOpen,
+    activities.open || cityMap.isOpen || pwa.open,
   );
   const active =
     ready &&
+    !network.stale &&
+    !network.congested &&
     !mobileHUD.isOpen &&
     !intro.active &&
     !activities.open &&
-    !cityMap.isOpen;
+    !cityMap.isOpen &&
+    !pwa.open;
   activities.update(self, active, now, clock.read().hour);
   const riverDistance = self
     ? nearestRoad([self.x, self.z], [{ points: world.path }]).distance
     : Infinity;
   audio.update(dt, self, keys, active, Math.max(0, 1 - riverDistance / 110));
   accumulator += dt;
-  while (accumulator >= 1 / 60) {
-    if (active && self) stepGuest(self, keys, 1 / 60);
-    accumulator -= 1 / 60;
+  while (accumulator >= INPUT_STEP) {
+    if (self && network.id && !network.stale)
+      prediction.advance(self, active ? keys : new Set(), (command) =>
+        network.command(command),
+      );
+    accumulator -= INPUT_STEP;
   }
-  sendElapsed += dt;
-  if (sendElapsed >= 0.05) {
-    sendElapsed = 0;
-    if (network.id) network.input(active ? keys : new Set());
-  }
+  $("network-status").hidden =
+    !joined || (!network.stale && !network.congested && network.latency < 350);
+  const connectionMessage = network.stale
+    ? "Connection interrupted · waiting for the city…"
+    : "Slow connection · smoothing movement";
+  if ($("network-status").textContent !== connectionMessage)
+    $("network-status").textContent = connectionMessage;
   clock.tick(dt);
   const time = clock.read(),
     activity = activityAt(time);

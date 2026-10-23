@@ -217,3 +217,34 @@ test("scooter paint is validated, shared with peers, and can change after summon
   a.ws.send(JSON.stringify({ type: "paint", vehiclePaint: { color: "bad" } }));
   assert.equal((await invalid).player.vehicle.paint, "factory");
 });
+
+test("sequenced movement commands are acknowledged only after authoritative simulation", async (t) => {
+  const server = createServer(),
+    hub = createMultiplayer(server);
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  const a = await client(
+    `ws://127.0.0.1:${server.address().port}/multiplayer`,
+    "Smooth Guest",
+  );
+  t.after(async () => {
+    a.ws.terminate();
+    hub.close();
+    await new Promise((resolve) => server.close(resolve));
+  });
+  const initial = (await waitMessage(a.ws, (m) => m.type === "state"))
+    .players[0];
+  for (let sequence = 1; sequence <= 6; sequence++)
+    a.ws.send(
+      JSON.stringify({ type: "command", sequence, keys: ["w"], x: 999999 }),
+    );
+  const state = await waitMessage(
+    a.ws,
+    (m) => m.type === "state" && m.acknowledged === 6,
+  );
+  assert.ok(state.players[0].z < initial.z - 0.5);
+  assert.equal(state.players[0].x, initial.x);
+  const pong = waitMessage(a.ws, (m) => m.type === "pong");
+  a.ws.send(JSON.stringify({ type: "ping", sent: 123 }));
+  assert.equal((await pong).sent, 123);
+});

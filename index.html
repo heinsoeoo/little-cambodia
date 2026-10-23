@@ -1,6 +1,11 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#183d35" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Little Cambodia" />
+    <link rel="apple-touch-icon" href="/icons/angkor-180.png" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta charset="UTF-8" />
     <meta
@@ -216,6 +221,11 @@
           <h3>Your city. Your pace.</h3>
           <p>Make the game comfortable for you.</p>
         </div>
+        <button type="button" data-install class="install-guide">
+          Install game ↗</button
+        ><button id="pwa-update" type="button" hidden>
+          Update game · reload
+        </button>
         <label class="language-setting"
           >Language
           <select data-language-switch aria-label="Language">
@@ -223,6 +233,24 @@
             <option value="km">ខ្មែរ</option>
           </select></label
         >
+        <label for="graphics-quality">Graphics quality</label
+        ><select id="graphics-quality">
+          <option value="standard">Standard</option>
+          <option value="performance">Performance</option>
+        </select>
+        <label class="camera-distance-setting"
+          >Camera distance
+          <input
+            id="camera-distance"
+            type="range"
+            min="7"
+            max="60"
+            step="0.5"
+            aria-label="Camera distance"
+        /></label>
+        <p class="camera-tip">
+          Pinch the game view or use the mouse wheel to zoom.
+        </p>
         <label class="control-size-setting"
           >Touch controls<select
             id="control-size"
@@ -245,6 +273,13 @@
       ></div>
     </section>
     <div class="mobile-status mobile-only" id="mobile-status"></div>
+    <div class="camera-zoom-controls" aria-label="Camera zoom">
+      <button id="camera-closer" type="button" aria-label="Zoom closer">
+        +</button
+      ><button id="camera-farther" type="button" aria-label="Zoom farther">
+        −
+      </button>
+    </div>
     <div id="hud-wallet" class="hud-wallet" hidden></div>
     <div class="mobile-context mobile-only">
       <button id="mobile-talk" hidden>Talk</button
@@ -401,6 +436,7 @@
           ></small
         >
         <div id="creator-utilities">
+          <button type="button" data-install>Install game ↗</button>
           <label class="language-setting"
             >Language
             <select data-language-switch aria-label="Language">
@@ -412,6 +448,28 @@
             For Claraa ♡
           </button>
         </div>
+      </div>
+    </section>
+    <div id="network-status" role="status" hidden></div>
+    <div id="pwa-offline" role="status" hidden>
+      You’re offline. Reconnect to join the city.
+    </div>
+    <section
+      id="install-help"
+      class="activities-overlay"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="install-title"
+    >
+      <div class="activities-board snack-board">
+        <h2 id="install-title">Take your little world with you.</h2>
+        <p id="install-instructions"></p>
+        <p>
+          Game files are saved for faster visits. Joining the shared city still
+          needs internet.
+        </p>
+        <button id="install-help-close" type="button">Done</button>
       </div>
     </section>
     <section
@@ -638,7 +696,8 @@
           <div class="intro-couple-stage">
             <img
               id="intro-couple-fallback"
-              src="/art/hein-claraa-couple.png"
+              hidden
+              data-src="/art/hein-claraa-couple.png"
               alt="Hein and Claraa together"
             />
             <canvas

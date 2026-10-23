@@ -1,20 +1,8 @@
+import { serveStatic } from "./static.js";
 import { createServer } from "node:http";
-import { readFile } from "node:fs/promises";
-import { resolve, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createMultiplayer } from "./multiplayer.js";
 const root = fileURLToPath(new URL("../dist/", import.meta.url));
-const mime = {
-  ".html": "text/html",
-  ".js": "text/javascript",
-  ".css": "text/css",
-  ".json": "application/json",
-  ".jpg": "image/jpeg",
-  ".png": "image/png",
-  ".svg": "image/svg+xml",
-  ".ico": "image/x-icon",
-  ".mp3": "audio/mpeg",
-};
 const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url, "http://localhost");
@@ -26,22 +14,7 @@ const server = createServer(async (req, res) => {
       res.end(JSON.stringify({ ok: true, game: "little-cambodia" }));
       return;
     }
-    const path = resolve(
-      root,
-      "." +
-        decodeURIComponent(url.pathname === "/" ? "/index.html" : url.pathname),
-    );
-    if (!path.startsWith(root)) {
-      res.writeHead(403);
-      res.end();
-      return;
-    }
-    const body = await readFile(path);
-    res.writeHead(200, {
-      "Content-Type": mime[extname(path)] || "application/octet-stream",
-      "X-Content-Type-Options": "nosniff",
-    });
-    res.end(body);
+    await serveStatic(root, req, res);
   } catch {
     res.writeHead(404);
     res.end("Not found");

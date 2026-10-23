@@ -96,7 +96,9 @@ export function createAudio() {
     if (songBuffer || songLoading) return;
     songLoading = true;
     try {
-      const response = await fetch("/audio/intro-song.mp3");
+      const response = await fetch("/audio/intro-song.mp3", {
+        priority: "low",
+      });
       if (!response.ok) throw new Error("Song unavailable");
       songBuffer = await ctx.decodeAudioData(await response.arrayBuffer());
       score();
