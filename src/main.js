@@ -142,6 +142,7 @@ for (const spec of VEHICLES) {
 wardrobe.mountGarage();
 for (const paint of VEHICLE_PAINTS)
   $("vehicle-paint").add(new Option(paint.name, paint.id));
+wardrobe.mountGaragePaint();
 $("vehicle-paint").addEventListener("change", () => {
   if (self && network.id)
     network.send({ type: "paint", vehiclePaint: $("vehicle-paint").value });
@@ -285,6 +286,7 @@ const network = new Multiplayer((event) => {
     wardrobe.save(profile);
     network.joinOptions = profile;
     $("vehicle-paint").value = self.preferredPaint;
+    wardrobe.syncShowcases();
   }
   if (event.type === "customized") {
     prediction.reset();
@@ -293,6 +295,7 @@ const network = new Multiplayer((event) => {
     self.preferredPaint = event.player.preferredPaint;
     if (self.vehicle) self.vehicle.paint = event.player.vehicle?.paint;
     $("vehicle-paint").value = self.preferredPaint;
+    wardrobe.syncShowcases();
     $("vehicle-type").value = self.preferredVehicle;
     vehicleStats();
     const profile = {
@@ -313,6 +316,7 @@ const network = new Multiplayer((event) => {
     clock.sync(event.gameTime);
     self = structuredClone(event.player);
     $("vehicle-paint").value = vehiclePaint(self.preferredPaint);
+    wardrobe.syncShowcases();
     joined = true;
     paused = false;
     $("welcome").hidden = true;
@@ -347,6 +351,7 @@ const network = new Multiplayer((event) => {
     prediction.reset();
     self = structuredClone(event.player);
     $("vehicle-paint").value = vehiclePaint(self.preferredPaint);
+    wardrobe.syncShowcases();
     audio.effect(event.action);
     if (["sit", "eat", "wave"].includes(event.action)) {
       notify(
@@ -447,6 +452,7 @@ $("guest-form").onsubmit = (event) => {
     wardrobe.save(profile);
     $("vehicle-type").value = profile.vehicleType;
     $("vehicle-paint").value = profile.vehiclePaint;
+    wardrobe.syncShowcases();
     network.connect(name, profile);
   }
 };

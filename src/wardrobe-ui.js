@@ -1,3 +1,4 @@
+import { createColorSwatches } from "./color-swatches.js";
 import { createShowcases } from "./showcase.js";
 import * as T from "three";
 import {
@@ -74,7 +75,8 @@ export function createWardrobe() {
     lastHeight = 0,
     mode = "main",
     custom = false;
-  let rails = [];
+  let rails = [],
+    palettes = [];
   function read() {
     return {
       appearance: appearance(
@@ -148,6 +150,7 @@ export function createWardrobe() {
     $("look-vehicle-name").textContent = vehicleSpec(profile.vehicleType).name;
     $("main-outfit").value = $("look-preset").value;
     rails.forEach((rail) => rail.sync());
+    palettes.forEach((palette) => palette.sync());
   }
   function load(profile, requireGender = false) {
     const look = appearance(profile?.appearance);
@@ -218,6 +221,9 @@ export function createWardrobe() {
       update();
     });
 
+  palettes.push(
+    createColorSwatches($("look-paint"), () => $("look-vehicle").value),
+  );
   const showcases = createShowcases(() => read().appearance);
   rails = [
     showcases.attach($("look-vehicle"), "vehicle"),
@@ -249,7 +255,13 @@ export function createWardrobe() {
   return {
     read,
     syncShowcases() {
+      palettes.forEach((palette) => palette.sync());
       rails.forEach((rail) => rail.sync());
+    },
+    mountGaragePaint() {
+      palettes.push(
+        createColorSwatches($("vehicle-paint"), () => $("vehicle-type").value),
+      );
     },
     mountGarage() {
       rails.push(showcases.attach($("vehicle-type"), "vehicle"));
