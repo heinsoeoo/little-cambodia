@@ -2,30 +2,59 @@ import { watchGameUpdates } from "./pwa-updates.js";
 export function createPwa({ onOpen = () => {}, onClose = () => {} } = {}) {
   const $ = (id) => document.getElementById(id),
     buttons = [...document.querySelectorAll("[data-install]")];
-  let prompt = null;
+  let prompt = null,
+    didInstall = false,
+    dismissedUntil = 0;
+  try {
+    dismissedUntil =
+      Number(localStorage.getItem("little-cambodia-install-later")) || 0;
+  } catch {}
+  function dismissInstallNotice() {
+    dismissedUntil = Date.now() + 7 * 24 * 60 * 60 * 1000;
+    try {
+      localStorage.setItem(
+        "little-cambodia-install-later",
+        String(dismissedUntil),
+      );
+    } catch {}
+    refresh();
+  }
+  $("install-later").onclick = dismissInstallNotice;
   const installed = () =>
-    matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+    didInstall ||
+    matchMedia("(display-mode: standalone)").matches ||
+    navigator.standalone;
   function refresh() {
     for (const button of buttons) {
       button.hidden = Boolean(installed());
     }
     $("pwa-offline").hidden = navigator.onLine;
+    $("install-notice").hidden = Boolean(
+      installed() || Date.now() < dismissedUntil,
+    );
   }
   addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
     prompt = event;
+    refresh();
   });
   addEventListener("appinstalled", () => {
     prompt = null;
+    didInstall = true;
     refresh();
   });
   for (const button of buttons)
     button.onclick = async () => {
+      dismissInstallNotice();
       if (prompt) {
         const install = prompt;
         prompt = null;
-        await install.prompt();
-        await install.userChoice;
+        try {
+          await install.prompt();
+          await install.userChoice;
+        } catch {
+          /* Keep manual installation available if the browser dismisses its prompt. */
+        }
         return;
       }
       onOpen();
@@ -49,10 +78,11 @@ export function createPwa({ onOpen = () => {}, onClose = () => {} } = {}) {
       $("install-help-close").focus();
     }
   });
+  addEventListener("pageshow", refresh);
   addEventListener("online", refresh);
   addEventListener("offline", refresh);
   refresh();
-  if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  if (import.meta.env?.PROD && "serviceWorker" in navigator) {
     navigator.serviceWorker
       .register("/sw.js", { updateViaCache: "none" })
       .then((registration) => {

@@ -1,6 +1,11 @@
 // UI text is translated without changing form values or player-created names.
 export const LANGUAGE_KEY = "little-cambodia-language";
 export const KHMER = {
+  "Install Little Cambodia": "ដំឡើង Little Cambodia",
+  "Keep your little world on your Home Screen.":
+    "រក្សាពិភពតូចរបស់អ្នកនៅលើអេក្រង់ដើម។",
+  Install: "ដំឡើង",
+
   "Game update": "បច្ចុប្បន្នភាពហ្គេម",
   "New update available": "មានបច្ចុប្បន្នភាពថ្មី",
   "Update now": "ធ្វើបច្ចុប្បន្នភាពឥឡូវនេះ",
