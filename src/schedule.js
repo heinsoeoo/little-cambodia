@@ -18,9 +18,9 @@ export function phnomPenhTime(date = new Date()) {
     label: `${parts.weekday} ${parts.hour}:${parts.minute}`,
   };
 }
-export function activityAt({ day, hour, minute = 0 }) {
+export function activityAt({ hour, minute = 0 }) {
   const time = hour + minute / 60,
-    market = [0, 6].includes(day) && time >= 18 && time < 23;
+    market = time >= 18 && time < 23;
   const night = time < 6 || time >= 18,
     vendors = time >= 7 && time < 23;
   return {
@@ -29,7 +29,7 @@ export function activityAt({ day, hour, minute = 0 }) {
     vendors: market ? 22 : vendors ? (night ? 8 : 4) : 0,
     people: market ? 240 : vendors ? (night ? 60 : 36) : 10,
     label: market
-      ? "Weekend riverside market"
+      ? "Nightly riverside market"
       : vendors
         ? night
           ? "Evening food carts"

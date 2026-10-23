@@ -14,17 +14,21 @@ test("Phnom Penh clock uses UTC+7 across a day boundary", () => {
   const time = phnomPenhTime(new Date("2026-10-16T18:00:00Z"));
   assert.deepEqual(time, { day: 6, hour: 1, minute: 0, label: "Sat 01:00" });
 });
-test("weekend market starts at 18:00 and closes at 23:00, with quieter weekdays", () => {
-  assert.equal(activityAt({ day: 6, hour: 17, minute: 59 }).market, false);
-  assert.equal(activityAt({ day: 6, hour: 18 }).market, true);
-  assert.equal(activityAt({ day: 0, hour: 22, minute: 59 }).market, true);
-  assert.equal(activityAt({ day: 0, hour: 23 }).market, false);
-  assert.equal(activityAt({ day: 5, hour: 19 }).market, false);
-  assert.equal(activityAt({ day: 1, hour: 3 }).vendors, 0);
-  assert.ok(
-    activityAt({ day: 6, hour: 19 }).people >
-      activityAt({ day: 1, hour: 12 }).people * 4,
-  );
+test("night market opens every day at 18:00 and closes at 23:00 with the full crowd and vendors", () => {
+  for (let day = 0; day < 7; day++) {
+    assert.equal(activityAt({ day, hour: 17, minute: 59 }).market, false);
+    for (const time of [{ hour: 18 }, { hour: 22, minute: 59 }]) {
+      const activity = activityAt({ day, ...time });
+      assert.equal(activity.market, true);
+      assert.equal(activity.vendors, 22);
+      assert.equal(activity.people, 240);
+      assert.equal(activity.label, "Nightly riverside market");
+    }
+    assert.equal(activityAt({ day, hour: 23 }).market, false);
+    assert.equal(activityAt({ day, hour: 0 }).market, false);
+    assert.equal(activityAt({ day, hour: 3 }).vendors, 0);
+    assert.equal(activityAt({ day, hour: 12 }).market, false);
+  }
 });
 test("time preview crosses closing time and returns to the shared game calendar", () => {
   const clock = new CityClock();

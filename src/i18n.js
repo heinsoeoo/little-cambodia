@@ -98,7 +98,7 @@ export const KHMER = {
   "City clock and scenery": "ម៉ោង និងទេសភាពទីក្រុង",
   "Shared game time · 10×": "ម៉ោងហ្គេមរួម · 10×",
   "Preview · weekday noon": "មើលសាក · ថ្ងៃធម្មតាពេលថ្ងៃត្រង់",
-  "Preview · weekend market": "មើលសាក · ផ្សារចុងសប្តាហ៍",
+  "Preview · night market": "មើលសាក · ផ្សាររាត្រី",
   "Summon vehicle · F": "ហៅយានយន្ត · F",
   "Summon vehicle": "ហៅយានយន្ត",
   "Enter vehicle · E": "ឡើងយានយន្ត · E",
@@ -174,7 +174,7 @@ export const KHMER = {
   "No vehicle summoned. Walking is the default.":
     "មិនទាន់ហៅយានយន្ត។ អ្នកអាចដើរលេងបាន។",
   "Your personal vehicle · not a taxi": "យានយន្តផ្ទាល់ខ្លួនរបស់អ្នក",
-  "Weekend riverside market": "ផ្សារមាត់ទន្លេចុងសប្តាហ៍",
+  "Nightly riverside market": "ផ្សារមាត់ទន្លេរាល់យប់",
   "Evening food carts": "រទេះម្ហូបពេលល្ងាច",
   "Daytime riverside": "មាត់ទន្លេពេលថ្ងៃ",
   "Quiet riverside": "មាត់ទន្លេស្ងប់ស្ងាត់",
