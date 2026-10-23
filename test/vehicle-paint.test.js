@@ -46,3 +46,31 @@ test("both scooters have distinct geometry, driving tune, and a visible seated r
   disposeMeshes(vespa);
   disposeMeshes(scoopy);
 });
+
+test("tuk-tuk, pedal rickshaw and scooters have distinct functional silhouettes", () => {
+  const designs = [
+    ["tuktuk", "tuktuk-windscreen", "enclosed-tuktuk"],
+    ["rickshaw", "pedal-crank", "open-pedal-rickshaw"],
+    ["vespa", "vespa-high-round-lamp", "classic-steel-scooter"],
+    ["scoopy", "scoopy-body-mounted-headlamp", "modern-step-through-scooter"],
+    ["offroad-moto", "knobby-tread", "tall-knobby-offroad"],
+    ["racing-moto", "racing-full-fairing", "low-faired-sportbike"],
+  ];
+  for (const [id, part, silhouette] of designs) {
+    const model = vehicleModel(id);
+    assert.ok(model.getObjectByName(part), id);
+    assert.equal(model.userData.silhouette, silhouette);
+    if (id === "rickshaw")
+      assert.equal(model.getObjectByName("tuktuk-windscreen"), undefined);
+    const rider = createCharacter();
+    rider.pose({ mode: "drive", vehicle: { type: id, heading: 0 }, speed: 1 });
+    if (["offroad-moto", "racing-moto"].includes(id))
+      assert.equal(rider.group.visible, true);
+    rider.dispose();
+    disposeMeshes(model);
+  }
+  assert.ok(
+    vehiclePhysics("racing-moto").maxSpeed >
+      vehiclePhysics("offroad-moto").maxSpeed,
+  );
+});

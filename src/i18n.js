@@ -1,6 +1,26 @@
 // UI text is translated without changing form values or player-created names.
 export const LANGUAGE_KEY = "little-cambodia-language";
 export const KHMER = {
+  RUNNING: "កំពុងរត់",
+  SITTING: "កំពុងអង្គុយ",
+  "run / handbrake": "រត់ / ហ្វ្រាំងដៃ",
+  "Enjoy the riverside view. Move or tap Stand up to get up.":
+    "រីករាយនឹងទេសភាពមាត់ទន្លេ។ រំកិល ឬចុច ក្រោកឈរ ដើម្បីក្រោក។",
+  "Back on your feet.": "ក្រោកឈរវិញហើយ។",
+  "Thanks for the snack!": "អរគុណសម្រាប់អាហារសម្រន់!",
+  "Walk closer to a riverside bench.": "ដើរទៅជិតកៅអីមាត់ទន្លេ។",
+  "This bench is occupied. Try another bench.":
+    "កៅអីនេះមានអ្នកអង្គុយហើយ។ សូមរកកៅអីផ្សេង។",
+  All: "ទាំងអស់",
+  Cute: "គួរឱ្យស្រឡាញ់",
+  Cool: "ឡូយ",
+  Classic: "បុរាណ",
+  Run: "រត់",
+  Walk: "ដើរ",
+  "Sit down": "អង្គុយ",
+  "Stand up": "ក្រោកឈរ",
+  "Off-road motorcycle": "ម៉ូតូផ្លូវលំបាក",
+  "Racing motorcycle": "ម៉ូតូប្រណាំង",
   Name: "ឈ្មោះ",
   Gender: "ភេទ",
   Male: "ប្រុស",

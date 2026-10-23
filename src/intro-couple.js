@@ -35,24 +35,25 @@ export function buildIntroCouple() {
     parent.add(o);
     return o;
   };
-  // Eyeglasses sit in front of the eyes, following the same cozy proportions.
-  for (const x of [-0.09, 0.09]) {
-    for (const y of [1.6, 1.7])
-      box(hein.group, 0.16, 0.009, 0.012, x, y, 0.255, dark);
-    for (const dx of [-0.08, 0.08])
-      box(hein.group, 0.009, 0.1, 0.012, x + dx, 1.65, 0.255, dark);
+  // Glasses share the head rig so they stay fitted during animation.
+  const head = hein.group.getObjectByName("illustrated-head");
+  for (const x of [-0.06, 0.06]) {
+    for (const y of [-0.008, 0.06])
+      box(head, 0.108, 0.006, 0.009, x, y, 0.153, dark);
+    for (const dx of [-0.054, 0.054])
+      box(head, 0.006, 0.068, 0.009, x + dx, 0.026, 0.153, dark);
   }
-  box(hein.group, 0.04, 0.009, 0.012, 0, 1.66, 0.26, dark);
+  box(head, 0.02, 0.006, 0.009, 0, 0.035, 0.155, dark);
   // Exactly one watch: navy woven-looking band, blue dial and rose-gold rim.
   const watch = new T.Group();
   watch.name = "hein-single-watch";
-  watch.position.set(-0.04, -0.45, 0.06);
-  const strap = new T.Mesh(new T.TorusGeometry(0.09, 0.025, 6, 12), navy);
+  watch.position.set(-0.04, -0.52, 0.04);
+  const strap = new T.Mesh(new T.TorusGeometry(0.05, 0.014, 6, 12), navy);
   strap.rotation.x = Math.PI / 2;
   watch.add(strap);
   for (const [radius, depth, z, material] of [
-    [0.075, 0.025, 0.07, rose],
-    [0.062, 0.027, 0.085, blue],
+    [0.043, 0.014, 0.04, rose],
+    [0.036, 0.016, 0.049, blue],
   ]) {
     const dial = new T.Mesh(
       new T.CylinderGeometry(radius, radius, depth, 14),

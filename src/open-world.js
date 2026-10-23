@@ -1,3 +1,4 @@
+import { riversideBenches, nearestBench } from "./benches.js";
 import { appearance } from "./wardrobe.js";
 import { phnomMap, bounds, spawn, promenade } from "./phnom-map.js";
 import { insidePolygon } from "./buildings.js";
@@ -73,6 +74,7 @@ export function blocked(x, z, mode = "walk") {
     },
   );
 }
+export const BENCHES = riversideBenches(promenade, blocked);
 export function createGuest(id, name, index = 0, look) {
   return {
     id,
@@ -87,6 +89,10 @@ export function createGuest(id, name, index = 0, look) {
   };
 }
 export function stepGuest(player, keys, dt) {
+  if (player.gestureSeconds > 0) {
+    player.gestureSeconds = Math.max(0, player.gestureSeconds - dt);
+    if (!player.gestureSeconds) player.gesture = null;
+  }
   if (player.mode === "drive" && player.vehicle) {
     stepVehicle(player.vehicle, keys, dt, (x, z) => blocked(x, z, "drive"));
     Object.assign(player, {
@@ -104,10 +110,19 @@ export function stepGuest(player, keys, dt) {
     Number(keys.has("s") || keys.has("arrowdown")) -
     Number(keys.has("w") || keys.has("arrowup"));
   const length = Math.hypot(dx, dz);
-  player.speed = length ? 4.5 : 0;
+  if (player.posture === "sit" && !length) {
+    player.speed = 0;
+    return;
+  }
+  if (length) {
+    player.posture = null;
+    player.benchId = null;
+  }
+  const pace = keys.has("shift") ? 7 : 4.5;
+  player.speed = length ? pace : 0;
   if (!length) return;
-  dx = (dx / length) * 4.5 * dt;
-  dz = (dz / length) * 4.5 * dt;
+  dx = (dx / length) * pace * dt;
+  dz = (dz / length) * pace * dt;
   if (!blocked(player.x + dx, player.z)) player.x += dx;
   if (!blocked(player.x, player.z + dz)) player.z += dz;
   player.heading = Math.atan2(dx, dz);
@@ -119,6 +134,37 @@ export function guestAction(
   occupied = [],
   paint = player.preferredPaint,
 ) {
+  if (action === "sit") {
+    if (player.mode !== "walk") return "Get out of your vehicle to sit down.";
+    if (player.posture === "sit") {
+      player.posture = null;
+      player.benchId = null;
+      return null;
+    }
+    const bench = nearestBench(player, BENCHES);
+    if (!bench || bench.distance > 3)
+      return "Walk closer to a riverside bench.";
+    if (occupied.some((other) => other.benchId === bench.id))
+      return "This bench is occupied. Try another bench.";
+    Object.assign(player, {
+      x: bench.x,
+      z: bench.z,
+      heading: bench.heading,
+      speed: 0,
+      posture: "sit",
+      benchId: bench.id,
+    });
+    return null;
+  }
+  if (action === "eat" || action === "wave") {
+    if (player.mode !== "walk")
+      return "Get out of your vehicle for a snack break.";
+    player.gesture = action;
+    player.gestureSeconds = action === "eat" ? 4.5 : 2;
+    return null;
+  }
+  player.posture = null;
+  player.benchId = null;
   if (action === "summon") {
     if (player.mode === "drive")
       return "Exit your vehicle before summoning another.";

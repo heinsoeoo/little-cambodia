@@ -229,10 +229,11 @@ export function createMultiplayer(httpServer) {
         client.commands = [];
         client.sequence = client.receivedSequence;
         const occupied = [...clients.values()]
-          .filter(
-            (c) => c.player && c.player !== client.player && c.player.vehicle,
-          )
-          .map((c) => c.player.vehicle);
+          .filter((c) => c.player && c.player !== client.player)
+          .flatMap((c) => [
+            ...(c.player.vehicle ? [c.player.vehicle] : []),
+            ...(c.player.benchId ? [c.player] : []),
+          ]);
         const error = guestAction(
           client.player,
           message.action,

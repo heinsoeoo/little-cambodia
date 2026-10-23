@@ -1,3 +1,5 @@
+import { BENCHES } from "./open-world.js";
+import { nearestBench } from "./benches.js";
 import { createPwa } from "./pwa.js";
 import { createCameraZoom } from "./camera-zoom.js";
 import { LocalPrediction, INPUT_STEP } from "./prediction.js";
@@ -113,6 +115,7 @@ const activities = createActivities({
     mobileHUD.closeMenu();
     stopInput();
   },
+  onGesture: (name) => action(name),
   onReward: (text) => {
     audio.effect("talk");
     notify(text, 5);
@@ -217,6 +220,12 @@ function action(name) {
   stopInput();
   network.action(name, $("vehicle-type").value, $("vehicle-paint").value);
 }
+$("run-toggle").onclick = () => {
+  const running = $("run-toggle").getAttribute("aria-pressed") !== "true";
+  $("run-toggle").setAttribute("aria-pressed", String(running));
+  $("run-toggle").textContent = running ? "Walk" : "Run";
+};
+$("sit-action").onclick = () => action("sit");
 function enterExit() {
   action(self?.mode === "drive" ? "exit" : "enter");
 }
@@ -339,6 +348,18 @@ const network = new Multiplayer((event) => {
     self = structuredClone(event.player);
     $("vehicle-paint").value = vehiclePaint(self.preferredPaint);
     audio.effect(event.action);
+    if (["sit", "eat", "wave"].includes(event.action)) {
+      notify(
+        event.action === "sit"
+          ? self.posture === "sit"
+            ? "Enjoy the riverside view. Move or tap Stand up to get up."
+            : "Back on your feet."
+          : event.action === "eat"
+            ? "A little snack break. Delicious!"
+            : "Thanks for the snack!",
+      );
+      return;
+    }
     notify(
       event.action === "summon"
         ? document.body.classList.contains("mobile-ui")
@@ -510,6 +531,7 @@ addEventListener("keydown", (event) => {
   if (key === "c") zoom();
   if (key === "v") talk();
   if (key === "q") activities.interact();
+  if (key === "x") action("sit");
 });
 addEventListener("keyup", (event) => keys.delete(event.key.toLowerCase()));
 addEventListener("blur", () => {
@@ -558,9 +580,16 @@ function frame(now) {
     : Infinity;
   audio.update(dt, self, keys, active, Math.max(0, 1 - riverDistance / 110));
   accumulator += dt;
+  const movementKeys = new Set(active ? keys : []);
+  if (
+    active &&
+    self?.mode === "walk" &&
+    $("run-toggle").getAttribute("aria-pressed") === "true"
+  )
+    movementKeys.add("shift");
   while (accumulator >= INPUT_STEP) {
     if (self && network.id && !network.stale)
-      prediction.advance(self, active ? keys : new Set(), (command) =>
+      prediction.advance(self, movementKeys, (command) =>
         network.command(command),
       );
     accumulator -= INPUT_STEP;
@@ -575,8 +604,9 @@ function frame(now) {
   clock.tick(dt);
   const time = clock.read(),
     activity = activityAt(time);
-  ambient.intensity = activity.night ? 0.9 : 1.7;
-  sun.intensity = activity.night ? 0.22 : 1.1;
+  ambient.intensity = activity.night ? 0.72 : 1.7;
+  ambient.color.setHex(activity.night ? 0xa5bad9 : 0xf8f3d9);
+  sun.intensity = activity.night ? 0.16 : 1.1;
   world.riverLife.update(dt, activity.night);
   world.landmarkScenes.update(activity.night);
   streetElapsed += dt;
@@ -599,6 +629,7 @@ function frame(now) {
       player.id === network.id && self ? self : player,
       dt,
       player.id === network.id,
+      activity.night,
     );
   }
   const focus = self || { x: spawn[0], z: spawn[1] };
@@ -652,7 +683,19 @@ function frame(now) {
           : self.vehicle?.drifting
             ? "DRIFT"
             : "DRIVE"
-        : "ON FOOT";
+        : self?.posture === "sit"
+          ? "SITTING"
+          : self?.speed > 4.6
+            ? "RUNNING"
+            : "ON FOOT";
+    $("run-toggle").hidden = !can || self?.mode !== "walk";
+    const seat = nearestBench(self, BENCHES);
+    $("sit-action").hidden =
+      !can ||
+      self?.mode !== "walk" ||
+      (self?.posture !== "sit" && (!seat || seat.distance > 3));
+    $("sit-action").textContent =
+      self?.posture === "sit" ? "Stand up" : "Sit down";
     const place = self ? nearestPlace(self.x, self.z) : null;
     $("place-label").textContent = place?.name || "";
     $("place-label").hidden = !place || !joined;

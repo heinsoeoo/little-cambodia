@@ -14,6 +14,7 @@ export function createActivities({
   spawn,
   onOpen,
   onReward,
+  onGesture = () => {},
   canUse,
   nearbyVendor,
 }) {
@@ -283,6 +284,7 @@ export function createActivities({
             return;
           }
           if (game.buy(snack.id, vendor.food)) {
+            onGesture("wave");
             persist();
             drawShop();
             onReward(translate("Snack packed! Enjoy it from your snack bag."));
@@ -302,7 +304,10 @@ export function createActivities({
         name.textContent = `${translate(item.name)} × ${game.snacks[item.id]}`;
         eat.textContent = translate("Enjoy snack");
         eat.onclick = () => {
-          if (!canUse() || !game.eat(item.id)) return;
+          if (!canUse() || player?.mode !== "walk" || !game.eat(item.id))
+            return;
+          onGesture("eat");
+          closeShop();
           persist();
           drawShop();
           onReward(translate("A little snack break. Delicious!"));

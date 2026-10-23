@@ -120,7 +120,7 @@ export function createWardrobe() {
       stage.scale.set(0.34, 1, 0.34);
     } else {
       character.group.position.set(-2, 0, 0);
-      character.group.scale.setScalar(1.55);
+      character.group.scale.setScalar(1.05);
       camera.position.set(6.2, 3.7, 8.6);
       camera.lookAt(0, 0.9, 0);
       stage.scale.set(1, 1, 1);

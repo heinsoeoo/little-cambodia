@@ -6,6 +6,7 @@ import {
   outfitCut,
   hairstyle,
 } from "./wardrobe.js";
+
 export function createCharacter(initial) {
   const group = new T.Group();
   let key = "",
@@ -19,353 +20,688 @@ export function createCharacter(initial) {
     group.clear();
     const top = style(look.top),
       bottom = style(look.bottom),
-      shoe = style(look.shoes),
-      hairStyle = hairstyle(look.hair, look.gender);
+      shoes = style(look.shoes);
+    const hairStyle = hairstyle(look.hair, look.gender),
+      cut = outfitCut(look);
+    const female = cut === "female",
+      male = cut === "male";
     const mat = (color) => new T.MeshLambertMaterial({ color });
     const cloth = mat(top.top),
       pants = mat(bottom.bottom),
-      footwear = mat(shoe.shoe),
-      skin = mat(SKIN_TONES.find((s) => s.id === look.skin).color),
-      hair = mat(hairStyle.hair),
-      trim = mat(0xe8dcc4),
-      dark = mat(0x393a40);
-    const add = (geometry, material, x, y, z, parent = group) => {
-      const m = new T.Mesh(geometry, material);
-      m.position.set(x, y, z);
-      m.castShadow = true;
-      parent.add(m);
-      return m;
-    };
-    const box = (w, h, d, x, y, z, material, parent = group) =>
-      add(new T.BoxGeometry(w, h, d), material, x, y, z, parent);
-    const sphere = (r, x, y, z, material, parent = group) =>
-      add(new T.SphereGeometry(r, 12, 9), material, x, y, z, parent);
-    const male = look.gender === "male",
-      female = look.gender === "female";
-    const cut = outfitCut(look),
-      maleCut = cut === "male",
-      femaleCut = cut === "female";
-    const broad = maleCut ? 1.16 : femaleCut ? 0.92 : 1;
-    const oversized = ["oversized", "hoodie"].includes(top.topShape);
-    // Fully clothed adult silhouettes: athletic shoulders versus a softer fitted waist/hips.
-    const profile =
-      oversized && !femaleCut
-        ? [
-            [0.34, 0.64],
-            [0.37, 0.85],
-            [0.35, 1.24],
-            [0.31, 1.4],
-          ]
-        : maleCut
-          ? [
-              [0.25, 0.64],
-              [0.23, 0.85],
-              [0.34, 1.23],
-              [0.3, 1.4],
-            ]
-          : femaleCut
-            ? [
-                [0.32, 0.64],
-                [0.22, 0.88],
-                [0.29, 1.17],
-                [0.24, 1.4],
-              ]
-            : [
-                [0.29, 0.64],
-                [0.26, 0.88],
-                [0.28, 1.23],
-                [0.25, 1.4],
-              ];
+      footwear = mat(shoes.shoe);
+    const skin = mat(SKIN_TONES.find((item) => item.id === look.skin).color),
+      hair = mat(hairStyle.hair);
+    const dark = mat(0x302d2c),
+      sole = mat(0xe2d9c8);
+    const seam = mat(new T.Color(top.top).multiplyScalar(0.76));
+    const inner = mat(0xf0e7d4);
+    const upper = new T.Group(),
+      standing = new T.Group(),
+      riding = new T.Group();
+    group.add(upper, standing, riding);
+    function add(geometry, material, position, parent = upper, name = "") {
+      const object = new T.Mesh(geometry, material);
+      object.position.set(...position);
+      object.castShadow = true;
+      object.name = name;
+      parent.add(object);
+      return object;
+    }
+    function oval(x, y, z, w, h, d, material, parent = upper, name = "") {
+      const object = add(
+        new T.SphereGeometry(1, 14, 10),
+        material,
+        [x, y, z],
+        parent,
+        name,
+      );
+      object.scale.set(w, h, d);
+      return object;
+    }
+    function box(w, h, d, x, y, z, material, parent = upper, name = "") {
+      return add(new T.BoxGeometry(w, h, d), material, [x, y, z], parent, name);
+    }
+    function limb(a, b, r1, r2, material, parent = upper, name = "") {
+      const start = new T.Vector3(...a),
+        end = new T.Vector3(...b);
+      const object = add(
+        new T.CylinderGeometry(r1, r2, start.distanceTo(end), 10),
+        material,
+        [0, 0, 0],
+        parent,
+        name,
+      );
+      object.position.copy(start).add(end).multiplyScalar(0.5);
+      object.quaternion.setFromUnitVectors(
+        new T.Vector3(0, 1, 0),
+        start.sub(end).normalize(),
+      );
+      return object;
+    }
+    function curve(points, radius, material, parent = upper, name = "") {
+      return add(
+        new T.TubeGeometry(
+          new T.CatmullRomCurve3(points.map((p) => new T.Vector3(...p))),
+          8,
+          radius,
+          5,
+          false,
+        ),
+        material,
+        [0, 0, 0],
+        parent,
+        name,
+      );
+    }
+    const oversized = ["hoodie", "oversized"].includes(top.topShape);
+    const shoulder = male ? 0.25 : female ? 0.21 : 0.23;
+    const hip = female ? 0.225 : 0.205,
+      waist = oversized ? 0.24 : female ? 0.155 : 0.185;
+    const profile = [
+      [hip, 0.89],
+      [hip, 0.96],
+      [waist, 1.12],
+      [shoulder, 1.42],
+      [shoulder * 0.9, 1.51],
+      [0.09, 1.56],
+    ];
     const torso = add(
       new T.LatheGeometry(
         profile.map(([r, y]) => new T.Vector2(r, y)),
-        16,
+        18,
       ),
       cloth,
-      0,
-      0,
-      0,
+      [0, 0, 0],
+      upper,
+      "clothed-torso",
     );
-    torso.scale.z = femaleCut ? 0.8 : 0.85;
-    torso.name = "clothed-torso";
-    if (maleCut && !oversized)
-      for (const x of [-0.23, 0.23]) {
-        const shoulder = sphere(0.14, x, 1.24, 0, cloth);
-        shoulder.scale.set(1.15, 1.15, 0.9);
-      }
-    const face = sphere(0.25, 0, 1.62, 0, skin);
-    face.scale.set(female ? 0.94 : 1, male ? 1.04 : 1, 1);
-    if (female) {
-      for (const x of [-0.14, 0.14]) {
-        const blush = sphere(0.04, x, 1.57, 0.21, mat(0xc58b7b));
-        blush.scale.z = 0.25;
-      }
-    }
-    // Small eyes face +Z, so the character also has an unambiguous front.
-    for (const x of [-0.085, 0.085]) sphere(0.025, x, 1.65, 0.235, dark);
-    // Small sculpted features stay readable at portrait distance.
-    for (const x of [-0.235, 0.235]) {
-      const ear = sphere(0.052, x, 1.62, 0, skin);
-      ear.scale.set(0.5, 1, 0.65);
-    }
-    const nose = sphere(0.035, 0, 1.605, 0.245, skin);
-    nose.scale.set(0.7, 1.1, 1);
-    box(0.075, 0.014, 0.018, 0, 1.535, 0.235, mat(0x996f61)).name =
-      "subtle-smile";
-    for (const x of [-0.085, 0.085]) {
-      const brow = box(0.065, 0.014, 0.018, x, 1.695, 0.225, hair);
-      brow.rotation.z = x < 0 ? 0.08 : -0.08;
-    }
-    const collar = add(
-      new T.TorusGeometry(0.105, 0.025, 5, 14, Math.PI),
-      trim,
-      0,
-      1.375,
-      0.19,
+    torso.scale.z = 0.67;
+    add(
+      new T.CylinderGeometry(0.065, 0.075, 0.18, 12),
+      skin,
+      [0, 1.6, 0],
+      upper,
+      "neck",
     );
-    collar.rotation.z = Math.PI;
-    collar.scale.y = 0.6;
-    if (["polo", "blouse", "jacket", "vest"].includes(top.topShape))
-      for (const y of [1.12, 1.22, 1.32]) sphere(0.016, 0, y, 0.265, trim);
-    const cap = add(
-      new T.SphereGeometry(0.265, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.43),
-      hair,
+    const head = new T.Group();
+    head.name = "illustrated-head";
+    head.position.y = 1.84;
+    upper.add(head);
+    oval(0, 0, 0, 0.145, 0.18, 0.135, skin, head, "sculpted-face");
+    // A restrained chin and cheek plane replace the old spherical doll head.
+    oval(
       0,
-      1.68,
-      0,
+      -0.095,
+      0.025,
+      female ? 0.103 : 0.115,
+      0.075,
+      0.101,
+      skin,
+      head,
+      "jawline",
     );
-    cap.name = "hair-cap";
-    if (["long", "bob", "braids", "waves"].includes(hairStyle.hairShape)) {
-      for (const x of [-0.21, 0.21]) {
-        const h = sphere(0.14, x, 1.48, -0.06, hair);
-        h.scale.set(
-          0.8,
-          ["long", "waves"].includes(hairStyle.hairShape) ? 2.6 : 1.5,
-          1,
-        );
-      }
-      box(
-        0.42,
-        ["long", "waves"].includes(hairStyle.hairShape) ? 0.65 : 0.32,
-        0.12,
-        0,
-        1.42,
-        -0.2,
-        hair,
-      );
-    }
-    if (["bun", "ponytail"].includes(hairStyle.hairShape)) {
-      const h = sphere(0.15, 0, 1.7, -0.28, hair);
-      if (hairStyle.hairShape === "ponytail") h.scale.set(0.8, 1.8, 0.8);
-    }
-    if (hairStyle.hairShape === "mohawk") {
-      cap.scale.y = 0.6;
-      box(0.12, 0.28, 0.4, 0, 1.92, 0, hair);
-    }
-    if (hairStyle.hairShape === "curls")
-      for (let i = 0; i < 8; i++)
-        sphere(
-          0.1,
-          Math.cos((i * Math.PI) / 4) * 0.21,
-          1.84 + 0.025 * (i % 2),
-          Math.sin((i * Math.PI) / 4) * 0.21,
-          hair,
-        );
-    if (["cropped", "fade"].includes(hairStyle.hairShape)) cap.scale.y = 0.5;
-    if (hairStyle.hairShape === "fade")
-      for (let i = 0; i < 5; i++)
-        sphere(0.075, (i - 2) * 0.08, 1.9, 0.08, hair);
-    if (["quiff", "pixie"].includes(hairStyle.hairShape)) {
-      const fringe = sphere(0.2, -0.05, 1.9, 0.08, hair);
-      fringe.scale.set(1, hairStyle.hairShape === "quiff" ? 0.7 : 0.35, 0.8);
-    }
-    if (hairStyle.hairShape === "waves")
-      for (const x of [-0.23, 0.23])
-        for (let i = 0; i < 4; i++) {
-          const wave = sphere(
-            0.13,
-            x,
-            1.65 - i * 0.14,
-            -0.12 + (i % 2) * 0.05,
-            hair,
-          );
-          wave.scale.set(0.9, 1.3, 0.8);
-        }
-    if (hairStyle.hairShape === "braids")
-      for (const x of [-0.2, 0.2])
-        for (let i = 0; i < (female ? 5 : 2); i++)
-          sphere(0.075, x, 1.5 - i * 0.12, -0.15, hair);
-    if (hairStyle.hairShape === "sidepart") {
-      const sweep = sphere(0.19, -0.08, 1.88, 0.04, hair);
-      sweep.scale.set(1, 0.4, 1);
-    }
-    if (["jacket", "vest"].includes(top.topShape)) {
-      box(0.17, 0.62, 0.08, 0, 1.04, 0.28, trim);
-      for (const x of [-0.14, 0.14])
-        box(0.12, 0.14, 0.09, x, 1.29, 0.27, cloth);
-    }
-    if (top.topShape === "polo" || top.topShape === "blouse")
-      for (const x of [-0.1, 0.1]) box(0.12, 0.09, 0.1, x, 1.4, 0.2, trim);
-    if (top.topShape === "hoodie") {
-      const hood = sphere(0.25, 0, 1.36, -0.14, cloth);
-      hood.scale.set(1, 0.8, 0.8);
-      box(0.3, 0.12, 0.09, 0, 0.94, 0.3, trim);
-    }
-    if (top.topShape === "jersey") box(0.08, 0.5, 0.04, 0, 1.04, 0.3, trim);
-    if (top.id === "rapper") {
-      const chain = sphere(0.12, 0, 1.21, 0.29, mat(0xd3b76d));
-      chain.scale.set(1, 0.6, 0.25);
-    }
-    if (
-      femaleCut &&
-      ["polo", "blouse", "jacket", "vest"].includes(top.topShape)
-    ) {
-      const belt = add(
-        new T.CylinderGeometry(0.235, 0.24, 0.055, 16),
-        trim,
-        0,
-        0.88,
-        0,
-      );
-      belt.scale.z = 0.8;
-      box(0.075, 0.06, 0.025, 0, 0.88, 0.2, mat(0xc3a36e));
-    }
-    if (maleCut && ["jacket", "vest", "tee"].includes(top.topShape)) {
-      for (const x of [-0.18, 0.18]) box(0.1, 0.09, 0.035, x, 1.14, 0.25, trim);
-    }
-    if (cut === "unisex") {
-      const hem = add(
-        new T.CylinderGeometry(0.31, 0.32, 0.065, 16),
-        cloth,
-        0,
-        0.66,
-        0,
-      );
-      hem.scale.z = 0.85;
-    }
-    const standing = new T.Group(),
-      riding = new T.Group();
-    group.add(standing, riding);
-    const legs = [];
-    const shoeSize =
-      shoe.shoeShape === "boots"
-        ? 0.23
-        : shoe.shoeShape === "high-tops"
-          ? 0.18
-          : 0.12;
     for (const side of [-1, 1]) {
+      oval(side * 0.143, -0.006, 0, 0.025, 0.043, 0.022, skin, head, "ear");
+      oval(
+        side * 0.057,
+        0.027,
+        0.119,
+        0.034,
+        0.017,
+        0.015,
+        inner,
+        head,
+        "eye-white",
+      );
+      oval(
+        side * 0.057,
+        0.027,
+        0.134,
+        0.014,
+        0.016,
+        0.006,
+        mat(0x53412e),
+        head,
+        "iris",
+      );
+      oval(side * 0.057, 0.027, 0.14, 0.007, 0.011, 0.004, dark, head, "pupil");
+      oval(
+        side * 0.052,
+        0.032,
+        0.143,
+        0.0035,
+        0.004,
+        0.002,
+        inner,
+        head,
+        "eye-highlight",
+      );
+      curve(
+        [
+          [side * 0.028, 0.075, 0.121],
+          [side * 0.058, 0.083, 0.125],
+          [side * 0.087, 0.073, 0.109],
+        ],
+        0.006,
+        hair,
+        head,
+        "eyebrow",
+      );
+      curve(
+        [
+          [side * 0.027, 0.035, 0.133],
+          [side * 0.058, 0.044, 0.14],
+          [side * 0.086, 0.034, 0.122],
+        ],
+        female ? 0.004 : 0.003,
+        dark,
+        head,
+        "eyelid",
+      );
+    }
+    oval(0, -0.014, 0.134, 0.019, 0.032, 0.028, skin, head, "nose");
+    curve(
+      [
+        [-0.028, -0.073, 0.121],
+        [0, -0.079, 0.129],
+        [0.029, -0.069, 0.121],
+      ],
+      0.004,
+      mat(0x9b6156),
+      head,
+      "subtle-smile",
+    );
+    const scalp = add(
+      new T.SphereGeometry(1, 18, 10, 0, Math.PI * 2, 0, Math.PI * 0.48),
+      hair,
+      [0, 0.045, -0.008],
+      head,
+      "hair-cap",
+    );
+    scalp.scale.set(0.155, 0.17, 0.145);
+    const shape = hairStyle.hairShape;
+    const long = ["long", "waves", "braids", "bob"].includes(shape);
+    if (long) {
+      const length = ["long", "waves", "braids"].includes(shape) ? 0.44 : 0.24;
+      for (const side of [-1, 1])
+        for (let i = 0; i < 3; i++) {
+          const x = side * (0.12 + i * 0.014),
+            z = -0.035 - i * 0.026;
+          curve(
+            [
+              [x, 0.12, z],
+              [x * 1.18, -0.02, z],
+              [x * 1.1, -length * 0.65, z + 0.015],
+              [x * 0.92, -length, z + 0.04],
+            ],
+            shape === "braids" ? 0.025 : 0.039,
+            hair,
+            head,
+            "hair-lock",
+          );
+        }
+      oval(
+        0,
+        -length * 0.38,
+        -0.095,
+        0.14,
+        length * 0.65,
+        0.07,
+        hair,
+        head,
+        "back-hair",
+      );
+    }
+    if (["bun", "ponytail"].includes(shape)) {
+      oval(
+        0,
+        0.06,
+        -0.18,
+        0.082,
+        shape === "bun" ? 0.075 : 0.1,
+        0.08,
+        hair,
+        head,
+        "tied-hair",
+      );
+      if (shape === "ponytail")
+        curve(
+          [
+            [0, 0.05, -0.2],
+            [0.01, -0.12, -0.23],
+            [0.035, -0.36, -0.19],
+          ],
+          0.055,
+          hair,
+          head,
+          "ponytail",
+        );
+    }
+    if (shape === "curls")
+      for (let i = 0; i < 9; i++) {
+        const a = (i * Math.PI * 2) / 9;
+        oval(
+          Math.cos(a) * 0.115,
+          0.14 + (i % 2) * 0.02,
+          Math.sin(a) * 0.1,
+          0.065,
+          0.065,
+          0.06,
+          hair,
+          head,
+          "curl",
+        );
+      }
+    if (shape === "mohawk") {
+      scalp.scale.y = 0.09;
+      for (let i = 0; i < 5; i++)
+        oval(
+          0,
+          0.22,
+          -0.11 + i * 0.055,
+          0.035,
+          0.08,
+          0.045,
+          hair,
+          head,
+          "mohawk",
+        );
+    } else if (!["bun", "ponytail", "braids"].includes(shape)) {
+      const short = ["fade", "cropped", "pixie"].includes(shape);
+      for (let i = 0; i < 4; i++) {
+        const lift = short ? 0 : shape === "quiff" ? 0.035 : 0.012;
+        curve(
+          [
+            [-0.12, 0.1 + i * 0.018, 0.07],
+            [-0.025, 0.16 + lift + i * 0.012, 0.135],
+            [0.11, 0.055 + i * 0.015, 0.105],
+          ],
+          short ? 0.016 : 0.022,
+          hair,
+          head,
+          "swept-fringe",
+        );
+      }
+    }
+    // Garment construction: slim collars, lapels, button plackets and seams.
+    curve(
+      [
+        [-0.082, 1.535, 0.035],
+        [0, 1.49, 0.083],
+        [0.082, 1.535, 0.035],
+      ],
+      0.012,
+      oversized ? seam : inner,
+      upper,
+      "neckline",
+    );
+    if (["jacket", "vest"].includes(top.topShape)) {
+      box(0.11, 0.49, 0.015, 0, 1.21, 0.145, inner, upper, "undershirt");
+      for (const side of [-1, 1]) {
+        const lapel = box(
+          0.065,
+          0.26,
+          0.02,
+          side * 0.073,
+          1.4,
+          0.155,
+          cloth,
+          upper,
+          "lapel",
+        );
+        lapel.rotation.z = side * 0.28;
+        box(
+          0.085,
+          0.015,
+          0.014,
+          side * 0.135,
+          1.18,
+          0.146,
+          seam,
+          upper,
+          "pocket-welt",
+        );
+      }
+    }
+    if (["polo", "blouse", "jacket"].includes(top.topShape)) {
+      for (const side of [-1, 1]) {
+        const collar = box(
+          0.072,
+          0.09,
+          0.018,
+          side * 0.052,
+          1.51,
+          0.09,
+          cloth,
+          upper,
+          "shirt-collar",
+        );
+        collar.rotation.z = side * 0.4;
+      }
+      for (const y of [1.22, 1.32, 1.42])
+        oval(0, y, 0.15, 0.009, 0.009, 0.006, seam, upper, "shirt-button");
+    }
+    if (top.topShape === "hoodie") {
+      oval(0, 1.48, -0.09, 0.15, 0.13, 0.105, cloth, upper, "hood");
+      for (const side of [-1, 1])
+        curve(
+          [
+            [side * 0.055, 1.49, 0.1],
+            [side * 0.06, 1.27, 0.14],
+          ],
+          0.005,
+          inner,
+        );
+      box(0.2, 0.012, 0.015, 0, 1.04, 0.15, seam, upper, "hoodie-pocket");
+    }
+    if (top.id === "rapper")
+      curve(
+        [
+          [-0.075, 1.5, 0.07],
+          [-0.06, 1.32, 0.16],
+          [0, 1.27, 0.17],
+          [0.06, 1.32, 0.16],
+          [0.075, 1.5, 0.07],
+        ],
+        0.01,
+        mat(0xcbb06d),
+        upper,
+        "chain",
+      );
+    const arms = [],
+      legs = [],
+      elbows = [],
+      snacks = [];
+    function hand(parent, x, y, z) {
+      oval(x, y, z, 0.043, 0.064, 0.028, skin, parent, "hand");
+      oval(
+        x * 0.98 + 0.028,
+        y + 0.015,
+        z + 0.012,
+        0.02,
+        0.036,
+        0.021,
+        skin,
+        parent,
+        "thumb",
+      );
+    }
+    for (const side of [-1, 1]) {
+      const arm = new T.Group();
+      arm.position.set(side * (shoulder + 0.015), 1.46, 0);
+      standing.add(arm);
+      arms.push(arm);
+      const shortSleeve = ["tee", "polo", "jersey", "blouse"].includes(
+        top.topShape,
+      );
+      oval(0, -0.025, 0, 0.09, 0.105, 0.092, cloth, arm, "shoulder");
+      limb(
+        [0, 0, 0],
+        [side * 0.045, -0.29, 0.005],
+        0.078,
+        0.065,
+        shortSleeve ? skin : cloth,
+        arm,
+        "upper-arm",
+      );
+      if (shortSleeve)
+        limb(
+          [0, 0.005, 0],
+          [side * 0.02, -0.13, 0],
+          0.092,
+          0.079,
+          cloth,
+          arm,
+          "short-sleeve",
+        );
+      oval(
+        side * 0.045,
+        -0.29,
+        0.005,
+        0.06,
+        0.062,
+        0.058,
+        shortSleeve ? skin : cloth,
+        arm,
+        "elbow",
+      );
+      const elbow = new T.Group();
+      elbow.position.set(side * 0.045, -0.29, 0.005);
+      arm.add(elbow);
+      elbows.push(elbow);
+      limb(
+        [0, 0, 0],
+        [-side * 0.01, -0.27, 0.035],
+        0.063,
+        0.043,
+        shortSleeve ? skin : cloth,
+        elbow,
+        "forearm",
+      );
+      hand(elbow, -side * 0.01, -0.32, 0.035);
+      const snack = oval(
+        -side * 0.01,
+        -0.36,
+        0.05,
+        0.045,
+        0.06,
+        0.045,
+        mat(0xe6b56e),
+        elbow,
+        "held-snack",
+      );
+      snack.visible = false;
+      snacks.push(snack);
       const leg = new T.Group();
-      leg.position.set(side * (female ? 0.18 : 0.15), 0.64, 0);
+      leg.position.set(side * (female ? 0.115 : 0.105), 0.9, 0);
       standing.add(leg);
       legs.push(leg);
       const shorts = bottom.bottomShape === "shorts",
+        skirt = bottom.bottomShape === "skirt",
         wide = bottom.bottomShape === "wide";
-      add(
-        new T.CylinderGeometry(
-          wide ? 0.14 : femaleCut ? 0.115 : maleCut ? 0.12 : 0.14,
-          wide ? 0.15 : femaleCut ? 0.085 : maleCut ? 0.1 : 0.125,
-          shorts ? (femaleCut ? 0.27 : 0.33) : 0.55,
-          8,
-        ),
-        pants,
-        0,
-        shorts ? -0.12 : -0.27,
-        0,
+      const legmat = skirt ? skin : pants;
+      limb(
+        [0, 0, 0],
+        [0, -0.39, 0.025],
+        wide ? 0.105 : 0.097,
+        wide ? 0.105 : 0.071,
+        legmat,
         leg,
+        "trouser-thigh",
       );
-      if (shorts)
-        add(new T.CylinderGeometry(0.08, 0.08, 0.28, 8), skin, 0, -0.4, 0, leg);
+      limb(
+        [0, -0.39, 0.025],
+        [0, -0.77, 0],
+        wide ? 0.105 : 0.075,
+        wide ? 0.11 : 0.057,
+        shorts || skirt ? skin : pants,
+        leg,
+        "trouser-calf",
+      );
       if (bottom.bottomShape === "cargo")
-        box(0.09, 0.15, 0.15, side * 0.11, -0.15, 0, pants, leg);
-      box(
-        femaleCut ? 0.21 : 0.25,
-        shoeSize,
-        femaleCut ? 0.33 : 0.37,
+        box(
+          0.05,
+          0.13,
+          0.12,
+          side * 0.08,
+          -0.24,
+          0,
+          pants,
+          leg,
+          "cargo-pocket",
+        );
+      const boot =
+        shoes.shoeShape === "boots" || shoes.shoeShape === "high-tops";
+      oval(
         0,
-        -0.57 + shoeSize / 2,
-        0.08,
+        -0.8,
+        0.045,
+        0.085,
+        boot ? 0.1 : 0.055,
+        0.145,
         footwear,
         leg,
+        "shaped-shoe",
       );
-      if (shoe.shoeShape === "sneakers" || shoe.shoeShape === "high-tops")
-        box(0.24, 0.035, 0.37, 0, -0.58, 0.08, trim, leg);
+      if (["sneakers", "high-tops"].includes(shoes.shoeShape)) {
+        oval(0, -0.835, 0.048, 0.087, 0.019, 0.146, sole, leg, "shoe-sole");
+        for (const z of [0.06, 0.09, 0.12])
+          box(0.075, 0.008, 0.009, 0, -0.751, z, sole, leg, "shoe-lace");
+      }
+      if (skirt) continue;
+      // A subtle crease gives tailored trousers a clearer cloth silhouette.
+      if (bottom.bottomShape === "tailored")
+        box(
+          0.008,
+          0.5,
+          0.008,
+          0,
+          -0.32,
+          0.077,
+          mat(new T.Color(bottom.bottom).multiplyScalar(0.8)),
+          leg,
+          "trouser-crease",
+        );
     }
-    if (bottom.bottomShape === "skirt")
-      add(
-        new T.CylinderGeometry(
-          femaleCut ? 0.31 : 0.3,
-          femaleCut ? 0.46 : maleCut ? 0.35 : 0.43,
-          femaleCut ? 0.46 : 0.53,
-          12,
-        ),
+    if (bottom.bottomShape === "skirt") {
+      const skirt = add(
+        new T.CylinderGeometry(0.22, 0.34, 0.7, 18),
         pants,
-        0,
-        0.44,
-        0,
+        [0, 0.57, 0],
         standing,
+        "flowing-skirt",
       );
-    function limb(parent, a, b, r, material) {
-      const av = new T.Vector3(...a),
-        bv = new T.Vector3(...b);
-      const m = add(
-        new T.CylinderGeometry(r, r, av.distanceTo(bv), 8),
-        material,
-        0,
-        0,
-        0,
-        parent,
-      );
-      m.position.copy(av).add(bv).multiplyScalar(0.5);
-      m.quaternion.setFromUnitVectors(
-        new T.Vector3(0, 1, 0),
-        bv.sub(av).normalize(),
-      );
+      skirt.scale.z = 0.78;
     }
-    const arms = [];
-    for (const s of [-1, 1]) {
-      const arm = new T.Group();
-      arm.position.set(s * 0.28 * broad, 1.3, 0);
-      standing.add(arm);
-      arms.push(arm);
-      limb(arm, [0, 0, 0], [s * (0.36 - 0.28 * broad), -0.53, 0], 0.09, cloth);
-      sphere(0.085, s * (0.36 - 0.28 * broad), -0.6, 0, skin, arm);
-      limb(riding, [s * 0.24, 1.3, 0.04], [s * 0.38, 1, 0.35], 0.1, cloth);
-      limb(riding, [s * 0.38, 1, 0.35], [s * 0.4, 0.78, 0.85], 0.075, skin);
-      limb(riding, [s * 0.22, 0.62, 0], [s * 0.43, 0.3, 0.38], 0.11, pants);
-      limb(riding, [s * 0.43, 0.3, 0.38], [s * 0.43, 0.02, 0.15], 0.09, pants);
-      box(0.23, shoeSize, 0.35, s * 0.43, 0.02, 0.28, footwear, riding);
+    // Seated rig has independent bent limbs; the torso lowers to meet the saddle.
+    for (const side of [-1, 1]) {
+      limb(
+        [side * 0.24, 1.25, 0],
+        [side * 0.34, 1.02, 0.28],
+        0.073,
+        0.06,
+        cloth,
+        riding,
+      );
+      limb(
+        [side * 0.34, 1.02, 0.28],
+        [side * 0.4, 0.8, 0.82],
+        0.06,
+        0.04,
+        skin,
+        riding,
+      );
+      hand(riding, side * 0.4, 0.79, 0.84);
+      limb(
+        [side * 0.12, 0.74, 0],
+        [side * 0.39, 0.39, 0.35],
+        0.09,
+        0.075,
+        pants,
+        riding,
+      );
+      limb(
+        [side * 0.39, 0.39, 0.35],
+        [side * 0.4, 0.06, 0.14],
+        0.075,
+        0.055,
+        pants,
+        riding,
+      );
+      oval(side * 0.4, 0.06, 0.22, 0.085, 0.06, 0.14, footwear, riding);
     }
+    const seated = new T.Group();
+    seated.name = "bench-seated-rig";
+    group.add(seated);
+    for (const side of [-1, 1]) {
+      limb(
+        [side * 0.12, 0.76, 0],
+        [side * 0.15, 0.7, 0.38],
+        0.095,
+        0.08,
+        pants,
+        seated,
+      );
+      limb(
+        [side * 0.15, 0.7, 0.38],
+        [side * 0.15, 0.17, 0.43],
+        0.08,
+        0.055,
+        pants,
+        seated,
+      );
+      oval(side * 0.15, 0.12, 0.49, 0.085, 0.055, 0.14, footwear, seated);
+    }
+    seated.visible = false;
     riding.visible = false;
-    rig = { standing, riding, legs, arms };
+    rig = { upper, standing, riding, seated, arms, legs, elbows, snacks };
     group.userData.appearance = look;
     group.userData.outfitCut = cut;
-    group.userData.silhouette = male
-      ? "lean-athletic"
-      : female
-        ? "soft-curved"
-        : "neutral";
+    group.userData.proportions = "illustrated-adult";
+    group.userData.silhouette =
+      look.gender === "male"
+        ? "lean-athletic"
+        : look.gender === "female"
+          ? "soft-curved"
+          : "neutral";
   }
   function pose(state) {
     const riding =
       state.mode === "drive" &&
-      ["moto", "vespa", "scoopy"].includes(state.vehicle?.type);
+      ["moto", "vespa", "scoopy", "offroad-moto", "racing-moto"].includes(
+        state.vehicle?.type,
+      );
     group.visible = state.mode === "walk" || riding;
     const heading = riding ? state.vehicle.heading : state.heading || 0;
     group.position.set(
       riding ? -Math.sin(heading) * 0.15 : 0,
-      riding ? 0.52 : 0,
+      riding ? (state.vehicle.type === "offroad-moto" ? 0.67 : 0.52) : 0,
       riding ? -Math.cos(heading) * 0.15 : 0,
     );
     group.rotation.y = heading;
-    rig.standing.visible = !riding;
+    const sitting = state.mode === "walk" && state.posture === "sit";
+    rig.standing.visible = !riding && !sitting;
+    rig.seated.visible = sitting;
+    for (const arm of rig.arms) {
+      const parent = sitting ? rig.seated : rig.standing;
+      if (arm.parent !== parent) parent.add(arm);
+      arm.position.y = sitting ? 1.28 : 1.46;
+    }
     rig.riding.visible = riding;
+    rig.upper.position.y = riding || sitting ? -0.18 : 0;
+    rig.upper.rotation.x =
+      riding && state.vehicle.type === "racing-moto" ? 0.12 : 0;
+    const moving = !riding && !sitting && state.speed > 0.1;
+    const running = state.speed > 4.6,
+      pace = running ? 95 : 150;
     rig.legs.forEach(
       (leg, i) =>
-        (leg.rotation.x =
-          !riding && state.speed > 0.1
-            ? Math.sin(performance.now() / 130 + i * Math.PI) * 0.35
-            : 0),
+        (leg.rotation.x = moving
+          ? Math.sin(performance.now() / pace + i * Math.PI) *
+            (running ? 0.55 : 0.34)
+          : 0),
     );
+    rig.arms.forEach((arm, i) => {
+      arm.rotation.z = 0;
+      rig.elbows[i].rotation.x = running ? -0.6 : 0;
+      rig.snacks[i].visible = false;
+      arm.rotation.x = moving
+        ? Math.sin(performance.now() / pace + i * Math.PI + Math.PI) *
+          (running ? 0.42 : 0.2)
+        : 0;
+    });
+    if (state.gesture === "eat" && state.gestureSeconds > 0 && !riding) {
+      rig.arms[1].rotation.x = -1.5 + Math.sin(performance.now() / 230) * 0.08;
+      rig.arms[1].rotation.z = -0.25;
+      rig.elbows[1].rotation.x = -1.65;
+      rig.snacks[1].visible = true;
+    } else if (
+      state.gesture === "wave" &&
+      state.gestureSeconds > 0 &&
+      !riding
+    ) {
+      rig.arms[1].rotation.z = -2.5 + Math.sin(performance.now() / 150) * 0.15;
+    }
   }
   rebuild(initial);
   return {
@@ -376,11 +712,12 @@ export function createCharacter(initial) {
       return rig.arms;
     },
     greet(time, side = 1) {
-      rig.arms.forEach((arm, i) => {
-        const sign = i === 0 ? -1 : 1;
-        arm.rotation.z =
-          sign * (i === side ? 2.5 + Math.sin(time * 4) * 0.15 : 0.08);
-      });
+      rig.arms.forEach(
+        (arm, i) =>
+          (arm.rotation.z =
+            (i === 0 ? -1 : 1) *
+            (i === side ? 2.5 + Math.sin(time * 4) * 0.15 : 0.08)),
+      );
     },
     dispose: () => disposeMeshes(group),
   };
@@ -388,10 +725,10 @@ export function createCharacter(initial) {
 export function disposeMeshes(root) {
   const geometries = new Set(),
     materials = new Set();
-  root.traverse((o) => {
-    if (o.geometry) geometries.add(o.geometry);
-    if (o.material) materials.add(o.material);
+  root.traverse((object) => {
+    if (object.geometry) geometries.add(object.geometry);
+    if (object.material) materials.add(object.material);
   });
-  geometries.forEach((g) => g.dispose());
-  materials.forEach((m) => m.dispose());
+  geometries.forEach((geometry) => geometry.dispose());
+  materials.forEach((material) => material.dispose());
 }

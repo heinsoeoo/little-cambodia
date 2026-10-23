@@ -1,6 +1,7 @@
 import { createCharacter } from "./character.js";
 import { vehicleModel, repaintVehicle } from "./vehicle-model.js";
 import * as T from "three";
+import { updateVehicleLighting } from "./vehicle-lighting.js";
 export function playerColor(id) {
   let hash = 0;
   for (const ch of id) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
@@ -21,7 +22,7 @@ export function createActor(scene, player) {
     type = null;
   group.position.set(player.x, 0, player.z);
   return {
-    update(state, dt, local = false) {
+    update(state, dt, local = false, night = false) {
       const distance = Math.hypot(
         group.position.x - state.x,
         group.position.z - state.z,
@@ -45,6 +46,11 @@ export function createActor(scene, player) {
       }
       if (vehicle) {
         repaintVehicle(vehicle, state.vehicle.paint);
+        updateVehicleLighting(vehicle, {
+          night,
+          driving: state.mode === "drive",
+          braking: state.vehicle.braking,
+        });
         vehicle.position.set(
           state.mode === "drive" ? group.position.x : state.vehicle.x,
           0,

@@ -1,3 +1,4 @@
+import { BENCHES } from "./open-world.js";
 import * as T from "three";
 import { addLandmarkScenes } from "./landmark-scenes.js";
 import { animateRiverMaterial, createRiverLife } from "./river-life.js";
@@ -48,7 +49,7 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
       color: textures.road
         ? 0xffffff
         : map.style === "cozy"
-          ? 0xd9c4a5
+          ? 0x92938a
           : palette.road,
       map: textures.road || null,
     }),
@@ -313,6 +314,54 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
         c = !c;
     }
     return c;
+  }
+  const wood = new T.MeshLambertMaterial({ color: 0x986e4e }),
+    metal = new T.MeshLambertMaterial({ color: 0x344b43 });
+  const benchParts = new Map([
+    [wood, []],
+    [metal, []],
+  ]);
+  for (const bench of BENCHES) {
+    const seat = new T.Group();
+    seat.position.set(bench.x, 0, bench.z);
+    seat.rotation.y = bench.heading;
+    seat.updateMatrix();
+    const part = (w, h, d, x, y, z, material) => {
+      const m = new T.Mesh(new T.BoxGeometry(w, h, d), material);
+      m.position.set(x, y, z);
+      m.updateMatrix();
+      m.geometry.applyMatrix4(m.matrix).applyMatrix4(seat.matrix);
+      benchParts.get(material).push(m.geometry);
+    };
+    for (const z of [-0.24, 0, 0.24]) part(2.5, 0.1, 0.18, 0, 0.71, z, wood);
+    for (const y of [0.95, 1.17]) part(2.5, 0.14, 0.09, 0, y, -0.31, wood);
+    for (const x of [-0.9, 0.9]) {
+      part(0.1, 0.7, 0.55, x, 0.35, 0, metal);
+      part(0.08, 0.55, 0.08, x, 1, -0.32, metal);
+      part(0.08, 0.08, 0.6, x, 0.95, 0, metal);
+    }
+    seat.name = bench.id;
+  }
+  const allBenchParts = [];
+  for (const [material, parts] of benchParts) {
+    for (const geometry of parts) {
+      const colors = [];
+      for (let i = 0; i < geometry.attributes.position.count; i++)
+        colors.push(material.color.r, material.color.g, material.color.b);
+      geometry.setAttribute("color", new T.Float32BufferAttribute(colors, 3));
+      allBenchParts.push(geometry);
+    }
+    material.dispose();
+  }
+  if (allBenchParts.length) {
+    const mesh = new T.Mesh(
+      mergeGeometries(allBenchParts),
+      new T.MeshLambertMaterial({ vertexColors: true }),
+    );
+    mesh.name = "riverside-benches";
+    mesh.castShadow = mesh.receiveShadow = true;
+    scene.add(mesh);
+    allBenchParts.forEach((part) => part.dispose());
   }
   const riverLife = createRiverLife(scene, map, city, riverUniforms);
   const [west, south, east, north] = city.bounds,

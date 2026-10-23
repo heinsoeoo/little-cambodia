@@ -1,3 +1,4 @@
+import { collectionFor } from "./collections.js";
 import * as T from "three";
 import { createCharacter, disposeMeshes } from "./character.js";
 import { vehicleModel } from "./vehicle-model.js";
@@ -49,8 +50,8 @@ export function createShowcases(readAppearance) {
       );
       camera.lookAt(0, vehicle ? 0.9 : 1, 0);
       if (type === "hair") {
-        camera.position.set(0.75, 1.85, 1.55);
-        camera.lookAt(0, 1.6, 0);
+        camera.position.set(0.55, 1.92, 1.2);
+        camera.lookAt(0, 1.8, 0);
       }
       if (type === "shoes") {
         camera.position.set(0.8, 0.65, 1.6);
@@ -111,6 +112,28 @@ export function createShowcases(readAppearance) {
     }
     select.addEventListener("change", sync);
     select.insertAdjacentElement("afterend", rail);
+    if (["outfit", "vehicle"].includes(type)) {
+      const filters = document.createElement("div");
+      filters.className = "showcase-filters";
+      filters.setAttribute("aria-label", "Style collections");
+      for (const name of ["All", "Cute", "Cool", "Classic"]) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = name;
+        button.setAttribute("aria-pressed", String(name === "All"));
+        button.onclick = () => {
+          for (const other of filters.children)
+            other.setAttribute("aria-pressed", String(other === button));
+          for (const card of rail.children)
+            card.hidden =
+              name !== "All" &&
+              collectionFor(type, card.dataset.value) !== name;
+          rail.scrollTo({ left: 0, behavior: "smooth" });
+        };
+        filters.append(button);
+      }
+      rail.before(filters);
+    }
     select.classList.add("showcase-select");
     sync();
     return {

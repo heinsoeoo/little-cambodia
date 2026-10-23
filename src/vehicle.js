@@ -8,13 +8,22 @@ export function stepVehicle(car, input, dt, collides) {
   const brake = input.has(" ") || input.has("b");
   const handbrake =
     input.has("shift") &&
-    !["moto", "vespa", "scoopy", "rickshaw", "tuktuk"].includes(car.type);
+    ![
+      "moto",
+      "vespa",
+      "scoopy",
+      "offroad-moto",
+      "racing-moto",
+      "rickshaw",
+      "tuktuk",
+    ].includes(car.type);
   car.vx ??= Math.sin(car.heading) * car.speed;
   car.vz ??= Math.cos(car.heading) * car.speed;
   const opposite =
     throttle &&
     Math.sign(throttle) !== Math.sign(car.speed) &&
     Math.abs(car.speed) > 0.1;
+  car.braking = Boolean(brake || opposite || handbrake);
   if (brake || opposite) {
     const speed = Math.hypot(car.vx, car.vz),
       remaining = Math.max(0, speed - tune.braking * dt);

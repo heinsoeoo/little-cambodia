@@ -113,8 +113,8 @@ export const STYLES = [
   {
     id: "bohemian",
     name: "Bohemian",
-    top: 0xdbb482,
-    bottom: 0xaf7e70,
+    top: 0xc88e83,
+    bottom: 0xe7d8bb,
     shoe: 0x957553,
     hair: 0x795b42,
     hairShape: "long",

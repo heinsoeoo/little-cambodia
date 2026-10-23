@@ -46,6 +46,20 @@ export const VEHICLES = [
     length: 2.2,
   },
   {
+    id: "offroad-moto",
+    name: "Off-road motorcycle",
+    kind: "bike",
+    color: 0xd78b55,
+    length: 2.4,
+  },
+  {
+    id: "racing-moto",
+    name: "Racing motorcycle",
+    kind: "bike",
+    color: 0x9cbd91,
+    length: 2.3,
+  },
+  {
     id: "vespa",
     name: "Vespa",
     kind: "bike",
@@ -120,6 +134,8 @@ export const VEHICLE_TYPES = ["car", ...VEHICLES.map((v) => v.id)];
 const tuning = {
   "mercedes-c300": [11, 30, 28, 12],
   moto: [10, 26, 22, 13],
+  "offroad-moto": [10.5, 27, 25, 14],
+  "racing-moto": [13, 33, 30, 12],
   vespa: [7.5, 22, 24, 13],
   scoopy: [7, 21, 25, 14],
   tuktuk: [6, 18, 18, 10],

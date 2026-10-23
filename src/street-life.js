@@ -79,21 +79,43 @@ export function createStreetLife(scene, path, map) {
     });
   }
   const bodies = new T.InstancedMesh(
-    new T.CylinderGeometry(0.24, 0.32, 0.75, 8),
+    new T.LatheGeometry(
+      [
+        [0.2, -0.31],
+        [0.18, -0.08],
+        [0.23, 0.24],
+        [0.2, 0.32],
+      ].map(([x, y]) => new T.Vector2(x, y)),
+      10,
+    ).scale(1, 1, 0.7),
     new T.MeshLambertMaterial({ color: 0xffffff }),
     262,
   );
   const heads = new T.InstancedMesh(
-    new T.SphereGeometry(0.19, 6, 4),
+    new T.SphereGeometry(1, 10, 7).scale(0.145, 0.18, 0.135),
     new T.MeshLambertMaterial({ color: 0xbb8b67 }),
     262,
   );
   const legs = new T.InstancedMesh(
-    new T.CylinderGeometry(0.08, 0.09, 0.6, 6),
+    new T.CylinderGeometry(0.08, 0.065, 0.8, 6),
     new T.MeshLambertMaterial({ color: 0x3b4d53 }),
     524,
   );
-  group.add(bodies, heads, legs);
+  const hair = new T.InstancedMesh(
+    new T.SphereGeometry(0.155, 10, 6, 0, Math.PI * 2, 0, Math.PI * 0.5).scale(
+      1,
+      1,
+      0.9,
+    ),
+    new T.MeshLambertMaterial({ color: 0x342f2a }),
+    262,
+  );
+  const arms = new T.InstancedMesh(
+    new T.CylinderGeometry(0.065, 0.045, 0.57, 6),
+    new T.MeshLambertMaterial({ color: 0xffffff }),
+    524,
+  );
+  group.add(bodies, heads, legs, hair, arms);
   const spriteMap =
     typeof document === "undefined" || map?.style === "cozy"
       ? null
@@ -111,7 +133,12 @@ export function createStreetLife(scene, path, map) {
     : null;
   if (pixelPeople) {
     group.add(pixelPeople);
-    bodies.visible = heads.visible = legs.visible = false;
+    bodies.visible =
+      heads.visible =
+      legs.visible =
+      hair.visible =
+      arms.visible =
+        false;
     pixelPeople.instanceMatrix.setUsage(T.DynamicDrawUsage);
   }
 
@@ -125,6 +152,8 @@ export function createStreetLife(scene, path, map) {
       [0xe1b36b, 0x719caa, 0xd97869, 0x8ba77b, 0xf0d6a8, 0x927aa4][i % 6],
     );
     bodies.setColorAt(i, color);
+    arms.setColorAt(i * 2, color);
+    arms.setColorAt(i * 2 + 1, color);
     if (pixelPeople)
       pixelPeople.setColorAt(
         i,
@@ -174,20 +203,31 @@ export function createStreetLife(scene, path, map) {
       }
       dummy.rotation.set(0, heading, 0);
       dummy.scale.set(1, 1, 1);
-      dummy.position.set(point[0], 1.12, point[1]);
+      dummy.position.set(point[0], 1.22, point[1]);
       dummy.updateMatrix();
       bodies.setMatrixAt(i, dummy.matrix);
-      dummy.position.y = 1.7;
+      dummy.position.y = 1.81;
       dummy.updateMatrix();
       heads.setMatrixAt(i, dummy.matrix);
+      dummy.position.y = 1.86;
+      dummy.updateMatrix();
+      hair.setMatrixAt(i, dummy.matrix);
       for (let side = 0; side < 2; side++) {
-        dummy.position.set(point[0] + (side ? 1 : -1) * 0.14, 0.45, point[1]);
+        dummy.position.set(point[0] + (side ? 1 : -1) * 0.11, 0.5, point[1]);
         dummy.rotation.x =
           i < activity.vendors
             ? 0
             : Math.sin(elapsed * 5 + i + side * Math.PI) * 0.3;
         dummy.updateMatrix();
         legs.setMatrixAt(i * 2 + side, dummy.matrix);
+        dummy.position.set(
+          point[0] + Math.cos(heading) * (side ? 1 : -1) * 0.27,
+          1.18,
+          point[1] - Math.sin(heading) * (side ? 1 : -1) * 0.27,
+        );
+        dummy.rotation.x *= -0.65;
+        dummy.updateMatrix();
+        arms.setMatrixAt(i * 2 + side, dummy.matrix);
       }
       if (pixelPeople) {
         dummy.position.set(point[0], 1.43, point[1]);
@@ -206,9 +246,10 @@ export function createStreetLife(scene, path, map) {
       pixelPeople.computeBoundingSphere();
       spriteMap.offset.x = (Math.floor(elapsed * 3) % 2) * 0.5;
     }
-    bodies.count = heads.count = count;
+    bodies.count = heads.count = hair.count = count;
+    arms.count = count * 2;
     legs.count = count * 2;
-    for (const mesh of [bodies, heads, legs]) {
+    for (const mesh of [bodies, heads, legs, hair, arms]) {
       mesh.instanceMatrix.needsUpdate = true;
       mesh.computeBoundingSphere();
     }

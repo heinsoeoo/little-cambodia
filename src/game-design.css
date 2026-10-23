@@ -782,3 +782,100 @@ body.mobile-menu-open::after {
     grid-column: 1 / -1;
   }
 }
+
+/* A bounded preview stays visible alongside the longer visual clothing shelves. */
+.character-creator .creator-preview {
+  align-self: start;
+  position: sticky;
+  top: 12px;
+  height: clamp(240px, 50dvh, 440px);
+  display: flex;
+  flex-direction: column;
+}
+.character-creator.creator-detail #look-preview {
+  flex: 1;
+  min-height: 0;
+  height: 220px;
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .character-creator .creator-preview {
+    height: clamp(150px, 52dvh, 280px);
+    top: 0;
+  }
+  .character-creator.creator-detail #look-preview {
+    height: 100px;
+  }
+}
+.showcase-filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 6px 0 0;
+  grid-column: 1 / -1;
+}
+.showcase-filters button {
+  min-height: 36px;
+  padding: 7px 13px;
+  border-radius: 22px;
+  background: #f4e3b518;
+  border: 1px solid #ccb88f66;
+  color: #f0dfbb;
+  font-size: 12px;
+}
+.showcase-filters button[aria-pressed="true"] {
+  background: #e7c786;
+  color: #243c33;
+}
+.showcase-card[hidden] {
+  display: none !important;
+}
+.outfit-main-choice .showcase-filters {
+  flex-basis: 100%;
+}
+.life-actions {
+  display: none;
+}
+.in-town .life-actions {
+  position: fixed;
+  display: flex;
+  gap: 10px;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 14;
+}
+.life-actions button {
+  min-height: 56px;
+  min-width: 80px;
+  border: 2px solid #dabd7c99;
+  border-radius: 18px;
+  background: #203c34e8;
+  color: #f6e6be;
+  padding: 10px 14px;
+  box-shadow: 0 3px 12px #10272033;
+}
+.life-actions button[aria-pressed="true"] {
+  background: #e6bd71;
+  color: #203c34;
+}
+.mobile-menu-open .life-actions,
+.dialog-open .life-actions,
+.ui-creating .life-actions,
+.intro-active .life-actions {
+  display: none;
+}
+.character-creator .showcase-filters,
+#game-menu .showcase-filters {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.character-creator .showcase-filters button,
+#game-menu .showcase-filters button {
+  width: auto !important;
+  min-width: 0;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 7px 13px;
+}
