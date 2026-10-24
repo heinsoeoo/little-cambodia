@@ -334,8 +334,8 @@ export function createDungeonUI({
 
       document.body.classList.toggle("in-dungeon", Boolean(self?.dungeonId));
       $("dungeon-hud").hidden = !self?.dungeonId;
-      $("rift-open").hidden = true;
       if (!self) {
+        $("rift-open").hidden = true;
         closePanel();
         held = false;
         return;
