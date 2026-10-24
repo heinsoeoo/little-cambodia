@@ -18,7 +18,7 @@ import { createIntroCouple } from "./intro-couple.js";
 import { createIntro } from "./intro.js";
 import { createMobileHUD, mobileViewport } from "./mobile-hud.js";
 import { createWardrobe } from "./wardrobe-ui.js";
-import { createVehicleCamera } from "./vehicle-camera.js";
+import { createPlayerVisibility } from "./player-visibility.js";
 import {
   VEHICLES,
   vehicleSpec,
@@ -113,7 +113,8 @@ sun.shadow.normalBias = 0.15;
 
 const wardrobe = createWardrobe();
 const introCouple = createIntroCouple($("intro-couple"));
-const world = makeWorld(scene, map, city),
+const playerVisibility = createPlayerVisibility();
+const world = makeWorld(scene, map, city, { visibility: playerVisibility }),
   streetLife = createStreetLife(scene, world.path, map);
 const activities = createActivities({
   scene,
@@ -603,7 +604,6 @@ addEventListener("pagehide", () => {
 let previous = performance.now(),
   accumulator = 0,
   streetElapsed = 0;
-const vehicleCamera = createVehicleCamera(world.cameraObstacles);
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min((now - previous) / 1000, 0.1);
@@ -719,13 +719,6 @@ function frame(now) {
   }
   const focus = actors.get(network.id)?.position ||
     self || { x: spawn[0], z: spawn[1] };
-  vehicleCamera.update(
-    dt,
-    focus,
-    cameraZoom,
-    self?.mode === "drive",
-    cameraZoom.manual(),
-  );
   followCamera(camera, focus, cameraZoom.offset(), orbitOffset, dt);
 
   hud += dt;
@@ -817,6 +810,14 @@ function frame(now) {
   camera.updateMatrixWorld();
   for (const actor of actors.values())
     actor.projectLabel(camera, viewportWidth, viewportHeight);
+  playerVisibility.update(
+    camera,
+    self,
+    viewportWidth,
+    viewportHeight,
+    renderer.getPixelRatio(),
+    Boolean(joined && self),
+  );
   renderer.render(scene, camera);
   wardrobe.render(now);
 }

@@ -13,9 +13,9 @@ test("cutaway follows the projected player in screen pixels, scales for high DPI
   assert.ok(Math.abs(center.x - 800) < 1e-8);
   assert.ok(Math.abs(center.y - 600) < 1e-8);
   assert.ok(center.z > 0 && center.z < 1);
-  assert.equal(visibility.uniforms.playerCutawayRadius.value, 112);
+  assert.equal(visibility.uniforms.playerCutawayRadius.value, 92);
   visibility.update(camera, { x: 0, z: 0, mode: "drive" }, 800, 600, 2);
-  assert.equal(visibility.uniforms.playerCutawayRadius.value, 144);
+  assert.equal(visibility.uniforms.playerCutawayRadius.value, 120);
   visibility.update(camera, null, 800, 600);
   assert.equal(visibility.uniforms.playerCutawayRadius.value, 0);
 });
@@ -41,6 +41,7 @@ test("cutaway patches batched walls and facade materials without enabling transp
       /gl_FragCoord.z < playerCutawayCenter.z/,
     );
     assert.match(shader.fragmentShader, /discard/);
+    assert.match(shader.fragmentShader, /cutawayAmount = 0.45/);
     assert.equal(material.transparent, false);
     assert.equal(material.depthWrite, true);
   }

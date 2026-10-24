@@ -25,13 +25,13 @@ export function createPlayerVisibility() {
           `#include <clipping_planes_fragment>
       if (playerCutawayRadius > 0.0 && gl_FragCoord.z < playerCutawayCenter.z - 0.00001) {
         float cutawayDistance = distance(gl_FragCoord.xy, playerCutawayCenter.xy);
-        float cutawayAmount = 1.0 - smoothstep(playerCutawayRadius * 0.55, playerCutawayRadius, cutawayDistance);
+        float cutawayAmount = 0.45 * (1.0 - smoothstep(playerCutawayRadius * 0.55, playerCutawayRadius, cutawayDistance));
         float cutawayDither = fract(dot(floor(gl_FragCoord.xy), vec2(0.754877666, 0.569840296)));
         if (cutawayDither < cutawayAmount) discard;
       }`,
         );
       };
-      material.customProgramCacheKey = () => "player-cutaway-v1";
+      material.customProgramCacheKey = () => "player-cutaway-subtle-v2";
       material.needsUpdate = true;
     },
     update(camera, focus, width, height, pixelRatio = 1, enabled = true) {
@@ -46,7 +46,7 @@ export function createPlayerVisibility() {
         projected.z * 0.5 + 0.5,
       );
       uniforms.playerCutawayRadius.value =
-        (focus.mode === "drive" ? 72 : 56) * pixelRatio;
+        (focus.mode === "drive" ? 60 : 46) * pixelRatio;
     },
   };
 }

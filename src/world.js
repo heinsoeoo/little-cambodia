@@ -408,7 +408,6 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
     facades,
     riverLife,
     landmarkScenes,
-    cameraObstacles: obstacles,
     collides(x, z) {
       if ((map.water || []).some((w) => insidePolygon(x, z, w.points)))
         return true;
