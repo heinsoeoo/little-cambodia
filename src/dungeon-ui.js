@@ -1,3 +1,4 @@
+import { createCombatEffects } from "./dungeon-effects.js";
 import * as T from "three";
 import {
   CLASSES,
@@ -5,7 +6,7 @@ import {
   DUNGEON_ROOMS,
   DUNGEON_CORRIDORS,
 } from "./dungeon-rules.js";
-import { PORTAL } from "./dungeon-portal.js";
+import { PORTAL, PORTAL_ENTRY_RANGE } from "./dungeon-portal.js";
 import {
   createHunter,
   createRiftEnemy,
@@ -28,7 +29,7 @@ export function createDungeonUI({
     if (node.textContent !== value) node.textContent = value;
   };
   let data = {
-      portal: { ...PORTAL, phase: "ready", count: 0 },
+      portal: { ...PORTAL, phase: "cooldown", active: false, count: 0 },
       instance: null,
     },
     opened = false,
@@ -45,8 +46,24 @@ export function createDungeonUI({
     labels = new Map(),
     rings = new Map(),
     seenHits = new Map(),
-    effects = [];
+    seenActions = new Map();
   const dungeon = new T.Scene();
+  const combatEffects = createCombatEffects(dungeon);
+  function combatButton(id, caption, icon) {
+    const button = $(id);
+    if (!button.firstElementChild) {
+      const img = document.createElement("img"),
+        label = document.createElement("span");
+      img.alt = "";
+      button.replaceChildren(img, label);
+    }
+    const path = `/art/combat/${icon}.svg`;
+    if (button.firstElementChild.getAttribute("src") !== path)
+      button.firstElementChild.setAttribute("src", path);
+    if (button.lastElementChild.textContent !== caption)
+      button.lastElementChild.textContent = caption;
+    button.setAttribute("aria-label", caption);
+  }
   dungeon.background = new T.Color(0x151526);
   dungeon.fog = new T.Fog(0x151526, 110, 210);
   dungeon.add(new T.HemisphereLight(0xc2c4ef, 0x353044, 2.1));
@@ -128,9 +145,9 @@ export function createDungeonUI({
     button.type = "button";
     button.dataset.class = id;
     button.setAttribute("aria-pressed", "false");
-    const icon = document.createElement("b");
-    icon.textContent = spec.icon;
-    icon.style.color = "#" + spec.color.toString(16);
+    const icon = document.createElement("img");
+    icon.src = `/art/combat/${id}.svg`;
+    icon.alt = "";
     const title = document.createElement("strong");
     title.textContent = translate(spec.name);
     const description = document.createElement("small");
@@ -217,11 +234,9 @@ export function createDungeonUI({
     }
     hunters.clear();
     seenHits.clear();
-    for (const effect of effects) {
-      dungeon.remove(effect.object);
-      disposeRiftObject(effect.object);
-    }
-    effects.length = 0;
+    seenActions.clear();
+    combatEffects.clear();
+
     for (const model of enemies.values()) {
       dungeon.remove(model);
       disposeRiftObject(model);
@@ -280,9 +295,12 @@ export function createDungeonUI({
       return opened;
     },
     get goal() {
-      return portalNavigation
-        ? { point: [PORTAL.x, PORTAL.z], label: "Lantern Rift" }
+      return portalNavigation && data.portal.active
+        ? { point: [data.portal.x, data.portal.z], label: "Lantern Rift" }
         : null;
+    },
+    get portal() {
+      return data.portal;
     },
     receive(event) {
       if (event.type === "state" && event.dungeon) {
@@ -328,17 +346,22 @@ export function createDungeonUI({
         p = data.portal,
         seconds = Math.max(0, Math.ceil((p.closesAt - clock) / 1000)),
         cooldown = Math.max(0, Math.ceil((p.cooldownUntil - clock) / 1000));
+      const idle = Math.max(0, Math.ceil((p.expiresAt - clock) / 1000)),
+        duration = `${Math.floor(idle / 60)}:${String(idle % 60).padStart(2, "0")}`;
       const status =
         p.phase === "joining"
           ? `${translate("Seals in")} ${seconds}s · ${p.count}/4`
           : p.phase === "ready"
-            ? translate("Portal ready")
+            ? `${translate("Fades in")} ${duration} · ${translate(p.district || "Riverside")}`
             : p.phase === "cooldown"
-              ? `${translate("Recharging")} ${cooldown}s`
+              ? `${translate("Next portal in")} ${cooldown}s`
               : translate("Raid in progress");
+      const distanceToPortal = Math.hypot(self.x - p.x, self.z - p.z);
       setText(
         "rift-open",
-        `◉ ${translate("Lantern Rift")} · ${p.phase === "joining" ? seconds + "s" : p.phase === "ready" ? translate("Enter") : translate("Busy")}`,
+        !p.active
+          ? `${translate("No active rift")} · ${cooldown}s`
+          : `◉ ${translate("Lantern Rift")} · ${distanceToPortal > PORTAL_ENTRY_RANGE ? Math.round(distanceToPortal) + " m" : p.phase === "ready" ? translate("Enter") : p.phase === "joining" ? seconds + "s" : translate("Busy")}`,
       );
       setText("rift-status", status);
       setText(
@@ -358,26 +381,31 @@ export function createDungeonUI({
           "aria-pressed",
           String(button.dataset.class === classId(self.combatClass)),
         );
-      const distance = Math.hypot(self.x - PORTAL.x, self.z - PORTAL.z);
+      const distance = Math.hypot(self.x - p.x, self.z - p.z);
       $("rift-enter").disabled =
+        !p.active ||
         self.mode !== "walk" ||
-        distance > 8 ||
+        distance > PORTAL_ENTRY_RANGE ||
         !["ready", "joining"].includes(p.phase) ||
         p.count >= 4;
       setText(
         "rift-distance",
-        distance > 8
-          ? `${translate("Walk to the portal")} · ${Math.round(distance)} m`
-          : self.mode === "drive"
-            ? translate("Get out of your vehicle first.")
-            : translate("Up to 4 hunters. Your class locks on entry."),
+        !p.active
+          ? translate("Watch the map for a new portal.")
+          : distance > PORTAL_ENTRY_RANGE
+            ? `${translate("Walk to the portal")} · ${Math.round(distance)} m`
+            : self.mode === "drive"
+              ? translate("Get out of your vehicle first.")
+              : translate("Up to 4 hunters. Your class locks on entry."),
       );
       rim.rotation.z = time * 0.00025;
       disc.material.opacity = 0.5 + Math.sin(time * 0.002) * 0.12;
       rim.material.color.setHex(
         p.phase === "ready" || p.phase === "joining" ? 0xb99bff : 0x7c708c,
       );
-      portal.visible = !self.dungeonId;
+      portal.position.set(p.x, 0, p.z);
+      portal.visible = p.active && !self.dungeonId;
+      $("rift-map").disabled = !p.active;
       if (self.dungeonId !== currentId) {
         clearModels();
         currentId = self.dungeonId;
@@ -422,13 +450,19 @@ export function createDungeonUI({
         );
         $(id).disabled =
           !active || instance?.phase !== "fighting" || remaining > 0;
-        setText(
+        combatButton(
           id,
           remaining
             ? `${remaining}s`
             : translate(action === "skill" ? spec.skill : "Dodge"),
+          action === "skill" ? classId(self.combatClass) : "dodge",
         );
       }
+      combatButton(
+        "dungeon-attack",
+        translate("Attack"),
+        classId(self.combatClass),
+      );
       attackButton.disabled = !active || instance?.phase !== "fighting";
       for (const [i, gate] of gates.entries())
         gate.visible = (instance?.stage || 0) <= i;
@@ -471,6 +505,14 @@ export function createDungeonUI({
           1 - Math.exp(-dt * 24),
         );
         model.update(p, dt, clock);
+        if (
+          p.combat?.lastAttackAt &&
+          seenActions.get(p.id) !== p.combat.lastAttackAt
+        ) {
+          seenActions.set(p.id, p.combat.lastAttackAt);
+          if (clock - p.combat.lastAttackAt < 1000)
+            combatEffects.action(p, time);
+        }
       }
       for (const e of data.instance?.enemies || []) {
         if (!enemies.has(e.id)) {
@@ -484,35 +526,11 @@ export function createDungeonUI({
         model.position.lerp(new T.Vector3(e.x, 0, e.z), 1 - Math.exp(-dt * 12));
         if (e.hitAt && e.hitAt !== seenHits.get(e.id)) {
           seenHits.set(e.id, e.hitAt);
-          const attacker = hunters.get(e.hitBy),
-            state = players.find((p) => p.id === e.hitBy);
+          const state = players.find((p) => p.id === e.hitBy);
           const color = CLASSES[classId(state?.combatClass)].color;
-          const spark = new T.Mesh(
-            new T.IcosahedronGeometry(0.45, 0),
-            new T.MeshBasicMaterial({ color, transparent: true, opacity: 0.9 }),
-          );
-          spark.position.set(e.x, 1.2, e.z);
-          dungeon.add(spark);
-          effects.push({ object: spark, until: time + 240 });
-          if (attacker) {
-            const from = attacker.group.position.clone();
-            from.y = 1.5;
-            const beam = new T.Line(
-              new T.BufferGeometry().setFromPoints([
-                from,
-                new T.Vector3(e.x, 1.2, e.z),
-              ]),
-              new T.LineBasicMaterial({
-                color,
-                transparent: true,
-                opacity: 0.8,
-              }),
-            );
-            dungeon.add(beam);
-            effects.push({ object: beam, until: time + 180 });
-          }
+          combatEffects.hit(e, color, time);
         }
-        model.rotation.y = Math.atan2(self.x - e.x, self.z - e.z);
+        model.rotation.y = e.heading ?? Math.atan2(self.x - e.x, self.z - e.z);
         model.position.y =
           e.type === "wisp" ? Math.sin(time * 0.003) * 0.15 : 0;
         if (e.windup && e.hp > 0) {
@@ -537,18 +555,7 @@ export function createDungeonUI({
           ring.material.opacity = 0.25 + Math.sin(time * 0.015) * 0.1;
         } else if (rings.has(e.id)) rings.get(e.id).visible = false;
       }
-      for (let i = effects.length - 1; i >= 0; i--) {
-        const effect = effects[i];
-        if (time > effect.until) {
-          dungeon.remove(effect.object);
-          disposeRiftObject(effect.object);
-          effects.splice(i, 1);
-        } else
-          effect.object.material.opacity = Math.max(
-            0,
-            (effect.until - time) / 240,
-          );
-      }
+      combatEffects.update(time);
       const focus = hunters.get(self.id)?.group.position || self;
       camera.zoom = 2.4;
       camera.updateProjectionMatrix();

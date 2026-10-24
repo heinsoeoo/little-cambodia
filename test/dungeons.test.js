@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { createDungeons, PORTAL } from "../server/dungeons.js";
 import { CLASSES, dungeonBlocked } from "../src/dungeon-rules.js";
 import { createGuest, stepGuest, guestAction } from "../src/open-world.js";
+import { PORTAL_SITES } from "../src/dungeon-portal.js";
+import { blocked } from "../src/open-world.js";
 import { withinVoiceRange } from "../src/voice-range.js";
 function setup(count = 1) {
   let clock = 100000;
@@ -16,6 +18,8 @@ function setup(count = 1) {
     players: () => players,
     emit: (p, e) => events.push({ id: p.id, ...structuredClone(e) }),
     now: () => clock,
+    sites: [PORTAL],
+    random: () => 0,
   });
   return {
     players,
@@ -136,6 +140,7 @@ test("empty and disconnected parties recover the portal and leave returns safely
   s.game.tick(0);
   assert.equal(s.game.snapshot().portal.phase, "cooldown");
   s.advance(15000);
+  s.game.tick(0);
   assert.equal(s.game.snapshot().portal.phase, "ready");
   s.game.action(p, { action: "enter" });
   s.players.splice(0, 1);
@@ -222,4 +227,56 @@ test("each class can defeat the solo boss using normal movement, attacks, skills
     assert.equal(boss.hp, 0, role + " can clear solo");
     assert.equal(p.riftCoins, 100);
   }
+});
+
+test("entry requires walking within four metres of the active portal", () => {
+  const s = setup(),
+    p = s.players[0];
+  p.x = PORTAL.x + 4.01;
+  assert.match(s.game.action(p, { action: "enter" }), /within 4 m/);
+  p.x = PORTAL.x + 4;
+  s.game.action(p, { action: "enter" });
+  assert.ok(p.dungeonId);
+});
+test("unused portals expire and respawn at a different random site", () => {
+  let clock = 1000;
+  const p = { ...createGuest("test", "Test"), x: PORTAL.x, z: PORTAL.z };
+  const game = createDungeons({
+    players: () => [p],
+    emit: () => {},
+    now: () => clock,
+    random: () => 0,
+    sites: [PORTAL, { ...PORTAL, x: PORTAL.x + 50, siteId: "other" }],
+    lifetime: 10000,
+  });
+  assert.equal(game.snapshot(p).portal.x, PORTAL.x);
+  clock += 10000;
+  assert.match(game.action(p, { action: "enter" }), /faded/);
+  game.tick(0);
+  assert.equal(game.snapshot(p).portal.active, false);
+  clock += 20000;
+  game.tick(0);
+  assert.equal(game.snapshot(p).portal.x, PORTAL.x + 50);
+  assert.match(game.action(p, { action: "enter" }), /within 4 m/);
+});
+test("an occupied portal survives its unused expiry deadline", () => {
+  const s = setup();
+  s.game.action(s.players[0], { action: "enter" });
+  s.advance(300001);
+  s.game.tick(0);
+  assert.equal(s.game.snapshot(s.players[0]).portal.active, true);
+  assert.equal(s.game.snapshot(s.players[0]).instance.phase, "fighting");
+});
+
+test("random portal sites have room for hunters away from buildings and water", () => {
+  assert.ok(PORTAL_SITES.length >= 3);
+  for (const site of PORTAL_SITES.slice(1))
+    for (const [dx, dz] of [
+      [0, 0],
+      [2, 0],
+      [-2, 0],
+      [0, 2],
+      [0, -2],
+    ])
+      assert.equal(blocked(site.x + dx, site.z + dz), false, site.siteId);
 });

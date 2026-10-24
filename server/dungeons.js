@@ -1,10 +1,43 @@
 import { CLASSES, classId, dungeonBlocked } from "../src/dungeon-rules.js";
-import { PORTAL } from "../src/dungeon-portal.js";
+import {
+  PORTAL,
+  PORTAL_SITES,
+  PORTAL_ENTRY_RANGE,
+  PORTAL_LIFETIME,
+} from "../src/dungeon-portal.js";
 export { PORTAL };
-export function createDungeons({ players, emit, now = Date.now }) {
+export function createDungeons({
+  players,
+  emit,
+  now = Date.now,
+  random = Math.random,
+  sites = PORTAL_SITES,
+  lifetime = PORTAL_LIFETIME,
+}) {
   let instance = null,
     cooldownUntil = 0,
-    serial = 0;
+    serial = 0,
+    portalSerial = 0,
+    portal = null,
+    lastSite = null;
+  function spawnPortal() {
+    const options = sites.filter((site) => site.siteId !== lastSite);
+    const choices = options.length ? options : sites;
+    const site =
+      choices[
+        Math.min(
+          choices.length - 1,
+          Math.max(0, Math.floor(random() * choices.length)),
+        )
+      ];
+    portal = {
+      ...site,
+      id: `portal-${++portalSerial}`,
+      expiresAt: now() + lifetime,
+    };
+    lastSite = site.siteId;
+  }
+  spawnPortal();
   function members() {
     return players().filter((p) => p.dungeonId === instance?.id);
   }
@@ -118,6 +151,10 @@ export function createDungeons({ players, emit, now = Date.now }) {
     c[ready] = time + (skill ? spec.skillCooldown : spec.cooldown);
     c.lastAttackAt = time;
     c.lastAction = skill ? "skill" : "attack";
+    c.fromX = p.x;
+    c.fromZ = p.z;
+    c.targetX = target?.x ?? p.x;
+    c.targetZ = target?.z ?? p.z;
     if (target) p.heading = Math.atan2(target.x - p.x, target.z - p.z);
     const hit = (enemy, amount) => {
       enemy.hp = Math.max(0, enemy.hp - amount);
@@ -184,8 +221,13 @@ export function createDungeons({ players, emit, now = Date.now }) {
       }
       if (message.action === "enter") {
         if (p.dungeonId) return "You are already in a dungeon.";
-        if (p.mode !== "walk" || Math.hypot(p.x - PORTAL.x, p.z - PORTAL.z) > 8)
-          return "Walk to the Lantern Rift to enter.";
+        if (!portal || (!instance && time >= portal.expiresAt))
+          return "This portal has faded. Check the map for the next rift.";
+        if (
+          p.mode !== "walk" ||
+          Math.hypot(p.x - portal.x, p.z - portal.z) > PORTAL_ENTRY_RANGE
+        )
+          return "Walk within 4 m of the portal to enter.";
         if (time < cooldownUntil) return "The portal is recharging.";
         if (
           instance &&
@@ -240,6 +282,8 @@ export function createDungeons({ players, emit, now = Date.now }) {
         p.combat &&
         time >= p.combat.dodgeReadyAt
       ) {
+        p.combat.fromX = p.x;
+        p.combat.fromZ = p.z;
         p.combat.dodgeReadyAt = time + 3000;
         p.combat.invulnerableUntil = time + 550;
         p.combat.lastAction = "dodge";
@@ -252,14 +296,23 @@ export function createDungeons({ players, emit, now = Date.now }) {
             p.z = z;
           }
         }
+        p.combat.targetX = p.x;
+        p.combat.targetZ = p.z;
       }
     },
     tick(dt) {
-      if (!instance) return;
-      const time = now(),
-        party = members();
+      const time = now();
+      if (!instance) {
+        if (portal && time >= portal.expiresAt) {
+          portal = null;
+          cooldownUntil = time + 20000 + Math.floor(random() * 40000);
+        } else if (!portal && time >= cooldownUntil) spawnPortal();
+        return;
+      }
+      const party = members();
       if (!party.length) {
         instance = null;
+        portal = null;
         cooldownUntil = time + 15000;
         return;
       }
@@ -270,6 +323,7 @@ export function createDungeons({ players, emit, now = Date.now }) {
         for (const p of party)
           leave(p, "The rift has returned you to the city.");
         instance = null;
+        portal = null;
         cooldownUntil = time + 60000;
         return;
       }
@@ -303,6 +357,7 @@ export function createDungeons({ players, emit, now = Date.now }) {
               ? a
               : b,
           );
+        e.heading = Math.atan2(target.x - e.x, target.z - e.z);
         if (e.windup) {
           if (time >= e.windup.endsAt) {
             for (const p of alive)
@@ -337,9 +392,10 @@ export function createDungeons({ players, emit, now = Date.now }) {
     snapshot(p) {
       return {
         portal: {
-          ...PORTAL,
-          phase:
-            instance?.phase || (now() < cooldownUntil ? "cooldown" : "ready"),
+          ...(portal || { ...PORTAL, id: null }),
+          active: Boolean(portal),
+          expiresAt: portal?.expiresAt || 0,
+          phase: instance?.phase || (portal ? "ready" : "cooldown"),
           closesAt: instance?.closesAt || 0,
           cooldownUntil,
           count: instance ? members().length : 0,

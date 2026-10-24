@@ -1,3 +1,4 @@
+import { PORTAL } from "../src/dungeon-portal.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
@@ -292,7 +293,9 @@ test("nearby voice membership and signaling follow authoritative positions over 
 
 test("dungeon entry, class locking and snapshots isolate hunters from city guests", async (t) => {
   const server = createServer(),
-    hub = createMultiplayer(server);
+    hub = createMultiplayer(server, {
+      dungeonOptions: { sites: [PORTAL], random: () => 0 },
+    });
   server.listen(0, "127.0.0.1");
   await once(server, "listening");
   const url = `ws://127.0.0.1:${server.address().port}/multiplayer`;
@@ -309,6 +312,10 @@ test("dungeon entry, class locking and snapshots isolate hunters from city guest
     JSON.stringify({ type: "dungeon", action: "class", classId: "mage" }),
   );
   assert.equal((await changed).player.combatClass, "mage");
+  Object.assign(
+    hub.snapshot().players.find((p) => p.id === a.id),
+    { x: PORTAL.x, z: PORTAL.z },
+  );
   const enter = waitMessage(
     a.ws,
     (m) => m.type === "dungeon-player" && m.player.dungeonId,

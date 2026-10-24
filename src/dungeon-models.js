@@ -166,11 +166,51 @@ export function createHunter(look, role = "fighter", enemy = false) {
       legs[1].rotation.x = -swing;
       arms[0].rotation.x = -swing * 0.7;
       arms[1].rotation.x = swing * 0.7;
-      const attacking = time - (state.combat?.lastAttackAt || 0) < 350;
-      if (attacking)
-        arms[1].rotation.x =
-          -1.6 +
-          Math.sin(((time - state.combat.lastAttackAt) / 350) * Math.PI) * 1.5;
+      arms.forEach((arm) => {
+        arm.rotation.y = 0;
+        arm.rotation.z = 0;
+      });
+      body.rotation.y = 0;
+      group.rotation.x = 0;
+      group.rotation.z = 0;
+      const age = time - (state.combat?.lastAttackAt || 0),
+        skill = state.combat?.lastAction === "skill",
+        duration = skill ? 520 : 360;
+      if (age >= 0 && age < duration) {
+        const phase = age / duration,
+          pulse = Math.sin(phase * Math.PI);
+        if (state.combat?.lastAction === "dodge") {
+          group.rotation.x = -pulse * 0.5;
+          arms[0].rotation.x = -0.8;
+          arms[1].rotation.x = -0.8;
+        } else if (role === "mage" || role === "support") {
+          arms[1].rotation.x = -1.5 * pulse;
+          arms[0].rotation.x = -1.1 * pulse;
+          arms[0].rotation.z = -0.5 * pulse;
+          body.rotation.y = 0.2 * pulse;
+        } else if (role === "marksman") {
+          arms[1].rotation.x = -1.4;
+          arms[1].rotation.z = 0.35;
+          arms[0].rotation.x = -1.2;
+          arms[0].rotation.y = 0.8 * (1 - phase);
+          body.rotation.y = 0.35;
+        } else if (role === "assassin") {
+          arms[1].rotation.x = -1.8 * pulse;
+          arms[0].rotation.x =
+            -1.8 * Math.sin(Math.min(1, phase + 0.2) * Math.PI);
+          body.rotation.y = Math.sin(phase * Math.PI * 2) * 0.35;
+          group.rotation.x = pulse * 0.2;
+        } else {
+          arms[1].rotation.x = -0.9;
+          arms[1].rotation.z = (phase - 0.5) * 2.8;
+          body.rotation.y = (phase - 0.5) * 0.7;
+          arms[0].rotation.x = role === "tank" ? -1.1 : -pulse * 0.3;
+        }
+      }
+      if (role === "tank" && state.combat?.guardUntil > time) {
+        arms[0].rotation.x = -1.3;
+        arms[0].rotation.z = -0.35;
+      }
       group.rotation.y = state.heading || 0;
       body.position.y =
         1.05 +

@@ -1,6 +1,16 @@
 // UI text is translated without changing form values or player-created names.
 export const LANGUAGE_KEY = "little-cambodia-language";
 export const KHMER = {
+  "Art credits": "ប្រភពស្នាដៃសិល្បៈ",
+  "Fades in": "នឹងបាត់ក្នុង",
+  "Next portal in": "ច្រកបន្ទាប់ក្នុង",
+  "No active rift": "មិនមានច្រកសកម្ម",
+  "Watch the map for a new portal.": "មើលផែនទីដើម្បីស្វែងរកច្រកថ្មី។",
+  "Walk within 4 m of the portal to enter.":
+    "ដើរចូលក្នុងចម្ងាយ ៤ ម៉ែត្រពីច្រកដើម្បីចូល។",
+  "This portal has faded. Check the map for the next rift.":
+    "ច្រកនេះបានបាត់ហើយ។ មើលផែនទីសម្រាប់ច្រកបន្ទាប់។",
+
   "Collected weapons": "អាវុធដែលបានប្រមូល",
   "Boss reward: 100 rift coins and a class weapon. Collected weapons add +2 damage.":
     "រង្វាន់មេបិសាច៖ កាក់ច្រក ១០០ និងអាវុធតួនាទី។ អាវុធដែលបានប្រមូលបន្ថែមការវាយ ២។",
@@ -49,7 +59,7 @@ export const KHMER = {
   "Whisper gallery": "វិចិត្រសាលសំឡេងខ្សឹប",
   "The Warden": "ឆ្មាំស្រមោល",
   "Boss defeated!": "បានកម្ចាត់មេបិសាច!",
-  "A shadow has opened beside the riverside. Choose your hunter class.":
+  "A shadow has opened in the city. Choose your hunter class.":
     "ច្រកស្រមោលបានបើកនៅមាត់ទន្លេ។ ជ្រើសរើសតួនាទីប្រយុទ្ធរបស់អ្នក។",
   "Balanced melee · wide sweeping attacks":
     "ប្រយុទ្ធជិតមានតុល្យភាព · វាយជារង្វង់ធំ",

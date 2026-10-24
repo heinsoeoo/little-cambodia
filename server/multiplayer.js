@@ -17,7 +17,7 @@ import {
   nickname,
 } from "../src/open-world.js";
 
-export function createMultiplayer(httpServer) {
+export function createMultiplayer(httpServer, { dungeonOptions = {} } = {}) {
   const wss = new WebSocketServer({
     noServer: true,
     maxPayload: 16384,
@@ -31,6 +31,7 @@ export function createMultiplayer(httpServer) {
   };
   const voice = createVoiceHub(clients, send);
   const dungeons = createDungeons({
+    ...dungeonOptions,
     players: () =>
       [...clients.values()].flatMap((c) => (c.player ? [c.player] : [])),
     emit: (player, data) => {

@@ -1659,3 +1659,36 @@ body:has(#update-notice:not([hidden])) .install-notice {
   z-index: 60;
   bottom: 115px;
 }
+
+.rift-classes button img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  opacity: 0.9;
+}
+.dungeon-combat button img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  pointer-events: none;
+}
+.dungeon-combat button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.dungeon-combat button span {
+  font-size: 11px;
+  line-height: 1.2;
+}
+.art-credits {
+  margin: 16px 0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.art-credits a {
+  color: inherit;
+  text-decoration: underline;
+}

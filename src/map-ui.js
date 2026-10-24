@@ -1,4 +1,3 @@
-import { PORTAL } from "./dungeon-portal.js";
 import { createQuestNavigation, radarPoint } from "./quest-navigation.js";
 import { translate } from "./i18n.js";
 export function createCityMap({ map, bounds, path, onOpen, canOpen }) {
@@ -45,7 +44,8 @@ export function createCityMap({ map, bounds, path, onOpen, canOpen }) {
   let player = null,
     target = null,
     players = [],
-    route = null;
+    route = null,
+    portal = null;
   const overlay = $("full-map-overlay");
   const cityCenter = [
     (bounds.min[0] + bounds.max[0]) / 2,
@@ -144,13 +144,15 @@ export function createCityMap({ map, bounds, path, onOpen, canOpen }) {
       extent * factor,
       extent * factor,
     );
-    context.strokeStyle = "#bba2ee";
-    context.fillStyle = "#6944aa";
-    context.lineWidth = 2;
-    context.beginPath();
-    context.arc(px(PORTAL.x), pz(PORTAL.z), 5, 0, Math.PI * 2);
-    context.fill();
-    context.stroke();
+    if (portal?.active) {
+      context.strokeStyle = "#bba2ee";
+      context.fillStyle = "#6944aa";
+      context.lineWidth = 2;
+      context.beginPath();
+      context.arc(px(portal.x), pz(portal.z), 5, 0, Math.PI * 2);
+      context.fill();
+      context.stroke();
+    }
     if (route && target) {
       context.save();
       context.lineJoin = context.lineCap = "round";
@@ -280,7 +282,8 @@ export function createCityMap({ map, bounds, path, onOpen, canOpen }) {
     get isOpen() {
       return !overlay.hidden;
     },
-    update(state, goal, guests, time) {
+    update(state, goal, guests, time, portalState = null) {
+      portal = portalState;
       player = state;
       target = goal;
       players = guests;

@@ -792,6 +792,7 @@ function frame(now) {
       activities.game.target || dungeonUI.goal,
       network.players,
       now,
+      dungeonUI.portal,
     );
   }
   if (now > noticeUntil) $("toast").style.opacity = 0;
