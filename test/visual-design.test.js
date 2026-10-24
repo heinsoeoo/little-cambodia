@@ -83,11 +83,13 @@ test("adult character details survive mixed clothes and seated/standing pose cha
   assert.equal(character.group.position.y, 0.52);
   character.pose({ mode: "walk", heading: 0, speed: 0 });
   assert.equal(character.group.position.y, 0);
-  assert.equal(
-    character.group
-      .getObjectByName("illustrated-head")
-      .getWorldPosition(new T.Vector3()).y,
-    1.84,
+  assert.ok(
+    Math.abs(
+      character.group
+        .getObjectByName("illustrated-head")
+        .getWorldPosition(new T.Vector3()).y - 1.656,
+    ) < 0.02,
+    "idle breathing keeps the head close to its mount height",
   );
   character.dispose();
 });

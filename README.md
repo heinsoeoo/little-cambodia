@@ -142,3 +142,8 @@ The opening lasts 50 seconds with paired English/Khmer story, love-note and cred
 Portals choose a walkable city site at random. Walk within 4 metres on foot to enter. Unused portals fade after five minutes, then a new portal appears after 20–60 seconds at another site. First entry still starts the 30-second party window; occupied portals remain until the run ends. The city map follows the active portal.
 
 Attacks now use class-specific poses, projectiles, melee arcs and healing/guard effects. Open assets and license details are in `public/art/combat/CREDITS.md` and the in-game Settings credits.
+
+### Soft modern visual theme
+The Luma Bay reference informs the warm pastel city palette, rounded vehicle bodies and cabins, softly shaded characters, and cream/sage interface. Model rendering is shared by gameplay, garage thumbnails, the wardrobe and intro. All 17 vehicle choices and existing paint/customization identifiers are retained. Cars include seats, headrests and steering wheels beneath tinted windows; bike mounting, leaning and rolling-wheel pivots are unchanged.
+
+Static city geometry stays batched below the existing 50-mesh budget. Building footprints, routes, landmarks, network simulation and dungeon rules are unchanged. Performance graphics still reduce resolution and disable dynamic shadows; inexpensive vehicle contact shadows remain visible.

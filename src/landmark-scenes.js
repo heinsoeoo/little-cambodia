@@ -6,13 +6,17 @@ import { places, detailFootprint } from "./places.js";
 
 // Shared static batches keep lamps and architectural detail inexpensive on phones.
 export function addLandmarkScenes(scene, map, city, path) {
-  const stone = new T.MeshLambertMaterial({ color: 0x9e6046 });
-  const cream = new T.MeshLambertMaterial({
+  const stone = new T.MeshStandardMaterial({
+    roughness: 0.85,
+    color: 0x9e6046,
+  });
+  const cream = new T.MeshStandardMaterial({
+    roughness: 0.85,
     color: 0xf3dfb0,
     side: T.DoubleSide,
   });
-  const gold = new T.MeshLambertMaterial({ color: 0xd8aa51 });
-  const roof = new T.MeshLambertMaterial({ color: 0xb26948 });
+  const gold = new T.MeshStandardMaterial({ roughness: 0.85, color: 0xd8aa51 });
+  const roof = new T.MeshStandardMaterial({ roughness: 0.85, color: 0xb26948 });
   const glow = new T.MeshBasicMaterial({ color: 0xffd58c });
   const batches = new Map(),
     groups = [];

@@ -1,3 +1,4 @@
+import { ART, roundedGeometry } from "./art-direction.js";
 import { BENCHES } from "./open-world.js";
 import * as T from "three";
 import { addLandmarkScenes } from "./landmark-scenes.js";
@@ -29,11 +30,12 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
       eastSouth[0] - westNorth[0] + 1200,
       eastSouth[1] - westNorth[1] + 1200,
     ),
-    new T.MeshLambertMaterial({
+    new T.MeshStandardMaterial({
+      roughness: 0.85,
       color: textures.grass
         ? 0xffffff
         : map.style === "cozy"
-          ? 0x96ad7d
+          ? 0xa6bd91
           : palette.grass,
       map: textures.grass || null,
     }),
@@ -45,22 +47,40 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
     (westNorth[1] + eastSouth[1]) / 2,
   );
   scene.add(ground);
-  const roadMaterial = new T.MeshLambertMaterial({
+  const roadMaterial = new T.MeshStandardMaterial({
+      roughness: 0.85,
       color: textures.road
         ? 0xffffff
         : map.style === "cozy"
-          ? 0x92938a
+          ? 0x758583
           : palette.road,
       map: textures.road || null,
     }),
-    curbMaterial = new T.MeshLambertMaterial({ color: palette.curb });
+    curbMaterial = new T.MeshStandardMaterial({
+      roughness: 0.85,
+      color: palette.curb,
+    });
   const markingMaterial = new T.MeshBasicMaterial({ color: 0xe7dfb2 });
   const batches = new Map();
   const batch = (geometry, material) => {
+    if (geometry.index) {
+      const flat = geometry.toNonIndexed();
+      geometry.dispose();
+      geometry = flat;
+    }
+    if (!geometry.attributes.uv)
+      geometry.setAttribute(
+        "uv",
+        new T.Float32BufferAttribute(
+          new Float32Array(geometry.attributes.position.count * 2),
+          2,
+        ),
+      );
     if (!batches.has(material)) batches.set(material, []);
     batches.get(material).push(geometry);
   };
-  const waterMaterial = new T.MeshLambertMaterial({
+  const waterMaterial = new T.MeshStandardMaterial({
+    roughness: 0.85,
     color: textures.water ? 0xffffff : palette.water,
     map: textures.water || null,
   });
@@ -108,7 +128,11 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
     geo.computeVertexNormals();
     batch(
       geo,
-      new T.MeshLambertMaterial({ color: 0xd5c6a2, side: T.DoubleSide }),
+      new T.MeshStandardMaterial({
+        roughness: 0.85,
+        color: 0xe8dfca,
+        side: T.DoubleSide,
+      }),
     );
   }
   const segment = (a, b, width, y, mat) => {
@@ -169,9 +193,14 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
     scene.add(mesh);
   }
   const obstacles = [];
-  const colors = [0xf0d19b, 0xe9bd8a, 0xd4dfba, 0xcba382, 0xe9d7ac, 0xbdcbb0];
+  const colors = ART.walls;
   const buildingMaterials = colors.map(
-    (color) => new T.MeshLambertMaterial({ color, map: textures.wall || null }),
+    (color) =>
+      new T.MeshStandardMaterial({
+        roughness: 0.85,
+        color,
+        map: textures.wall || null,
+      }),
   );
   buildingMaterials.forEach((material) => visibility?.apply(material));
   for (const b of map.buildings) {
@@ -182,7 +211,11 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
       );
       const geo = new T.ExtrudeGeometry(shape, {
         depth: b.height,
-        bevelEnabled: false,
+        bevelEnabled: true,
+        bevelThickness: 0.12,
+        bevelSize: 0.12,
+        bevelSegments: 1,
+        steps: 1,
       });
       geo.rotateX(-Math.PI / 2);
       geo.translate(0, 0.1, 0);
@@ -228,7 +261,8 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
   for (const [material, geometries] of batches) {
     const merged = mergeGeometries(geometries);
     const mesh = new T.Mesh(merged, material);
-    mesh.castShadow = map.style === "cozy";
+    merged.computeBoundingBox();
+    mesh.castShadow = map.style === "cozy" && merged.boundingBox.max.y > 0.5;
     mesh.receiveShadow = true;
     scene.add(mesh);
     geometries.forEach((geometry) => geometry.dispose());
@@ -238,15 +272,15 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
   const landmarkScenes = addLandmarkScenes(scene, map, city, path);
   // Instanced trees keep the district inexpensive to render.
   const trunk = new T.InstancedMesh(
-    new T.CylinderGeometry(0.4, 0.55, 5, 5),
-    new T.MeshLambertMaterial({ color: 0x7d7050 }),
+    new T.CylinderGeometry(0.32, 0.5, 5, 10),
+    new T.MeshStandardMaterial({ roughness: 0.85, color: 0x9b866c }),
     220,
   );
   const crown = new T.InstancedMesh(
     map.style === "cozy"
-      ? new T.SphereGeometry(3.6, 12, 9)
+      ? new T.SphereGeometry(3.6, 16, 12)
       : new T.IcosahedronGeometry(3.6, 0),
-    new T.MeshLambertMaterial({ color: 0x547d5a }),
+    new T.MeshStandardMaterial({ roughness: 0.85, color: 0x81a67d }),
     220,
   );
   const dummy = new T.Object3D();
@@ -291,6 +325,8 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
     }
   trunk.count = crown.count = count;
   crown.castShadow = true;
+  visibility?.apply(crown.material);
+  visibility?.apply(trunk.material);
   scene.add(trunk, crown);
 
   // Simple spatial hash keeps collision queries local even with thousands of footprints.
@@ -315,8 +351,8 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
     }
     return c;
   }
-  const wood = new T.MeshLambertMaterial({ color: 0x986e4e }),
-    metal = new T.MeshLambertMaterial({ color: 0x344b43 });
+  const wood = new T.MeshStandardMaterial({ roughness: 0.85, color: 0x986e4e }),
+    metal = new T.MeshStandardMaterial({ roughness: 0.85, color: 0x344b43 });
   const benchParts = new Map([
     [wood, []],
     [metal, []],
@@ -327,7 +363,7 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
     seat.rotation.y = bench.heading;
     seat.updateMatrix();
     const part = (w, h, d, x, y, z, material) => {
-      const m = new T.Mesh(new T.BoxGeometry(w, h, d), material);
+      const m = new T.Mesh(roundedGeometry(w, h, d, 0.035), material);
       m.position.set(x, y, z);
       m.updateMatrix();
       m.geometry.applyMatrix4(m.matrix).applyMatrix4(seat.matrix);
@@ -356,7 +392,7 @@ export function makeWorld(scene, map, city, { visibility } = {}) {
   if (allBenchParts.length) {
     const mesh = new T.Mesh(
       mergeGeometries(allBenchParts),
-      new T.MeshLambertMaterial({ vertexColors: true }),
+      new T.MeshStandardMaterial({ roughness: 0.85, vertexColors: true }),
     );
     mesh.name = "riverside-benches";
     mesh.castShadow = mesh.receiveShadow = true;
@@ -411,7 +447,7 @@ export function taxi() {
   const box = (w, h, d, x, y, z, color) => {
     const m = new T.Mesh(
       new T.BoxGeometry(w, h, d),
-      new T.MeshLambertMaterial({ color }),
+      new T.MeshStandardMaterial({ roughness: 0.85, color }),
     );
     m.position.set(x, y, z);
     group.add(m);
@@ -424,7 +460,7 @@ export function taxi() {
     for (const z of [-1.25, 1.25]) {
       const w = new T.Mesh(
         new T.CylinderGeometry(0.4, 0.4, 0.22, 12),
-        new T.MeshLambertMaterial({ color: 0x25312f }),
+        new T.MeshStandardMaterial({ roughness: 0.85, color: 0x25312f }),
       );
       w.rotation.z = Math.PI / 2;
       w.position.set(x, 0.45, z);

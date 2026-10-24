@@ -1,11 +1,20 @@
+import { roundedGeometry } from "./art-direction.js";
 import * as T from "three";
 
-// Cross-sections describe bodywork and glass as continuous sculpted surfaces.
+// Soft modern volumes preserve each vehicle's silhouette and signature details.
 // +Z is the nose. Heights and widths are deliberately readable at town scale.
 export function buildCarDesign(group, spec, materials) {
   const { body, dark, glass, cream, lamp, tail } = materials;
-  const chrome = new T.MeshLambertMaterial({ color: 0xb1bab9 });
-  const rubber = new T.MeshLambertMaterial({ color: 0x242a2d });
+  const chrome = new T.MeshStandardMaterial({
+    roughness: 0.55,
+    metalness: 0.12,
+    color: 0xb1bab9,
+  });
+  const rubber = new T.MeshStandardMaterial({
+    roughness: 0.55,
+    metalness: 0.12,
+    color: 0x242a2d,
+  });
   const { length: length, kind, id } = spec;
   const suv = kind === "suv",
     pickup = kind === "pickup",
@@ -17,7 +26,7 @@ export function buildCarDesign(group, spec, materials) {
   const width = tall ? 2.06 : modern ? 1.94 : coupe ? 1.89 : 1.84;
   const sill = tall ? 0.69 : 0.46,
     belt = tall ? 1.48 : 1.12;
-  const roof = tall ? 2.18 : coupe ? 1.59 : hatch ? 1.79 : modern ? 1.57 : 1.68;
+  const roof = tall ? 2.32 : coupe ? 1.76 : hatch ? 1.95 : modern ? 1.82 : 1.88;
   const front = length / 2,
     rear = -front;
   function mesh(geometry, material, name) {
@@ -28,121 +37,88 @@ export function buildCarDesign(group, spec, materials) {
     return object;
   }
   function box(w, h, d, x, y, z, material, name = "trim") {
-    const object = mesh(new T.BoxGeometry(w, h, d), material, name);
+    const object = mesh(roundedGeometry(w, h, d, 0.08), material, name);
     object.position.set(x, y, z);
     return object;
   }
-  function sectionHull(rings, material, name) {
-    const vertices = [],
-      indices = [];
-    for (const { z, w, bottom, top, bevel = 0.07 } of rings) {
-      const x = w / 2;
-      for (const [px, py] of [
-        [-x + bevel, bottom],
-        [x - bevel, bottom],
-        [x, bottom + bevel],
-        [x, top - bevel],
-        [x - bevel, top],
-        [-x + bevel, top],
-        [-x, top - bevel],
-        [-x, bottom + bevel],
-      ])
-        vertices.push(px, py, z);
-    }
-    for (let ring = 0; ring < rings.length - 1; ring++)
-      for (let j = 0; j < 8; j++) {
-        const a = ring * 8 + j,
-          b = ring * 8 + ((j + 1) % 8),
-          c = b + 8,
-          d = a + 8;
-        indices.push(a, b, d, b, c, d);
-      }
-    for (let j = 1; j < 7; j++) {
-      indices.push(0, j + 1, j);
-      const end = (rings.length - 1) * 8;
-      indices.push(end, end + j, end + j + 1);
-    }
-    const geometry = new T.BufferGeometry();
-    geometry.setAttribute(
-      "position",
-      new T.Float32BufferAttribute(vertices, 3),
-    );
-    geometry.setIndex(indices);
-    geometry.computeVertexNormals();
-    return mesh(geometry, material, name);
-  }
-  sectionHull(
-    [
-      { z: rear, w: width * 0.88, bottom: sill + 0.04, top: belt - 0.12 },
-      { z: rear + 0.28, w: width, bottom: sill, top: belt },
-      { z: -0.4, w: width, bottom: sill, top: belt + 0.03 },
-      {
-        z: front - 0.55,
-        w: width * 0.97,
-        bottom: sill,
-        top: belt - (modern ? 0.03 : 0.01),
-      },
-      {
-        z: front,
-        w: width * (boxy ? 0.94 : 0.86),
-        bottom: sill + 0.05,
-        top: belt - 0.14,
-      },
-    ],
+  // Rounded toy-like volumes match the Luma Bay reference. Individual cabin
+  // lengths, roof heights, lights and trim still identify the existing cars.
+  const bodyHeight = belt - sill + 0.12;
+  const shell = mesh(
+    roundedGeometry(width, bodyHeight, length, boxy ? 0.15 : 0.23),
     body,
     "sculpted-body",
   );
+  shell.position.set(0, (belt + sill) / 2, 0);
+  box(
+    width * 0.97,
+    0.13,
+    length * 0.94,
+    0,
+    sill - 0.025,
+    0,
+    dark,
+    "lower-sill",
+  );
   const cabinRear = pickup ? -0.22 : hatch || suv ? rear + 0.28 : rear + 0.95;
-  const roofRear = pickup ? -0.13 : hatch || suv ? rear + 0.5 : rear + 1.35;
-  const roofFront = pickup ? 0.8 : coupe ? 0.15 : 0.34;
   const cabinFront = pickup ? 1.22 : modern ? 1.08 : 0.92;
-  sectionHull(
-    [
-      {
-        z: cabinRear,
-        w: width * 0.91,
-        bottom: belt - 0.02,
-        top: belt + 0.02,
-        bevel: 0.015,
-      },
-      { z: roofRear, w: width * 0.77, bottom: belt, top: roof - 0.07 },
-      { z: roofFront, w: width * 0.76, bottom: belt, top: roof - 0.07 },
-      {
-        z: cabinFront,
-        w: width * 0.89,
-        bottom: belt - 0.02,
-        top: belt + 0.02,
-        bevel: 0.015,
-      },
-    ],
+  const roofRear = cabinRear + 0.13,
+    roofFront = cabinFront - 0.13;
+  const cabinLength = cabinFront - cabinRear;
+  const cabin = mesh(
+    roundedGeometry(width * 0.85, roof - belt + 0.1, cabinLength, 0.21),
     glass,
     "shaped-cabin-glass",
   );
-  sectionHull(
-    [
-      {
-        z: roofRear - 0.04,
-        w: width * 0.77,
-        bottom: roof - 0.08,
-        top: roof,
-        bevel: 0.025,
-      },
-      {
-        z: roofFront + 0.04,
-        w: width * 0.76,
-        bottom: roof - 0.08,
-        top: roof,
-        bevel: 0.025,
-      },
-    ],
+  cabin.position.set(0, (belt + roof) / 2 - 0.02, (cabinFront + cabinRear) / 2);
+  const roofPanel = mesh(
+    roundedGeometry(width * 0.83, 0.14, cabinLength * 0.92, 0.09),
     body,
     "shaped-roof",
   );
+  roofPanel.position.set(0, roof + 0.025, (cabinFront + cabinRear) / 2);
+  const hoodLength = Math.max(0.4, front - cabinFront - 0.07);
+  box(
+    width * 0.9,
+    0.14,
+    hoodLength,
+    0,
+    belt + 0.015,
+    cabinFront + hoodLength / 2,
+    body,
+    "rounded-bonnet",
+  );
+  if (!pickup && !hatch && !suv)
+    box(
+      width * 0.88,
+      0.1,
+      Math.max(0.25, cabinRear - rear - 0.1),
+      0,
+      belt + 0.01,
+      (rear + cabinRear) / 2,
+      body,
+      "rounded-boot",
+    );
+  // Interior silhouettes show through the softly tinted windows.
+  glass.transparent = true;
+  glass.opacity = 0.92;
+  glass.depthWrite = false;
+  for (const x of [-width * 0.22, width * 0.22]) {
+    box(0.43, 0.38, 0.16, x, belt + 0.12, cabinRear + 0.5, dark, "seat-back");
+    box(0.22, 0.17, 0.12, x, belt + 0.4, cabinRear + 0.5, cream, "headrest");
+  }
+  const steering = mesh(
+    new T.TorusGeometry(0.13, 0.025, 6, 20),
+    dark,
+    "steering-wheel",
+  );
+  steering.position.set(-width * 0.23, belt + 0.12, cabinFront - 0.26);
+  steering.rotation.x = -0.55;
   function pillar(a, b, thickness = 0.065) {
     const start = new T.Vector3(...a),
       end = new T.Vector3(...b);
     const object = mesh(
-      new T.CylinderGeometry(thickness, thickness, start.distanceTo(end), 4),
+      new T.CylinderGeometry(thickness, thickness, start.distanceTo(end), 10),
       body,
       "window-pillar",
     );
@@ -154,23 +130,23 @@ export function buildCarDesign(group, spec, materials) {
   }
   for (const side of [-1, 1]) {
     pillar(
-      [side * width * 0.445, belt, cabinFront],
-      [side * width * 0.38, roof - 0.03, roofFront],
+      [side * width * 0.425, belt, cabinFront],
+      [side * width * 0.425, roof - 0.03, roofFront],
     );
     pillar(
-      [side * width * 0.455, belt, cabinRear],
-      [side * width * 0.385, roof - 0.03, roofRear],
+      [side * width * 0.425, belt, cabinRear],
+      [side * width * 0.4255, roof - 0.03, roofRear],
       0.085,
     );
     pillar(
-      [side * width * 0.45, belt, -0.25],
-      [side * width * 0.38, roof - 0.04, -0.25],
+      [side * width * 0.425, belt, -0.25],
+      [side * width * 0.425, roof - 0.04, -0.25],
       0.04,
     );
     box(
-      0.2,
-      0.13,
-      0.28,
+      0.26,
+      0.17,
+      0.32,
       side * (width / 2 + 0.08),
       belt + 0.16,
       cabinFront - 0.18,
@@ -184,7 +160,7 @@ export function buildCarDesign(group, spec, materials) {
       side * (width / 2 + 0.005),
       belt - 0.08,
       -0.05,
-      modern ? chrome : dark,
+      body,
     );
     for (const z of coupe || pickup ? [0.0] : [-0.7, 0.38]) {
       box(
@@ -242,11 +218,11 @@ export function buildCarDesign(group, spec, materials) {
       const start = group.children.length;
       const x = side * width * 0.49;
       const tire = mesh(
-        new T.CylinderGeometry(wheelRadius, wheelRadius, 0.25, 16),
+        new T.TorusGeometry(wheelRadius - 0.075, 0.075, 10, 28),
         rubber,
         "tire",
       );
-      tire.rotation.z = Math.PI / 2;
+      tire.rotation.y = Math.PI / 2;
       tire.position.set(x, wheelRadius, z);
       const rim = mesh(
         new T.CylinderGeometry(

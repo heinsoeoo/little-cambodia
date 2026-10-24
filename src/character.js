@@ -1,3 +1,4 @@
+import { softMaterial, roundedGeometry } from "./art-direction.js";
 import * as T from "three";
 import {
   appearance,
@@ -26,7 +27,7 @@ export function createCharacter(initial) {
       cut = outfitCut(look);
     const female = cut === "female",
       male = cut === "male";
-    const mat = (color) => new T.MeshLambertMaterial({ color });
+    const mat = (color) => softMaterial(color);
     const cloth = mat(top.top),
       pants = mat(bottom.bottom),
       footwear = mat(shoes.shoe);
@@ -40,6 +41,7 @@ export function createCharacter(initial) {
       standing = new T.Group(),
       riding = new T.Group();
     group.add(upper, standing, riding);
+    upper.scale.y = 0.9;
     function add(geometry, material, position, parent = upper, name = "") {
       const object = new T.Mesh(geometry, material);
       object.position.set(...position);
@@ -50,7 +52,7 @@ export function createCharacter(initial) {
     }
     function oval(x, y, z, w, h, d, material, parent = upper, name = "") {
       const object = add(
-        new T.SphereGeometry(1, 14, 10),
+        new T.SphereGeometry(1, 20, 14),
         material,
         [x, y, z],
         parent,
@@ -60,7 +62,13 @@ export function createCharacter(initial) {
       return object;
     }
     function box(w, h, d, x, y, z, material, parent = upper, name = "") {
-      return add(new T.BoxGeometry(w, h, d), material, [x, y, z], parent, name);
+      return add(
+        roundedGeometry(w, h, d, 0.035),
+        material,
+        [x, y, z],
+        parent,
+        name,
+      );
     }
     function limb(a, b, r1, r2, material, parent = upper, name = "") {
       const start = new T.Vector3(...a),
@@ -95,9 +103,9 @@ export function createCharacter(initial) {
       );
     }
     const oversized = ["hoodie", "oversized"].includes(top.topShape);
-    const shoulder = male ? 0.25 : female ? 0.21 : 0.23;
+    const shoulder = male ? 0.27 : female ? 0.23 : 0.25;
     const hip = female ? 0.225 : 0.205,
-      waist = oversized ? 0.24 : female ? 0.155 : 0.185;
+      waist = oversized ? 0.255 : female ? 0.19 : 0.22;
     const profile = [
       [hip, 0.89],
       [hip, 0.96],
@@ -127,20 +135,11 @@ export function createCharacter(initial) {
     const head = new T.Group();
     head.name = "illustrated-head";
     head.position.y = 1.84;
+    head.scale.set(1.85, 1.75, 1.8);
     upper.add(head);
     oval(0, 0, 0, 0.145, 0.18, 0.135, skin, head, "sculpted-face");
-    // A restrained chin and cheek plane replace the old spherical doll head.
-    oval(
-      0,
-      -0.095,
-      0.025,
-      female ? 0.103 : 0.115,
-      0.075,
-      0.101,
-      skin,
-      head,
-      "jawline",
-    );
+    // Keep the cheek and chin within the round face silhouette.
+    oval(0, -0.095, 0.005, 0.085, 0.055, 0.075, skin, head, "jawline");
     for (const side of [-1, 1]) {
       oval(side * 0.143, -0.006, 0, 0.025, 0.043, 0.022, skin, head, "ear");
       oval(
@@ -148,9 +147,9 @@ export function createCharacter(initial) {
         0.027,
         0.119,
         0.034,
-        0.017,
+        0.026,
         0.015,
-        inner,
+        dark,
         head,
         "eye-white",
       );
@@ -158,14 +157,14 @@ export function createCharacter(initial) {
         side * 0.057,
         0.027,
         0.134,
-        0.014,
-        0.016,
+        0.021,
+        0.024,
         0.006,
-        mat(0x53412e),
+        mat(0x293a37),
         head,
         "iris",
       );
-      oval(side * 0.057, 0.027, 0.14, 0.007, 0.011, 0.004, dark, head, "pupil");
+      oval(side * 0.057, 0.027, 0.14, 0.012, 0.017, 0.004, dark, head, "pupil");
       oval(
         side * 0.052,
         0.032,
@@ -212,8 +211,26 @@ export function createCharacter(initial) {
       head,
       "subtle-smile",
     );
+    const blush = mat(0xe4a091);
+    for (const side of [-1, 1])
+      oval(
+        side * 0.092,
+        -0.022,
+        0.112,
+        0.024,
+        0.012,
+        0.008,
+        blush,
+        head,
+        "cheek-tint",
+      );
+    const eyes = [];
+    head.traverse((o) => {
+      if (["eye-white", "iris", "pupil", "eye-highlight"].includes(o.name))
+        eyes.push(o);
+    });
     const scalp = add(
-      new T.SphereGeometry(1, 18, 10, 0, Math.PI * 2, 0, Math.PI * 0.48),
+      new T.SphereGeometry(1, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.48),
       hair,
       [0, 0.045, -0.008],
       head,
@@ -307,21 +324,21 @@ export function createCharacter(initial) {
           head,
           "mohawk",
         );
-    } else if (!["bun", "ponytail", "braids"].includes(shape)) {
+    } else if (!["bun", "ponytail", "braids", "curls"].includes(shape)) {
       const short = ["fade", "cropped", "pixie"].includes(shape);
-      for (let i = 0; i < 4; i++) {
-        const lift = short ? 0 : shape === "quiff" ? 0.035 : 0.012;
-        curve(
-          [
-            [-0.12, 0.1 + i * 0.018, 0.07],
-            [-0.025, 0.16 + lift + i * 0.012, 0.135],
-            [0.11, 0.055 + i * 0.015, 0.105],
-          ],
-          short ? 0.016 : 0.022,
+      for (let i = 0; i < 5; i++) {
+        const lock = oval(
+          -0.12 + i * 0.057,
+          0.13 + Math.sin(i * 0.8) * 0.02,
+          0.065,
+          0.052,
+          short ? 0.055 : shape === "quiff" ? 0.11 : 0.085,
+          0.075,
           hair,
           head,
           "swept-fringe",
         );
+        lock.rotation.z = -0.35;
       }
     }
     // Garment construction: slim collars, lapels, button plackets and seams.
@@ -409,6 +426,47 @@ export function createCharacter(initial) {
         upper,
         "chain",
       );
+    if (["tee", "hoodie", "oversized"].includes(top.topShape)) {
+      box(0.13, 0.14, 0.025, -0.12, 1.3, 0.159, cloth, upper, "chest-pocket");
+      curve(
+        [
+          [-0.18, 1.25, 0.178],
+          [-0.12, 1.23, 0.18],
+          [-0.06, 1.25, 0.178],
+        ],
+        0.005,
+        seam,
+        upper,
+        "pocket-stitch",
+      );
+    }
+    if (["casual", "street", "workwear", "sporty"].includes(top.id)) {
+      const bag = mat(top.id === "street" ? 0x637e98 : 0x567b65);
+      box(0.36, 0.4, 0.2, 0, 1.23, -0.24, bag, upper, "daypack");
+      box(
+        0.25,
+        0.15,
+        0.045,
+        0,
+        1.12,
+        -0.36,
+        mat(0x88a68b),
+        upper,
+        "daypack-pocket",
+      );
+      for (const side of [-1, 1])
+        curve(
+          [
+            [side * 0.18, 1.47, -0.05],
+            [side * 0.2, 1.3, -0.18],
+            [side * 0.16, 1.06, -0.19],
+          ],
+          0.018,
+          bag,
+          upper,
+          "bag-strap",
+        );
+    }
     const arms = [],
       legs = [],
       knees = [],
@@ -433,6 +491,7 @@ export function createCharacter(initial) {
       arm.position.set(side * (shoulder + 0.015), 1.46, 0);
       standing.add(arm);
       arms.push(arm);
+      arm.scale.set(1.15, 0.86, 1.15);
       const shortSleeve = ["tee", "polo", "jersey", "blouse"].includes(
         top.topShape,
       );
@@ -496,6 +555,8 @@ export function createCharacter(initial) {
       snacks.push(snack);
       const leg = new T.Group();
       leg.position.set(side * (female ? 0.115 : 0.105), 0.9, 0);
+      leg.position.y = 0.78;
+      leg.scale.set(1.15, 0.85, 1.15);
       standing.add(leg);
       legs.push(leg);
       const shorts = bottom.bottomShape === "shorts",
@@ -648,6 +709,8 @@ export function createCharacter(initial) {
     riding.visible = false;
     rig = {
       upper,
+      head,
+      eyes,
       standing,
       riding,
       seated,
@@ -659,7 +722,7 @@ export function createCharacter(initial) {
     };
     group.userData.appearance = look;
     group.userData.outfitCut = cut;
-    group.userData.proportions = "illustrated-adult";
+    group.userData.proportions = "soft-modern";
     group.userData.silhouette =
       look.gender === "male"
         ? "lean-athletic"
@@ -687,16 +750,30 @@ export function createCharacter(initial) {
     for (const arm of rig.arms) {
       const parent = sitting ? rig.seated : rig.standing;
       if (arm.parent !== parent) parent.add(arm);
-      arm.position.y = sitting ? 1.28 : 1.46;
+      arm.position.y = sitting ? 1.2 : 1.3;
     }
     rig.riding.visible = riding;
     rig.upper.position.y = riding || sitting ? -0.18 : 0;
     rig.upper.rotation.x =
       riding && state.vehicle.type === "racing-moto" ? 0.12 : 0;
+    const now = performance.now() / 1000;
+    const blink = now % 4.7 > 4.55 ? 0.16 : 1;
+    for (const eye of rig.eyes) {
+      eye.userData.openHeight ??= eye.scale.y;
+      eye.scale.y = eye.userData.openHeight * blink;
+    }
+    rig.head.rotation.z = riding ? 0 : Math.sin(now * 1.6) * 0.025;
+    if (riding)
+      rig.upper.position.y +=
+        Math.sin(now * 7) *
+        Math.min(Math.abs(state.speed || 0) / 20, 1) *
+        0.012;
     const moving = !riding && !sitting && state.speed > 0.1;
     const running = state.speed > 4.6;
     gait += moving ? Math.abs(state.speed) * dt * (running ? 2.5 : 2) : 0;
-    rig.upper.position.y += running ? Math.abs(Math.sin(gait)) * 0.035 : 0;
+    rig.upper.position.y += moving
+      ? Math.abs(Math.sin(gait)) * (running ? 0.045 : 0.018)
+      : Math.sin(now * 2) * 0.005;
     if (running && moving) rig.upper.rotation.x = 0.1;
     rig.legs.forEach(
       (leg, i) =>
@@ -716,7 +793,7 @@ export function createCharacter(initial) {
       rig.elbows[i].rotation.x = running ? -0.6 : 0;
       rig.snacks[i].visible = false;
       arm.rotation.x = moving
-        ? Math.sin(gait + i * Math.PI + Math.PI) * (running ? 0.42 : 0.2)
+        ? Math.sin(gait + i * Math.PI + Math.PI) * (running ? 0.5 : 0.3)
         : 0;
     });
     if (state.gesture === "eat" && state.gestureSeconds > 0 && !riding) {

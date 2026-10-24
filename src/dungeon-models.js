@@ -1,3 +1,4 @@
+import { softMaterial } from "./art-direction.js";
 import * as T from "three";
 import { CLASSES, classId } from "./dungeon-rules.js";
 import { SKIN_TONES, appearance, hairstyle } from "./wardrobe.js";
@@ -5,7 +6,7 @@ export function createHunter(look, role = "fighter", enemy = false) {
   const group = new T.Group(),
     spec = CLASSES[classId(role)],
     value = appearance(look);
-  const material = (color) => new T.MeshToonMaterial({ color });
+  const material = (color) => softMaterial(color);
   const cloth = material(enemy ? 0x34324c : spec.color),
     dark = material(0x252435),
     gold = material(0xe4c480);

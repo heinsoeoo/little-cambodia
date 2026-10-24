@@ -1,3 +1,4 @@
+import { finishRenderer } from "./art-direction.js";
 import * as T from "three";
 import { createCharacter } from "./character.js";
 export function buildIntroCouple() {
@@ -128,7 +129,7 @@ export function createIntroCouple(canvas) {
             alpha: true,
           });
           renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
-          renderer.outputColorSpace = T.SRGBColorSpace;
+          finishRenderer(renderer);
           scene = new T.Scene();
           camera = new T.PerspectiveCamera(31, 1, 0.1, 40);
           camera.position.set(0.2, 2.5, 6.4);

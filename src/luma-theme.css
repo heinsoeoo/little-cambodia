@@ -1,0 +1,341 @@
+/* Soft modern city theme. Layout and touch targets remain owned by game-design.css. */
+:root {
+  --city-ink: #2b4540;
+  --city-deep: #edf0e4;
+  --city-cream: #2b4540;
+  --city-gold: #a66a43;
+  --city-line: #bdc9b955;
+  --bay-paper: #fbf8eef2;
+  --bay-border: #ffffffa8;
+  --bay-muted: #718077;
+  color: #2b4540;
+  background: #d9e6dc;
+}
+.welcome.character-creator,
+body #game-menu,
+.mobile-ui #game-menu {
+  background: linear-gradient(135deg, #fcfaf2fa, #eff1e5fa);
+  border: 1px solid var(--bay-border);
+  color: #2b4540;
+  box-shadow:
+    0 22px 80px #234d3c24,
+    inset 0 1px #fff;
+  border-radius: 24px;
+}
+.character-creator .creator-heading h1,
+.guide-heading h2,
+.guide-section-heading h3 {
+  color: #2b4540;
+  font-family: system-ui, "DM Sans", sans-serif;
+  font-weight: 600;
+  letter-spacing: -1px;
+}
+.character-creator .creator-tagline,
+.character-creator .creator-footer > small,
+.character-creator .creator-footer .feedback-link,
+.creator-heading .eyebrow span,
+.character-creator .creator-field label,
+.character-creator #outfit-set-fields label,
+.character-creator .paint-caption,
+.character-creator #outfit-set-fields p,
+#game-menu p,
+#game-menu small,
+#game-menu label {
+  color: #687a6e;
+}
+.creator-heading .eyebrow,
+.guide-heading .eyebrow {
+  color: #9b704e;
+}
+.character-creator .creator-preview {
+  background: radial-gradient(ellipse at 50% 35%, #faf4e5, #d6e1d2);
+  border: 1px solid #fff;
+  border-radius: 20px;
+}
+.character-creator .preview-heading,
+.character-creator .preview-heading small,
+.character-creator .preview-details,
+.character-creator .preview-details strong,
+.character-creator .creator-preview p {
+  color: #4e685d;
+}
+.character-creator .creator-field input,
+.character-creator .creator-field select,
+.character-creator #outfit-set-fields select,
+#game-menu select,
+#game-menu input {
+  color: #2b4540;
+  background: #fffdf7;
+  border: 1px solid #ced6c6;
+  border-radius: 12px;
+}
+.character-creator .gender-icons button {
+  color: #537566;
+  background: #e5ecdf;
+  border-color: #cedac9;
+}
+.character-creator .gender-icons button[aria-checked="true"] {
+  color: #fffaf0;
+  background: #547b67;
+  border-color: #547b67;
+}
+.character-creator #start,
+.character-creator .outfit-main-choice #outfit-open {
+  background: #365c4e;
+  color: #fff9ea;
+  border: 1px solid #365c4e;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px #365c4e18;
+}
+.character-creator .outfit-tabs button,
+.character-creator .showcase-filters button,
+#game-menu .showcase-filters button,
+.showcase-card {
+  background: #e9eddf;
+  border-color: #d3dccb;
+  color: #4e685d;
+}
+.showcase-card[aria-pressed="true"],
+.character-creator .outfit-tabs button[aria-pressed="true"],
+.showcase-filters button[aria-pressed="true"] {
+  background: #eddbc3;
+  border-color: #bd946b;
+  color: #35594a;
+}
+.character-creator .creator-footer {
+  border-color: #cbd7c5;
+}
+.character-creator #creator-utilities button,
+.character-creator .language-setting {
+  color: #61796a;
+}
+.character-creator .language-setting select {
+  color: #36594c;
+  background: #e8eddf;
+  border-color: #cbd7c5;
+}
+.guide-heading {
+  background: #f7f7ed;
+}
+.guide-profile,
+.guide-city-strip,
+#game-menu .guide-launchers button {
+  background: #e8eddf;
+  border: 1px solid #d3ddca;
+  color: #35594a;
+}
+.guide-profile #guide-player,
+.guide-profile strong,
+.guide-profile small,
+#game-menu .guide-launchers button small {
+  color: #466650;
+}
+#game-menu #mobile-menu-close,
+#game-menu .guide-toolbar button,
+#game-menu .guide-toolbar a,
+#game-menu #game-sound {
+  background: #e7ecde;
+  color: #3c6051;
+  border-color: #ced8c5;
+}
+.guide-tabs button {
+  color: #697e6f;
+}
+.guide-tabs button[aria-selected="true"] {
+  color: #365c4e;
+  border-bottom-color: #b58c61;
+}
+#game-menu {
+  scrollbar-color: #a4b99f #edf0e4;
+}
+body.in-town header > .brand,
+body:not(.mobile-ui).in-town header > .brand,
+body.in-town header > #connection,
+body:not(.mobile-ui).in-town header > #connection,
+body.in-town header > #mobile-map-toggle,
+body:not(.mobile-ui).in-town header > #mobile-map-toggle,
+body.in-town header > #mobile-menu-toggle,
+body:not(.mobile-ui).in-town header > #mobile-menu-toggle,
+body.in-town .map,
+body.in-town .dash,
+body.in-town .game-calendar,
+body.in-town .hud-wallet,
+body.in-town #voice-toggle,
+body.in-town .activity-tracker {
+  background: var(--bay-paper);
+  color: #2b4540;
+  border: 1px solid var(--bay-border);
+  border-radius: 16px;
+  box-shadow: 0 6px 22px #234d3c14;
+  text-shadow: none;
+}
+body.in-town header > .brand b {
+  color: #a66a43;
+}
+body.in-town header > .brand small,
+body:not(.mobile-ui).in-town header > .brand small {
+  color: #768675;
+}
+body.in-town .map > span,
+body.in-town .map small,
+body.in-town .dash .gear b,
+body.in-town .dash .gear small,
+body.in-town .dash small {
+  color: #5f7c6b;
+}
+body.in-town .dash #speed {
+  color: #365c4e;
+}
+body.in-town .map canvas {
+  border-radius: 10px;
+}
+body.in-town #place-label {
+  background: #f9f6eae0;
+  color: #365c4e;
+  border: 1px solid #fff9;
+  border-radius: 20px;
+  box-shadow: none;
+}
+.player-nameplate {
+  background: #fffdf2ed;
+  color: #36594b;
+  border: 1px solid #fff;
+  box-shadow: 0 3px 12px #2443331a;
+}
+.mobile-ui.in-town .touch .steering button,
+.mobile-ui.in-town .touch .pedals button,
+.mobile-ui.in-town #mobile-primary,
+.mobile-ui.in-town #mobile-talk {
+  background: #f9f7ece0;
+  border: 1px solid #ffffffbc;
+  color: #355c4d;
+  box-shadow: 0 4px 15px #24433320;
+}
+.mobile-ui.in-town .touch .pedals .accelerate {
+  background: #90b798ed;
+  color: #183e2e;
+}
+.mobile-ui.in-town .touch .pedals #touch-down {
+  background: #e8d4bfe6;
+}
+.mobile-ui.in-town .joystick,
+.mobile-ui.in-town #joystick {
+  border-color: #fff9;
+  background: #f9f7ec45;
+}
+.mobile-ui.in-town .joystick-knob {
+  background: #ebf0e2dd;
+  border-color: #fff;
+}
+#toast {
+  background: #365c4ef0;
+  color: #fff9ea;
+  border: 1px solid #ffffff66;
+  border-radius: 24px;
+  box-shadow: 0 8px 28px #233e3320;
+}
+.rift-launch {
+  background: #ece5f4ed;
+  color: #5d4e76;
+  border: 1px solid #fff8;
+  border-radius: 24px;
+  box-shadow: 0 4px 20px #362e4520;
+}
+.install-notice {
+  background: #faf7edef;
+  color: #365c4e;
+  border-color: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px #234d3c20;
+}
+@media (max-height: 500px) {
+  body.in-town header > .brand,
+  body.in-town .game-calendar {
+    border-radius: 12px;
+  }
+}
+
+.character-creator #creator-title {
+  color: #2b4540;
+  font-family: system-ui, "DM Sans", sans-serif;
+  font-weight: 600;
+  letter-spacing: -1.5px;
+}
+.character-creator .showcase-card,
+#game-menu .showcase-card {
+  background: linear-gradient(145deg, #f7f7ec, #e0e9db);
+  color: #35594a;
+  border-color: #ced8c5;
+}
+.character-creator .showcase-card[aria-pressed="true"],
+#game-menu .showcase-card[aria-pressed="true"] {
+  background: #eddbc3;
+  border-color: #b98e63;
+}
+.install-notice #install-later {
+  color: #557365;
+  background: #e8eddf;
+  border-color: #cdd9c5;
+}
+
+body .character-creator #start {
+  background: #365c4e;
+  color: #fff9ea;
+  border-color: #365c4e;
+  box-shadow: 0 4px 12px #365c4e18;
+}
+body.in-town .map,
+body.in-town .map strong,
+body.in-town .map .map-heading,
+body.in-town .map .map-footer,
+body.in-town .map .map-hint {
+  color: #4c6b5b;
+}
+body:not(.mobile-ui).in-town header > .brand {
+  padding: 10px 14px 20px;
+}
+
+body #game-menu #guide-settings label,
+body #game-menu #guide-settings summary,
+body #game-menu #guide-settings .language-setting {
+  color: #4b6a59;
+}
+body #game-menu #guide-settings select,
+body #game-menu #guide-settings input {
+  color: #2b4540;
+  background: #fffdf7;
+  border: 1px solid #cbd7c5;
+}
+.mobile-ui.in-town .joystick-rim {
+  background: #fbf8ee45;
+  border: 1px solid #fff9;
+}
+.mobile-ui.in-town .joystick-thumb {
+  background: #e8efdfdf;
+  color: #365c4e;
+  border-color: #fff;
+}
+body.in-town .map .map-heading,
+body.in-town .map .map-footer,
+body.in-town .map .map-hint,
+body.in-town .map > small {
+  color: #4c6b5b;
+}
+
+body.mobile-ui.in-town .dash,
+body.mobile-ui.in-town .game-calendar,
+body.mobile-ui.in-town .map {
+  background: #fbf8eef0;
+  color: #365c4e;
+  border: 1px solid #ffffffad;
+  box-shadow: 0 3px 12px #294c3c17;
+  border-radius: 12px;
+}
+body.mobile-ui.in-town .touch .pedals #touch-drift {
+  background: #f9f7ece0;
+  color: #355c4d;
+  border: 1px solid #ffffffbc;
+}
+body.in-town #map-navigation-hint {
+  color: #5f7b69;
+}

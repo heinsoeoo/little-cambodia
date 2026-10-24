@@ -1,3 +1,4 @@
+import { finishRenderer } from "./art-direction.js";
 import { createDungeonUI } from "./dungeon-ui.js";
 import { followCamera } from "./camera-follow.js";
 import { createVoiceChat } from "./voice-chat.js";
@@ -94,9 +95,9 @@ const cameraZoom = createCameraZoom({
   viewport: () => ({ width: viewportWidth, height: viewportHeight }),
 });
 renderer.setPixelRatio(1);
-renderer.outputColorSpace = T.SRGBColorSpace;
-const ambient = new T.HemisphereLight(0xf8f3d9, 0x45645b, 1.7),
-  sun = new T.DirectionalLight(0xffe2ac, 1.1);
+finishRenderer(renderer);
+const ambient = new T.HemisphereLight(0xe9f2e4, 0xa5aa91, 1.65),
+  sun = new T.DirectionalLight(0xffedcf, 2.1);
 sun.position.set(-200, 300, -100);
 scene.add(ambient, sun);
 renderer.shadowMap.enabled = true;
@@ -108,6 +109,7 @@ sun.shadow.camera.right = 150;
 sun.shadow.camera.top = 180;
 sun.shadow.camera.bottom = -180;
 sun.shadow.bias = -0.001;
+sun.shadow.normalBias = 0.15;
 const playerVisibility = createPlayerVisibility();
 const wardrobe = createWardrobe();
 const introCouple = createIntroCouple($("intro-couple"));
@@ -681,9 +683,9 @@ function frame(now) {
   }
   const time = clock.read(),
     activity = activityAt(time);
-  ambient.intensity = activity.night ? 0.72 : 1.7;
-  ambient.color.setHex(activity.night ? 0xa5bad9 : 0xf8f3d9);
-  sun.intensity = activity.night ? 0.16 : 1.1;
+  ambient.intensity = activity.night ? 0.85 : 1.65;
+  ambient.color.setHex(activity.night ? 0xa5c4e1 : 0xe9f2e4);
+  sun.intensity = activity.night ? 0.25 : 2.1;
   world.riverLife.update(dt, activity.night);
   world.landmarkScenes.update(activity.night);
   streetElapsed += dt;

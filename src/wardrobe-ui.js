@@ -1,3 +1,4 @@
+import { finishRenderer } from "./art-direction.js";
 import { createGenderPicker } from "./gender-picker.js";
 import { createColorSwatches } from "./color-swatches.js";
 import { createShowcases } from "./showcase.js";
@@ -56,7 +57,7 @@ export function createWardrobe() {
   const canvas = $("look-preview"),
     renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
-  renderer.outputColorSpace = T.SRGBColorSpace;
+  finishRenderer(renderer);
   const scene = new T.Scene(),
     camera = new T.PerspectiveCamera(34, 1, 0.1, 100);
   scene.add(new T.HemisphereLight(0xfff1dc, 0x7c8e82, 2));

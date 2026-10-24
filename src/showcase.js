@@ -1,3 +1,4 @@
+import { finishRenderer } from "./art-direction.js";
 import { collectionFor } from "./collections.js";
 import * as T from "three";
 import { createCharacter, disposeMeshes } from "./character.js";
@@ -26,7 +27,7 @@ export function createShowcases(readAppearance) {
     try {
       renderer ||= new T.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(240, 180);
-      renderer.outputColorSpace = T.SRGBColorSpace;
+      finishRenderer(renderer);
       const scene = new T.Scene();
       scene.add(new T.HemisphereLight(0xfff3df, 0x718c80, 2.3));
       const light = new T.DirectionalLight(0xffffff, 2);

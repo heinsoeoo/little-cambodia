@@ -1,3 +1,4 @@
+import { roundedGeometry } from "./art-direction.js";
 import * as T from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 
@@ -6,9 +7,19 @@ export function buildSmallVehicle(
   spec,
   { body, dark, glass, cream, lamp, tail },
 ) {
-  const chrome = new T.MeshLambertMaterial({ color: 0xaeb9b5 });
-  const tire = new T.MeshLambertMaterial({ color: 0x242a2a });
-  const saddle = new T.MeshLambertMaterial({
+  const chrome = new T.MeshStandardMaterial({
+    roughness: 0.55,
+    metalness: 0.12,
+    color: 0xaeb9b5,
+  });
+  const tire = new T.MeshStandardMaterial({
+    roughness: 0.55,
+    metalness: 0.12,
+    color: 0x242a2a,
+  });
+  const saddle = new T.MeshStandardMaterial({
+    roughness: 0.55,
+    metalness: 0.12,
     color: spec.id === "vespa" ? 0x886047 : 0x383c3d,
   });
   function mesh(geometry, material, x, y, z, name = "") {
@@ -20,7 +31,7 @@ export function buildSmallVehicle(
     return object;
   }
   function box(w, h, d, x, y, z, material, name = "") {
-    return mesh(new T.BoxGeometry(w, h, d), material, x, y, z, name);
+    return mesh(roundedGeometry(w, h, d, 0.13), material, x, y, z, name);
   }
   function oval(w, h, d, x, y, z, material, name = "") {
     const object = mesh(
@@ -55,14 +66,19 @@ export function buildSmallVehicle(
   function wheel(x, z, r = 0.33, wide = 0.17, spokes = false, knobby = false) {
     const start = group.children.length;
     const object = mesh(
-      new T.CylinderGeometry(r, r, wide, 16),
+      new T.TorusGeometry(
+        r - Math.min(0.07, wide * 0.36),
+        Math.min(0.07, wide * 0.36),
+        10,
+        28,
+      ),
       tire,
       x,
       r,
       z,
       "tire",
     );
-    object.rotation.z = Math.PI / 2;
+    object.rotation.y = Math.PI / 2;
     const rim = mesh(
       new T.CylinderGeometry(r * 0.69, r * 0.69, wide + 0.012, 12),
       chrome,
@@ -117,8 +133,8 @@ export function buildSmallVehicle(
     wheel(-0.79, -0.91, 0.34, 0.2);
     wheel(0.79, -0.91, 0.34, 0.2);
     wheel(0, 1.12, 0.36, 0.23);
-    box(1.6, 0.22, 2.68, 0, 0.58, -0.12, body, "tuktuk-floor");
-    box(1.57, 0.72, 0.14, 0, 1.02, -1.43, body, "rear-body");
+    box(1.6, 0.32, 2.68, 0, 0.58, -0.12, body, "tuktuk-floor");
+    box(1.57, 0.72, 0.24, 0, 1.02, -1.43, body, "rear-body");
     for (const side of [-1, 1]) {
       box(
         0.12,
@@ -262,7 +278,7 @@ export function buildSmallVehicle(
   if (classic || scoopy) {
     box(0.55, 0.1, 1.15, 0, 0.43, -0.02, dark, "step-through-floor");
     if (classic) {
-      oval(0.79, 0.65, 1.05, 0, 0.65, -0.5, body, "vespa-rear-haunch");
+      oval(0.86, 0.7, 1.05, 0, 0.65, -0.5, body, "vespa-rear-haunch");
       oval(0.76, 0.98, 0.22, 0, 0.87, 0.4, body, "vespa-broad-leg-shield");
       oval(0.57, 0.19, 0.55, 0, 0.52, front, body, "vespa-rounded-fender");
       box(0.57, 0.17, 0.89, 0, 0.99, -0.28, saddle, "vespa-brown-bench-seat");
@@ -283,7 +299,7 @@ export function buildSmallVehicle(
       oval(0.26, 0.24, 0.06, 0, 1.4, 0.77, lamp, "vespa-high-round-lamp");
       group.userData.silhouette = "classic-steel-scooter";
     } else {
-      oval(0.7, 0.64, 1.06, 0, 0.7, -0.39, body, "scoopy-sculpted-tail");
+      oval(0.76, 0.69, 1.06, 0, 0.7, -0.39, body, "scoopy-sculpted-tail");
       oval(0.56, 0.8, 0.36, 0, 0.81, 0.5, body, "scoopy-narrow-front-apron");
       oval(
         0.43,

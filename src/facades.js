@@ -1,31 +1,37 @@
+import { roundedGeometry } from "./art-direction.js";
 import * as T from "three";
 import { buildingPlace } from "./places.js";
 import { tileTexture } from "./pixel-art.js";
 
 export function addFacades(scene, buildings, batch, cozy = false, visibility) {
-  const roofMaterial = new T.MeshLambertMaterial({
+  const roofMaterial = new T.MeshStandardMaterial({
+      roughness: 0.85,
       color: 0xb96343,
       map:
         !cozy && typeof document !== "undefined" ? tileTexture("roof") : null,
       side: T.DoubleSide,
     }),
-    flatRoof = new T.MeshLambertMaterial({
-      color: 0xd3aa76,
+    flatRoof = new T.MeshStandardMaterial({
+      roughness: 0.85,
+      color: 0xd5c5b1,
       map:
         !cozy && typeof document !== "undefined" ? tileTexture("roof") : null,
     });
   const cozyRoofs = cozy
     ? [0xc3947b, 0xad8b7e, 0x829e98, 0xc5af8d].map(
-        (color) => new T.MeshLambertMaterial({ color }),
+        (color) => new T.MeshStandardMaterial({ roughness: 0.85, color }),
       )
     : [];
-  const glass = new T.MeshBasicMaterial({ color: 0x47616a }),
-    frames = new T.MeshLambertMaterial({ color: 0xeee1c3 });
+  const glass = new T.MeshBasicMaterial({ color: 0x789caa }),
+    frames = new T.MeshStandardMaterial({ roughness: 0.85, color: 0xf7edda });
   [roofMaterial, flatRoof, glass, frames, ...cozyRoofs].forEach((material) =>
     visibility?.apply(material),
   );
   const panes = [],
     doors = [];
+  const awnings = cozy ? cozyRoofs : [roofMaterial];
+  awnings.forEach((m) => visibility?.apply(m));
+  let dressed = 0;
   const object = new T.Object3D();
   for (const b of buildings) {
     const placeKind = buildingPlace(b)?.kind;
@@ -132,6 +138,40 @@ export function addFacades(scene, buildings, batch, cozy = false, visibility) {
           object.updateMatrix();
           panes.push(object.matrix.clone());
         }
+      if (
+        i === 1 &&
+        !palace &&
+        b.height < 35 &&
+        length > 4 &&
+        dressed++ < 700
+      ) {
+        // Shallow canopies, sills and door pulls keep the map footprint intact.
+        const local = (w, h, d, x, y, z, material) => {
+          const geo = roundedGeometry(w, h, d, 0.05);
+          const transform = new T.Matrix4().compose(
+            new T.Vector3((a[0] + c[0]) / 2, y, (a[1] + c[1]) / 2),
+            new T.Quaternion().setFromAxisAngle(
+              new T.Vector3(0, 1, 0),
+              Math.atan2(nx, nz),
+            ),
+            new T.Vector3(1, 1, 1),
+          );
+          geo.translate(x, 0, z);
+          geo.applyMatrix4(transform);
+          batch(geo, material);
+        };
+        local(
+          Math.min(length * 0.8, 8),
+          0.16,
+          0.85,
+          0,
+          2.9,
+          0.4,
+          awnings[b.id % awnings.length],
+        );
+        local(1.32, 0.12, 0.2, 0, 0.12, 0.15, frames);
+        local(0.045, 0.42, 0.08, 0.37, 1.05, 0.14, frames);
+      }
       if (i === 1) {
         object.position.set(
           (a[0] + c[0]) / 2 + nx * 0.07,
@@ -146,7 +186,7 @@ export function addFacades(scene, buildings, batch, cozy = false, visibility) {
     }
   }
   const windows = new T.InstancedMesh(
-    new T.PlaneGeometry(1.1, 1.3),
+    roundedGeometry(1.1, 1.3, 0.08, 0.04),
     glass,
     panes.length,
   );
@@ -154,16 +194,24 @@ export function addFacades(scene, buildings, batch, cozy = false, visibility) {
   panes.forEach((matrix, i) => windows.setMatrixAt(i, matrix));
   scene.add(windows);
   const entrances = new T.InstancedMesh(
-    new T.PlaneGeometry(1.1, 2.1),
+    new T.BoxGeometry(1, 1, 0.08),
     frames,
-    doors.length,
+    doors.length + panes.length,
   );
-  frames.side = T.FrontSide;
-  doors.forEach((matrix, i) => entrances.setMatrixAt(i, matrix));
+  const doorScale = new T.Matrix4().makeScale(1.1, 2.1, 1);
+  doors.forEach((matrix, i) =>
+    entrances.setMatrixAt(i, matrix.clone().multiply(doorScale)),
+  );
+  const inset = new T.Matrix4()
+    .makeTranslation(0, 0, -0.055)
+    .multiply(new T.Matrix4().makeScale(1.32, 1.5, 1));
+  panes.forEach((matrix, i) =>
+    entrances.setMatrixAt(doors.length + i, matrix.clone().multiply(inset)),
+  );
   scene.add(entrances);
   return {
     setNight(night) {
-      glass.color.setHex(night ? 0xffd58b : 0x47616a);
+      glass.color.setHex(night ? 0xffd58b : 0x789caa);
     },
     windows: panes.length,
   };

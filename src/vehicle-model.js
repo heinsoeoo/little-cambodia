@@ -1,21 +1,58 @@
+import { softMaterial, roundedGeometry } from "./art-direction.js";
 import * as T from "three";
 import { buildSmallVehicle } from "./bike-design.js";
 import { buildCarDesign } from "./car-design.js";
 import { addVehicleLighting } from "./vehicle-lighting.js";
 import { vehicleSpec, paintColor } from "./vehicle-catalog.js";
+let contactTexture;
+function contactShadow(width, length) {
+  if (!contactTexture) {
+    const size = 32,
+      pixels = new Uint8Array(size * size * 4);
+    for (let y = 0; y < size; y++)
+      for (let x = 0; x < size; x++) {
+        const i = (y * size + x) * 4,
+          radius = Math.hypot((x - 15.5) / 15.5, (y - 15.5) / 15.5);
+        pixels[i] = 33;
+        pixels[i + 1] = 52;
+        pixels[i + 2] = 43;
+        pixels[i + 3] = Math.round(Math.max(0, 1 - radius) ** 2 * 85);
+      }
+    contactTexture = new T.DataTexture(pixels, size, size);
+    contactTexture.needsUpdate = true;
+  }
+  const mesh = new T.Mesh(
+    new T.PlaneGeometry(width, length),
+    new T.MeshBasicMaterial({
+      map: contactTexture,
+      transparent: true,
+      depthWrite: false,
+      polygonOffset: true,
+      polygonOffsetFactor: -1,
+    }),
+  );
+  mesh.name = "soft-contact-shadow";
+  mesh.rotation.x = -Math.PI / 2;
+  mesh.position.y = 0.015;
+  return mesh;
+}
 // All models face local +Z, matching stepVehicle's forward movement.
 export function vehicleModel(type, paint = "factory") {
   const spec = vehicleSpec(type),
     group = new T.Group();
-  const material = (color) => new T.MeshLambertMaterial({ color });
-  const body = material(paintColor(type, paint)),
+  const material = (color) =>
+    new T.MeshStandardMaterial({ roughness: 0.55, metalness: 0.12, color });
+  const body = softMaterial(paintColor(type, paint), {
+      roughness: 0.32,
+      metalness: 0.12,
+    }),
     dark = material(0x42474c),
-    glass = material(0x344b57),
+    glass = softMaterial(0x36565b, { roughness: 0.18, metalness: 0.35 }),
     cream = material(0xf1dfbc);
   const lamp = new T.MeshBasicMaterial({ color: 0xfff2b6 }),
     tail = new T.MeshBasicMaterial({ color: 0xe46159 });
   function box(w, h, d, x, y, z, mat) {
-    let geometry = new T.BoxGeometry(w, h, d);
+    let geometry = roundedGeometry(w, h, d, 0.08);
     if (mat === body && w > 1.4 && h > 0.4 && d > 2) {
       geometry.dispose();
       const shape = new T.Shape();
@@ -63,6 +100,13 @@ export function vehicleModel(type, paint = "factory") {
     for (const x of [-0.99, 0.99])
       box(0.035, 0.045, length * 0.7, x, 1.15, 0, chrome);
   }
+  group.add(
+    contactShadow(
+      car ? 2.8 : spec.kind === "bike" ? 1.5 : 2.4,
+      spec.length * 1.18,
+    ),
+  );
+  group.userData.artStyle = "soft-modern";
   addVehicleLighting(group, spec, lamp, tail);
   group.userData.vehicleType = spec.id;
   group.userData.paintMaterial = body;

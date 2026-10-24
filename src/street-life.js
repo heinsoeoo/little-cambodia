@@ -1,3 +1,4 @@
+import { softMaterial, roundedGeometry } from "./art-direction.js";
 import * as T from "three";
 import { personTexture } from "./pixel-art.js";
 import { samplePath } from "./riverside.js";
@@ -33,8 +34,8 @@ export function createStreetLife(scene, path, map) {
   const vendors = [];
   const box = (parent, size, position, color) => {
     const mesh = new T.Mesh(
-      new T.BoxGeometry(...size),
-      new T.MeshLambertMaterial({ color }),
+      roundedGeometry(...size, 0.06),
+      new T.MeshStandardMaterial({ roughness: 0.85, color }),
     );
     mesh.position.set(...position);
     parent.add(mesh);
@@ -88,34 +89,39 @@ export function createStreetLife(scene, path, map) {
       ].map(([x, y]) => new T.Vector2(x, y)),
       10,
     ).scale(1, 1, 0.7),
-    new T.MeshLambertMaterial({ color: 0xffffff }),
+    new T.MeshStandardMaterial({ roughness: 0.85, color: 0xffffff }),
     262,
   );
   const heads = new T.InstancedMesh(
-    new T.SphereGeometry(1, 10, 7).scale(0.145, 0.18, 0.135),
-    new T.MeshLambertMaterial({ color: 0xbb8b67 }),
+    new T.SphereGeometry(1, 16, 10).scale(0.225, 0.265, 0.2),
+    new T.MeshStandardMaterial({ roughness: 0.85, color: 0xbb8b67 }),
     262,
   );
   const legs = new T.InstancedMesh(
     new T.CylinderGeometry(0.08, 0.065, 0.8, 6),
-    new T.MeshLambertMaterial({ color: 0x3b4d53 }),
+    new T.MeshStandardMaterial({ roughness: 0.85, color: 0x3b4d53 }),
     524,
   );
   const hair = new T.InstancedMesh(
-    new T.SphereGeometry(0.155, 10, 6, 0, Math.PI * 2, 0, Math.PI * 0.5).scale(
+    new T.SphereGeometry(0.235, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.5).scale(
       1,
       1,
       0.9,
     ),
-    new T.MeshLambertMaterial({ color: 0x342f2a }),
+    new T.MeshStandardMaterial({ roughness: 0.85, color: 0x342f2a }),
     262,
   );
   const arms = new T.InstancedMesh(
     new T.CylinderGeometry(0.065, 0.045, 0.57, 6),
-    new T.MeshLambertMaterial({ color: 0xffffff }),
+    new T.MeshStandardMaterial({ roughness: 0.85, color: 0xffffff }),
     524,
   );
-  group.add(bodies, heads, legs, hair, arms);
+  const eyes = new T.InstancedMesh(
+    new T.SphereGeometry(0.027, 8, 6),
+    softMaterial(0x30443b),
+    524,
+  );
+  group.add(bodies, heads, legs, hair, arms, eyes);
   const spriteMap =
     typeof document === "undefined" || map?.style === "cozy"
       ? null
@@ -209,10 +215,20 @@ export function createStreetLife(scene, path, map) {
       dummy.position.y = 1.81;
       dummy.updateMatrix();
       heads.setMatrixAt(i, dummy.matrix);
-      dummy.position.y = 1.86;
+      dummy.position.y = 1.91;
       dummy.updateMatrix();
       hair.setMatrixAt(i, dummy.matrix);
       for (let side = 0; side < 2; side++) {
+        const ex = (side ? 1 : -1) * 0.082,
+          ez = 0.19;
+        dummy.position.set(
+          point[0] + Math.cos(heading) * ex + Math.sin(heading) * ez,
+          1.84,
+          point[1] - Math.sin(heading) * ex + Math.cos(heading) * ez,
+        );
+        dummy.rotation.set(0, heading, 0);
+        dummy.updateMatrix();
+        eyes.setMatrixAt(i * 2 + side, dummy.matrix);
         dummy.position.set(point[0] + (side ? 1 : -1) * 0.11, 0.5, point[1]);
         dummy.rotation.x =
           i < activity.vendors
@@ -247,9 +263,9 @@ export function createStreetLife(scene, path, map) {
       spriteMap.offset.x = (Math.floor(elapsed * 3) % 2) * 0.5;
     }
     bodies.count = heads.count = hair.count = count;
-    arms.count = count * 2;
+    eyes.count = arms.count = count * 2;
     legs.count = count * 2;
-    for (const mesh of [bodies, heads, legs, hair, arms]) {
+    for (const mesh of [bodies, heads, legs, hair, arms, eyes]) {
       mesh.instanceMatrix.needsUpdate = true;
       mesh.computeBoundingSphere();
     }

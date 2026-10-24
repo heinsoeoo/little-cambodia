@@ -1,12 +1,12 @@
 import * as T from "three";
 
 export const palette = {
-  grass: 0x86a956,
-  road: 0x9c8068,
-  curb: 0xd9b980,
-  water: 0x609fac,
-  sky: 0xc6ddb1,
-  night: 0x263850,
+  grass: 0xa6bd91,
+  road: 0x758583,
+  curb: 0xe8dfca,
+  water: 0x83b9ba,
+  sky: 0xd9e6dc,
+  night: 0x263e51,
 };
 function texture(width, height, paint) {
   const canvas = document.createElement("canvas");

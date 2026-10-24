@@ -15,7 +15,7 @@ export function addPlaceDetails(buildings, batch, visibility, roads = []) {
   const materials = Object.fromEntries(
     Object.entries(colors).map(([name, color]) => [
       name,
-      new T.MeshLambertMaterial({ color }),
+      new T.MeshStandardMaterial({ roughness: 0.85, color }),
     ]),
   );
   Object.values(materials).forEach((m) => visibility?.apply(m));
