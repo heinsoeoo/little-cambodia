@@ -5,5 +5,10 @@ export function voiceVolume(distance) {
   return (1 - fade) ** 2;
 }
 export function withinVoiceRange(a, b) {
-  return Boolean(a && b && Math.hypot(a.x - b.x, a.z - b.z) < VOICE_RANGE);
+  return Boolean(
+    a &&
+      b &&
+      (a.dungeonId || null) === (b.dungeonId || null) &&
+      Math.hypot(a.x - b.x, a.z - b.z) < VOICE_RANGE,
+  );
 }

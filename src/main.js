@@ -1,3 +1,4 @@
+import { createDungeonUI } from "./dungeon-ui.js";
 import { followCamera } from "./camera-follow.js";
 import { createVoiceChat } from "./voice-chat.js";
 import { BENCHES } from "./open-world.js";
@@ -253,8 +254,8 @@ function talk() {
     activities.openShop(vendor);
   }
 }
-function syncRoster(players) {
-  $("online").textContent = `${players.length} / 16 guests online`;
+function syncRoster(players, total = players.length) {
+  $("online").textContent = `${total} / 16 guests online`;
   $("roster").replaceChildren(
     ...players.map((p) => {
       const li = document.createElement("li");
@@ -263,9 +264,22 @@ function syncRoster(players) {
     }),
   );
 }
-let voice;
+let voice, dungeonUI;
 const network = new Multiplayer((event) => {
   voice?.event(event);
+  dungeonUI?.receive(event);
+  if (event.type === "dungeon-player") {
+    prediction.reset();
+    self = structuredClone(event.player);
+    stopInput();
+    if (event.result) {
+      voice?.stop();
+      cityMap.close();
+      activities.hide();
+      mobileHUD.closeMenu();
+      notify(event.result, 5);
+    }
+  }
   if (event.type === "connection") {
     $("connection").textContent = event.status;
     if (!network.id) {
@@ -355,7 +369,7 @@ const network = new Multiplayer((event) => {
         actor.dispose();
         actors.delete(id);
       }
-    syncRoster(event.players);
+    syncRoster(event.players, event.onlineCount);
   }
   if (event.type === "action") {
     prediction.reset();
@@ -395,6 +409,14 @@ const network = new Multiplayer((event) => {
   }
 });
 voice = createVoiceChat({ network, button: $("voice-toggle"), notify });
+dungeonUI = createDungeonUI({
+  scene,
+  network,
+  getSelf: () => self,
+  clearInput: stopInput,
+  notify,
+  onMap: () => cityMap.open(),
+});
 
 const mobileHUD = createMobileHUD({
   clearInput: stopInput,
@@ -465,6 +487,10 @@ $("guest-form").onsubmit = (event) => {
     $("vehicle-type").value = profile.vehicleType;
     $("vehicle-paint").value = profile.vehiclePaint;
     wardrobe.syncShowcases();
+    try {
+      profile.combatClass =
+        localStorage.getItem("little-cambodia-class") || "fighter";
+    } catch {}
     network.connect(name, profile);
   }
 };
@@ -536,6 +562,7 @@ $("leave").onclick = () => {
 addEventListener("keydown", (event) => {
   if (!$("welcome").hidden || activities.open || cityMap.isOpen || pwa.open)
     return;
+  if (dungeonUI.open) return;
   if (["INPUT", "SELECT", "TEXTAREA"].includes(event.target.tagName)) return;
   if (
     ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key)
@@ -544,6 +571,10 @@ addEventListener("keydown", (event) => {
   keys.add(event.key.toLowerCase());
   if (event.repeat) return;
   const key = event.key.toLowerCase();
+  if (self?.dungeonId) {
+    if (key === "p") pause();
+    return;
+  }
   if (key === "e") enterExit();
   if (key === "f") action("summon");
   if (key === "p") pause();
@@ -595,9 +626,10 @@ function frame(now) {
     !intro.active &&
     !activities.open &&
     !cityMap.isOpen &&
-    !pwa.open;
+    !pwa.open &&
+    !dungeonUI.open;
   voice.update(self, network.players, Boolean(network.id && !network.stale));
-  activities.update(self, active, now, clock.read().hour);
+  if (!self?.dungeonId) activities.update(self, active, now, clock.read().hour);
   const riverDistance = self
     ? nearestRoad([self.x, self.z], [{ points: world.path }]).distance
     : Infinity;
@@ -629,6 +661,24 @@ function frame(now) {
   if ($("network-status").textContent !== connectionMessage)
     $("network-status").textContent = connectionMessage;
   clock.tick(dt);
+  dungeonUI.update(self, network.players, dt, now, keys, active);
+  camera.zoom = self?.dungeonId ? 2.4 : 1;
+  camera.updateProjectionMatrix();
+  if (self?.dungeonId) {
+    mobileHUD.update(self, ready, false, null);
+    dungeonUI.render(
+      renderer,
+      camera,
+      self,
+      network.players,
+      dt,
+      now,
+      cameraZoom.offset(),
+      orbitOffset,
+    );
+    if (now > noticeUntil) $("toast").style.opacity = 0;
+    return;
+  }
   const time = clock.read(),
     activity = activityAt(time);
   ambient.intensity = activity.night ? 0.72 : 1.7;
@@ -737,7 +787,12 @@ function frame(now) {
         : nearestRoad([focus.x, focus.z], map.roads).road.name;
     mobileHUD.update(self, can, !$("welcome").hidden, vendor);
     guide.update(self, activities.game);
-    cityMap.update(self, activities.game.target, network.players, now);
+    cityMap.update(
+      self,
+      activities.game.target || dungeonUI.goal,
+      network.players,
+      now,
+    );
   }
   if (now > noticeUntil) $("toast").style.opacity = 0;
   sun.position.set(focus.x - 120, 180, focus.z - 80);

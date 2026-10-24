@@ -1,3 +1,5 @@
+import { createDungeons } from "./dungeons.js";
+import { classId } from "../src/dungeon-rules.js";
 import { createVoiceHub } from "./voice.js";
 import { sharedGameTime } from "../src/schedule.js";
 import { appearance } from "../src/wardrobe.js";
@@ -28,12 +30,36 @@ export function createMultiplayer(httpServer) {
       ws.send(JSON.stringify(data));
   };
   const voice = createVoiceHub(clients, send);
+  const dungeons = createDungeons({
+    players: () =>
+      [...clients.values()].flatMap((c) => (c.player ? [c.player] : [])),
+    emit: (player, data) => {
+      const entry = [...clients.entries()].find(([, c]) => c.player === player);
+      if (entry) {
+        if (data.type === "dungeon-player" && data.result) {
+          entry[1].keys.clear();
+          entry[1].commands = [];
+          entry[1].sequence = entry[1].receivedSequence;
+        }
+        send(entry[0], data);
+      }
+    },
+  });
   const snapshot = (client) => ({
     type: "state",
     time: Date.now(),
     gameTime: sharedGameTime(),
     acknowledged: client?.sequence,
-    players: [...clients.values()].filter((c) => c.player).map((c) => c.player),
+    onlineCount: [...clients.values()].filter((c) => c.player).length,
+    players: [...clients.values()]
+      .filter(
+        (c) =>
+          c.player &&
+          (!client?.player ||
+            (c.player.dungeonId || null) === (client.player.dungeonId || null)),
+      )
+      .map((c) => c.player),
+    dungeon: dungeons.snapshot(client?.player),
   });
   function upgrade(request, socket, head) {
     if (request.url?.split("?")[0] !== "/multiplayer") return;
@@ -129,6 +155,7 @@ export function createMultiplayer(httpServer) {
         )
           ? message.vehicleType
           : DEFAULT_VEHICLE;
+        client.player.combatClass = classId(message.combatClass);
         client.player.preferredPaint = vehiclePaint(message.vehiclePaint);
         clearTimeout(joinTimeout);
         send(ws, {
@@ -141,6 +168,16 @@ export function createMultiplayer(httpServer) {
         return;
       }
       if (!client.player) return;
+      if (message.type === "dungeon") {
+        if (["enter", "leave", "class"].includes(message.action)) {
+          client.keys.clear();
+          client.commands = [];
+          client.sequence = client.receivedSequence;
+        }
+        const error = dungeons.action(client.player, message);
+        if (error) send(ws, { type: "error", message: error });
+        return;
+      }
       if (voice.handle(ws, client, message)) return;
       if (message.type === "ping" && Number.isFinite(message.sent)) {
         send(ws, { type: "pong", sent: message.sent });
@@ -184,6 +221,7 @@ export function createMultiplayer(httpServer) {
         return;
       }
       if (message.type === "customize") {
+        if (client.player.dungeonId) return;
         if (now - client.lastAction <= 250) {
           send(ws, {
             type: "error",
@@ -282,6 +320,7 @@ export function createMultiplayer(httpServer) {
           stepGuest(c.player, c.keys, 1 / 30);
         }
       }
+    dungeons.tick(1 / 30);
     if (tick % 9 === 0) voice.tick();
     if (++tick % 3 === 0) {
       for (const [ws, c] of clients)

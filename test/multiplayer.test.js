@@ -289,3 +289,60 @@ test("nearby voice membership and signaling follow authoritative positions over 
   );
   assert.deepEqual(far.ids, []);
 });
+
+test("dungeon entry, class locking and snapshots isolate hunters from city guests", async (t) => {
+  const server = createServer(),
+    hub = createMultiplayer(server);
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  const url = `ws://127.0.0.1:${server.address().port}/multiplayer`;
+  const a = await client(url, "Dungeon Hunter"),
+    b = await client(url, "City Guest");
+  t.after(async () => {
+    a.ws.terminate();
+    b.ws.terminate();
+    hub.close();
+    await new Promise((resolve) => server.close(resolve));
+  });
+  const changed = waitMessage(a.ws, (m) => m.type === "dungeon-player");
+  a.ws.send(
+    JSON.stringify({ type: "dungeon", action: "class", classId: "mage" }),
+  );
+  assert.equal((await changed).player.combatClass, "mage");
+  const enter = waitMessage(
+    a.ws,
+    (m) => m.type === "dungeon-player" && m.player.dungeonId,
+  );
+  a.ws.send(JSON.stringify({ type: "dungeon", action: "enter" }));
+  const joined = await enter;
+  assert.equal(joined.player.combat.maxHp, 95);
+  const dungeonState = await waitMessage(
+    a.ws,
+    (m) => m.type === "state" && m.dungeon?.instance,
+  );
+  assert.deepEqual(
+    dungeonState.players.map((p) => p.id),
+    [a.id],
+  );
+  assert.equal(dungeonState.dungeon.portal.phase, "joining");
+  const cityState = await waitMessage(
+    b.ws,
+    (m) => m.type === "state" && m.dungeon?.portal?.phase === "joining",
+  );
+  assert.deepEqual(
+    cityState.players.map((p) => p.id),
+    [b.id],
+  );
+  assert.equal(cityState.dungeon.instance, null);
+  const locked = waitMessage(a.ws, (m) => m.type === "error");
+  a.ws.send(
+    JSON.stringify({ type: "dungeon", action: "class", classId: "tank" }),
+  );
+  assert.match((await locked).message, /locked/);
+  const leave = waitMessage(
+    a.ws,
+    (m) => m.type === "dungeon-player" && !m.player.dungeonId,
+  );
+  a.ws.send(JSON.stringify({ type: "dungeon", action: "leave" }));
+  assert.equal((await leave).player.combat, null);
+});

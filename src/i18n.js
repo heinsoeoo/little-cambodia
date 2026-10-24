@@ -1,6 +1,90 @@
 // UI text is translated without changing form values or player-created names.
 export const LANGUAGE_KEY = "little-cambodia-language";
 export const KHMER = {
+  "Collected weapons": "អាវុធដែលបានប្រមូល",
+  "Boss reward: 100 rift coins and a class weapon. Collected weapons add +2 damage.":
+    "រង្វាន់មេបិសាច៖ កាក់ច្រក ១០០ និងអាវុធតួនាទី។ អាវុធដែលបានប្រមូលបន្ថែមការវាយ ២។",
+
+  Wisp: "ព្រលឹងភ្លើង",
+  Shade: "ស្រមោល",
+  "Lantern Rift": "ច្រកពន្លឺចង្កៀង",
+  Fighter: "អ្នកប្រយុទ្ធ",
+  Mage: "គ្រូមន្តអាគម",
+  Assassin: "ឃាតករលាក់ខ្លួន",
+  Marksman: "អ្នកបាញ់ចម្ងាយ",
+  Support: "អ្នកគាំទ្រ",
+  Tank: "អ្នកការពារ",
+  "Sweeping slash": "ការកាប់ជារង្វង់",
+  "Arcane burst": "ការផ្ទុះមន្តអាគម",
+  "Dash strike": "ស្ទុះវាយ",
+  "Piercing shot": "ការបាញ់ទម្លុះ",
+  "Healing circle": "រង្វង់ព្យាបាល",
+  "Taunt and guard": "ទាក់ទាញ និងការពារ",
+  Dodge: "គេច",
+  Attack: "វាយ",
+  Skill: "ជំនាញ",
+  "FIRST EXPEDITION": "បេសកកម្មដំបូង",
+  "Combat class": "តួនាទីប្រយុទ្ធ",
+  "Close dungeon menu": "បិទម៉ឺនុយគុកងងឹត",
+  "Dungeon controls": "ប៊ូតុងប្រយុទ្ធក្នុងគុកងងឹត",
+  "Return to city": "ត្រឡប់ទៅទីក្រុង",
+  "Enter dungeon": "ចូលគុកងងឹត",
+  "Show on map": "បង្ហាញលើផែនទី",
+  "Portal ready": "ច្រកត្រៀមរួច",
+  "Seals in": "ច្រកបិទក្នុង",
+  Recharging: "កំពុងស្ដារថាមពល",
+  "Raid in progress": "ក្រុមកំពុងប្រយុទ្ធ",
+  Enter: "ចូល",
+  Busy: "កំពុងប្រើប្រាស់",
+  "rift coins": "កាក់ច្រក",
+  "Session rewards": "រង្វាន់ក្នុងការលេងលើកនេះ",
+  "Walk to the portal": "ដើរទៅកាន់ច្រក",
+  "Up to 4 hunters. Your class locks on entry.":
+    "អាចចូលបានរហូតដល់ ៤ នាក់។ តួនាទីមិនអាចប្ដូរក្រោយចូលបានទេ។",
+  "Get out of your vehicle first.": "សូមចុះពីយានយន្តជាមុនសិន។",
+  "Waiting for hunters": "កំពុងរង់ចាំអ្នកប្រយុទ្ធ",
+  "Victory! Collect your rewards and return.":
+    "ជ័យជម្នះ! ទទួលរង្វាន់ ហើយត្រឡប់មកវិញ។",
+  "Lantern hall": "សាលចង្កៀង",
+  "Whisper gallery": "វិចិត្រសាលសំឡេងខ្សឹប",
+  "The Warden": "ឆ្មាំស្រមោល",
+  "Boss defeated!": "បានកម្ចាត់មេបិសាច!",
+  "A shadow has opened beside the riverside. Choose your hunter class.":
+    "ច្រកស្រមោលបានបើកនៅមាត់ទន្លេ។ ជ្រើសរើសតួនាទីប្រយុទ្ធរបស់អ្នក។",
+  "Balanced melee · wide sweeping attacks":
+    "ប្រយុទ្ធជិតមានតុល្យភាព · វាយជារង្វង់ធំ",
+  "Ranged magic · powerful area damage": "មន្តអាគមចម្ងាយ · វាយលើតំបន់",
+  "Fast melee · dash into burst damage": "ប្រយុទ្ធជិតរហ័ស · ស្ទុះចូលវាយខ្លាំង",
+  "Long range · steady damage and piercing shots":
+    "បាញ់ចម្ងាយឆ្ងាយ · វាយជាប់ និងបាញ់ទម្លុះ",
+  "Magic attacks · heal yourself and nearby allies":
+    "វាយដោយមន្តអាគម · ព្យាបាលខ្លួន និងមិត្តក្បែរ",
+  "Durable melee · draw enemies and reduce damage":
+    "ប្រយុទ្ធជិតរឹងមាំ · ទាក់ទាញសត្រូវ និងបន្ថយការខូចខាត",
+  "Ember blade": "ដាវភ្លើង",
+  "Moon staff": "ដំបងចន្ទ",
+  "Twin dusk daggers": "កាំបិតភ្លោះព្រលប់",
+  "River bow": "ធ្នូទន្លេ",
+  "Lotus scepter": "ដំបងផ្កាឈូក",
+  "Guardian shield": "ខែលការពារ",
+  "First hunter starts a 30-second joining window. Then the portal seals. Attack J · Skill K · Dodge Space. You can leave at any time.":
+    "អ្នកចូលដំបូងចាប់ផ្ដើមការរាប់ ៣០ វិនាទី។ បន្ទាប់មកច្រកនឹងបិទ។ វាយ J · ជំនាញ K · គេច Space។ អ្នកអាចចេញបានគ្រប់ពេល។",
+  "Returned to Phnom Penh.": "បានត្រឡប់ទៅភ្នំពេញ។",
+  "You were rescued. Your party can keep fighting.":
+    "អ្នកត្រូវបានសង្គ្រោះ។ ក្រុមរបស់អ្នកអាចបន្តប្រយុទ្ធ។",
+  "The rift has returned you to the city.": "ច្រកបានបញ្ជូនអ្នកត្រឡប់ទៅទីក្រុង។",
+  "Walk to the Lantern Rift to enter.": "ដើរទៅច្រកពន្លឺចង្កៀងដើម្បីចូល។",
+  "The portal is recharging.": "ច្រកកំពុងស្ដារថាមពល។",
+  "The portal is sealed. Wait for the hunters to return.":
+    "ច្រកបានបិទ។ សូមរង់ចាំក្រុមត្រឡប់មកវិញ។",
+  "This dungeon party is full (4 hunters).": "ក្រុមគុកងងឹតពេញហើយ (៤ នាក់)។",
+  "Your class is locked until you return to the city.":
+    "អ្នកមិនអាចប្ដូរតួនាទីបានទេ រហូតដល់ត្រឡប់ទៅទីក្រុង។",
+  "Return to the city before using city activities.":
+    "ត្រឡប់ទៅទីក្រុងមុននឹងធ្វើសកម្មភាពទីក្រុង។",
+  "Lantern Rift · the portal seals in 30 seconds.":
+    "ច្រកពន្លឺចង្កៀង · ច្រកនឹងបិទក្នុង ៣០ វិនាទី។",
+
   "Install Little Cambodia": "ដំឡើង Little Cambodia",
   "Keep your little world on your Home Screen.":
     "រក្សាពិភពតូចរបស់អ្នកនៅលើអេក្រង់ដើម។",

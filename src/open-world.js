@@ -1,3 +1,4 @@
+import { CLASSES, classId, dungeonBlocked } from "./dungeon-rules.js";
 import { riversideBenches, nearestBench } from "./benches.js";
 import { appearance } from "./wardrobe.js";
 import { phnomMap, bounds, spawn, promenade } from "./phnom-map.js";
@@ -86,6 +87,10 @@ export function createGuest(id, name, index = 0, look) {
     mode: "walk",
     speed: 0,
     vehicle: null,
+    combatClass: "fighter",
+    dungeonId: null,
+    riftCoins: 0,
+    riftEquipment: [],
   };
 }
 export function stepGuest(player, keys, dt, cameraYaw = 0) {
@@ -123,13 +128,20 @@ export function stepGuest(player, keys, dt, cameraYaw = 0) {
     player.posture = null;
     player.benchId = null;
   }
-  const pace = keys.has("shift") ? 7 : 4.5;
+  const pace = player.dungeonId
+    ? CLASSES[classId(player.combatClass)].speed * (keys.has("shift") ? 1.4 : 1)
+    : keys.has("shift")
+      ? 7
+      : 4.5;
   player.speed = length ? pace : 0;
   if (!length) return;
   dx = (dx / length) * pace * dt;
   dz = (dz / length) * pace * dt;
-  if (!blocked(player.x + dx, player.z)) player.x += dx;
-  if (!blocked(player.x, player.z + dz)) player.z += dz;
+  const collision = player.dungeonId
+    ? (x, z) => dungeonBlocked(x, z, player.dungeonStage)
+    : blocked;
+  if (!collision(player.x + dx, player.z)) player.x += dx;
+  if (!collision(player.x, player.z + dz)) player.z += dz;
   player.heading = Math.atan2(dx, dz);
 }
 export function guestAction(
@@ -139,6 +151,8 @@ export function guestAction(
   occupied = [],
   paint = player.preferredPaint,
 ) {
+  if (player.dungeonId)
+    return "Return to the city before using city activities.";
   if (action === "sit") {
     if (player.mode !== "walk") return "Get out of your vehicle to sit down.";
     if (player.posture === "sit") {

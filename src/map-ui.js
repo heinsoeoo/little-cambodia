@@ -1,3 +1,4 @@
+import { PORTAL } from "./dungeon-portal.js";
 import { createQuestNavigation, radarPoint } from "./quest-navigation.js";
 import { translate } from "./i18n.js";
 export function createCityMap({ map, bounds, path, onOpen, canOpen }) {
@@ -143,6 +144,13 @@ export function createCityMap({ map, bounds, path, onOpen, canOpen }) {
       extent * factor,
       extent * factor,
     );
+    context.strokeStyle = "#bba2ee";
+    context.fillStyle = "#6944aa";
+    context.lineWidth = 2;
+    context.beginPath();
+    context.arc(px(PORTAL.x), pz(PORTAL.z), 5, 0, Math.PI * 2);
+    context.fill();
+    context.stroke();
     if (route && target) {
       context.save();
       context.lineJoin = context.lineCap = "round";

@@ -1329,3 +1329,333 @@ body:has(#update-notice:not([hidden])) .install-notice {
     max-width: 230px;
   }
 }
+
+/* First expedition: city portal and an isolated, touch-friendly dungeon view. */
+.rift-launch {
+  position: fixed;
+  z-index: 28;
+  left: 50%;
+  bottom: max(44px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  border: 1px solid #c8b1f0;
+  background: #30263eea;
+  color: #f4e9ff;
+  border-radius: 24px;
+  padding: 11px 18px;
+  min-height: 44px;
+  font-size: 12px;
+}
+.rift-launch[hidden],
+.rift-panel[hidden],
+#dungeon-hud[hidden],
+#dungeon-boss[hidden] {
+  display: none;
+}
+.choosing-language .rift-launch,
+.intro-active .rift-launch,
+.ui-creating .rift-launch,
+.dialog-open .rift-launch,
+.mobile-menu-open .rift-launch,
+.dungeon-menu-open .rift-launch {
+  display: none;
+}
+.rift-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 180;
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  background: #100e1dbf;
+  overflow: auto;
+}
+.rift-board {
+  position: relative;
+  width: min(680px, 100%);
+  max-height: calc(100dvh - 28px);
+  overflow: auto;
+  background: #242335;
+  color: #f5eddc;
+  border: 1px solid #9f89bb;
+  border-radius: 20px;
+  padding: 22px;
+}
+.rift-board h2 {
+  font-family: Georgia, serif !important;
+  color: #f2dfb7;
+  margin: 4px 0 8px;
+  font-size: 29px;
+}
+.rift-board p {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.rift-board small {
+  display: block;
+  font-size: 10px;
+  line-height: 1.5;
+  margin-top: 10px;
+  color: #c5bbd2;
+}
+.rift-eyebrow {
+  color: #bcabdc;
+  letter-spacing: 3px;
+  font-size: 9px;
+}
+.rift-close {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  min-width: 44px;
+  min-height: 44px;
+}
+#rift-status {
+  color: #e9c87f;
+  font-size: 13px;
+  margin: 10px 0;
+}
+.rift-classes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.rift-classes button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 100px;
+  padding: 10px;
+  background: #333044;
+  color: #eee4d8;
+  border: 1px solid #65576d;
+  border-radius: 12px;
+}
+.rift-classes button b {
+  font-size: 24px;
+  line-height: 1;
+}
+.rift-classes button strong {
+  font-size: 12px;
+}
+.rift-classes button small {
+  font-size: 9px;
+  margin: 0;
+}
+.rift-classes button[aria-pressed="true"] {
+  border-color: #f2cb82;
+  background: #50404c;
+  box-shadow: inset 0 0 0 1px #f2cb82;
+}
+.rift-panel-actions {
+  display: flex;
+  gap: 10px;
+}
+.rift-panel-actions button {
+  flex: 1;
+  min-height: 44px;
+}
+.rift-panel-actions #rift-enter {
+  background: #c4addc;
+  color: #221b30;
+}
+.dungeon-menu-open .install-notice,
+.in-dungeon .install-notice,
+.dungeon-menu-open .touch {
+  display: none;
+}
+.in-dungeon header,
+.in-dungeon .map,
+.in-dungeon .dash,
+.in-dungeon .game-calendar,
+.in-dungeon #place-label,
+.in-dungeon .player-nameplate,
+.in-dungeon .mobile-context,
+.in-dungeon .life-actions,
+.in-dungeon .activity-tracker,
+.in-dungeon .hud-wallet,
+.in-dungeon #game-menu {
+  display: none !important;
+}
+.in-dungeon .touch {
+  z-index: 45;
+}
+.in-dungeon #voice-toggle {
+  z-index: 46;
+  right: 145px;
+  top: max(10px, env(safe-area-inset-top));
+}
+#dungeon-hud {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  color: #f7eed9;
+}
+#dungeon-hud button {
+  pointer-events: auto;
+  touch-action: none;
+}
+.dungeon-story {
+  position: absolute;
+  left: max(14px, env(safe-area-inset-left));
+  top: max(12px, env(safe-area-inset-top));
+  width: min(270px, 40vw);
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #1c1b2bdc;
+  border: 1px solid #a692be66;
+}
+.dungeon-story strong,
+.dungeon-story span,
+.dungeon-story small {
+  display: block;
+  margin-bottom: 5px;
+}
+.dungeon-story strong {
+  font-family: Georgia, serif;
+  font-size: 20px;
+  color: #e7c888;
+}
+.dungeon-story span {
+  font-size: 11px;
+}
+.dungeon-story small {
+  font-size: 9px;
+  color: #d4c6df;
+  line-height: 1.4;
+}
+.dungeon-health-track {
+  height: 6px;
+  background: #4a354b;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 7px 0;
+}
+.dungeon-health-track i {
+  display: block;
+  height: 100%;
+  background: #a2c58c;
+  transition: width 0.15s;
+}
+.dungeon-radar {
+  position: absolute;
+  right: max(10px, env(safe-area-inset-right));
+  top: max(10px, env(safe-area-inset-top));
+  width: 112px;
+  padding: 5px;
+  background: #252232e8;
+  border: 1px solid #8c799b;
+  border-radius: 10px;
+}
+.dungeon-radar canvas {
+  display: block;
+  width: 100%;
+  height: 132px;
+}
+.dungeon-radar small {
+  display: block;
+  font-size: 8px;
+  text-align: center;
+  margin: 5px 0;
+}
+.dungeon-radar button {
+  width: 100%;
+  min-height: 40px;
+  padding: 5px;
+  font-size: 10px;
+}
+.dungeon-combat {
+  position: absolute;
+  right: max(14px, env(safe-area-inset-right));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+.dungeon-combat button {
+  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+  padding: 7px;
+  font-size: 10px;
+  background: #443450e8;
+  color: #f6eddc;
+  border: 2px solid #b49dc4;
+}
+.dungeon-combat #dungeon-attack {
+  width: 86px;
+  height: 86px;
+  background: #b99660;
+  color: #211d2c;
+  font-size: 14px;
+  border-color: #f5dcaa;
+}
+.dungeon-combat button:disabled {
+  opacity: 0.5;
+}
+#dungeon-boss {
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  transform: translateX(-50%);
+  padding: 9px 18px;
+  border-radius: 10px;
+  border: 1px solid #d48b9b;
+  background: #4d263ae8;
+  font-size: 12px;
+}
+.rift-nameplate {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  font-size: 10px;
+  color: #fff4df;
+  text-align: center;
+  text-shadow: 0 1px 3px #000;
+  min-width: 50px;
+}
+.rift-nameplate i {
+  display: block;
+  height: 3px;
+  background: #9fc997;
+  margin: 3px auto;
+}
+@media (max-height: 500px) {
+  .rift-board {
+    padding: 16px;
+  }
+  .rift-board h2 {
+    font-size: 24px;
+  }
+  .rift-classes button {
+    min-height: 82px;
+  }
+  .dungeon-story {
+    width: 200px;
+    padding: 8px;
+  }
+  .dungeon-story strong {
+    font-size: 16px;
+  }
+  .dungeon-radar canvas {
+    height: 100px;
+  }
+  .dungeon-radar {
+    width: 90px;
+  }
+  .in-dungeon #voice-toggle {
+    right: 125px;
+  }
+  .dungeon-combat button {
+    width: 62px;
+    height: 62px;
+  }
+  .dungeon-combat #dungeon-attack {
+    width: 76px;
+    height: 76px;
+  }
+}
+.in-dungeon #toast {
+  z-index: 60;
+  bottom: 115px;
+}

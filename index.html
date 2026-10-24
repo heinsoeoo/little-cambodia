@@ -498,6 +498,78 @@
         </div>
       </div>
     </section>
+    <button id="rift-open" class="rift-launch" type="button" hidden>
+      ◉ Lantern Rift · Enter
+    </button>
+    <section
+      id="rift-panel"
+      class="rift-panel"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="rift-title"
+    >
+      <div class="rift-board">
+        <button
+          id="rift-close"
+          class="rift-close"
+          type="button"
+          aria-label="Close dungeon menu"
+        >
+          ✕
+        </button>
+        <span class="rift-eyebrow">FIRST EXPEDITION</span>
+        <h2 id="rift-title">Lantern Rift</h2>
+        <p>
+          A shadow has opened beside the riverside. Choose your hunter class.
+        </p>
+        <div id="rift-status" role="status"></div>
+        <div
+          id="rift-classes"
+          class="rift-classes"
+          role="group"
+          aria-label="Combat class"
+        ></div>
+        <p id="rift-distance"></p>
+        <div class="rift-panel-actions">
+          <button id="rift-map" type="button">Show on map</button
+          ><button id="rift-enter" type="button">Enter dungeon</button>
+        </div>
+        <small id="rift-coins"></small>
+        <small id="rift-gear"></small>
+        <small
+          >First hunter starts a 30-second joining window. Then the portal
+          seals. Attack J · Skill K · Dodge Space. You can leave at any
+          time.</small
+        >
+      </div>
+    </section>
+    <section id="dungeon-hud" hidden aria-label="Dungeon controls">
+      <div class="dungeon-story">
+        <strong id="dungeon-title">Lantern Rift</strong
+        ><span id="dungeon-phase" role="status"></span
+        ><span id="dungeon-health"></span>
+        <div class="dungeon-health-track"><i id="dungeon-hp-fill"></i></div>
+        <small id="dungeon-party"></small>
+      </div>
+      <div class="dungeon-radar">
+        <canvas
+          id="dungeon-map"
+          width="112"
+          height="180"
+          aria-label="Dungeon map: rooms, teammates, enemies and exit"
+        ></canvas
+        ><small>◉ Hunters · ◆ Boss</small
+        ><button id="dungeon-exit" type="button">Return to city</button>
+      </div>
+      <div id="dungeon-boss" hidden></div>
+      <div id="dungeon-labels"></div>
+      <div class="dungeon-combat">
+        <button id="dungeon-dodge" type="button">Dodge</button
+        ><button id="dungeon-skill" type="button">Skill</button
+        ><button id="dungeon-attack" type="button">Attack</button>
+      </div>
+    </section>
     <aside
       id="install-notice"
       class="install-notice"
