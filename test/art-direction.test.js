@@ -59,7 +59,94 @@ test("expressive characters keep mixed customization through walking, running, r
     }
     assert.equal(c.group.userData.appearance.top, "street");
     assert.ok(c.group.getObjectByName("eye-highlight"));
-    assert.ok(c.group.getObjectByName("cheek-tint"));
+    assert.ok(c.group.getObjectByName("sculpted-face"));
     c.dispose();
   }
+});
+
+import {
+  createCharacter as sourceCharacter,
+  createVehicle as sourceVehicle,
+} from "../src/luma-models.js";
+test("default player uses the actual reference shoulder, leg, face and hair geometry", () => {
+  const source = sourceCharacter(),
+    player = createCharacter({ gender: "male", top: "casual", hair: "casual" }),
+    rig = player.group.children[0].userData;
+  for (const [a, b] of [
+    [rig.arms[0], source.userData.arms[0]],
+    [rig.legs[0], source.userData.legs[0]],
+  ]) {
+    assert.deepEqual(a.position.toArray(), b.position.toArray());
+    assert.deepEqual(
+      Array.from(a.children[0].geometry.attributes.position.array),
+      Array.from(b.children[0].geometry.attributes.position.array),
+    );
+  }
+  for (let i = 0; i < 7; i++)
+    assert.deepEqual(
+      Array.from(rig.head.children[i].geometry.attributes.position.array),
+      Array.from(
+        source.userData.head.children[i].geometry.attributes.position.array,
+      ),
+    );
+  player.dispose();
+  disposeMeshes(source);
+});
+test("sedan body is imported directly and materials stay independent between guests", () => {
+  const reference = sourceVehicle({ id: "sedan", color: 0x20242b }),
+    first = vehicleModel("mercedes-c300"),
+    second = vehicleModel("mercedes-c300");
+  assert.deepEqual(
+    Array.from(
+      first.getObjectByName("sculpted-body").geometry.attributes.position.array,
+    ),
+    Array.from(reference.children[0].geometry.attributes.position.array),
+  );
+  const original = second.userData.paintMaterial.color.getHex();
+  first.userData.paintMaterial.color.setHex(0xff0000);
+  assert.equal(second.userData.paintMaterial.color.getHex(), original);
+  [reference, first, second].forEach(disposeMeshes);
+});
+
+import { createHunter } from "../src/dungeon-models.js";
+import { createLumaCrowd } from "../src/luma-crowd.js";
+test("dungeon hunters and animated city crowds use the same reference character safely", () => {
+  for (const role of [
+    "fighter",
+    "mage",
+    "assassin",
+    "marksman",
+    "support",
+    "tank",
+  ]) {
+    const hunter = createHunter({ gender: "female" }, role);
+    assert.ok(hunter.group.getObjectByName("sculpted-face"));
+    for (const action of ["attack", "skill", "dodge"]) {
+      hunter.update(
+        {
+          speed: 4,
+          heading: 1,
+          combat: { lastAttackAt: 1000, lastAction: action },
+        },
+        1 / 30,
+        1100,
+      );
+      hunter.group.updateMatrixWorld(true);
+      assert.ok(hunter.group.matrixWorld.elements.every(Number.isFinite));
+    }
+    disposeMeshes(hunter.group);
+  }
+  const scene = new T.Group(),
+    crowd = createLumaCrowd(scene, 3);
+  crowd.pose(0, [1, 2], 0.5, 3, true);
+  crowd.flush(1);
+  scene.traverse((o) => {
+    if (o.isInstancedMesh) {
+      assert.equal(o.count, 1);
+      const matrix = new T.Matrix4();
+      o.getMatrixAt(0, matrix);
+      assert.ok(matrix.elements.every(Number.isFinite));
+    }
+  });
+  disposeMeshes(scene);
 });

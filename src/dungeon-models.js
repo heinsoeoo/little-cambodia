@@ -1,93 +1,35 @@
+import { createCharacter } from "./character.js";
 import { softMaterial } from "./art-direction.js";
 import * as T from "three";
 import { CLASSES, classId } from "./dungeon-rules.js";
-import { SKIN_TONES, appearance, hairstyle } from "./wardrobe.js";
+import { appearance } from "./wardrobe.js";
 export function createHunter(look, role = "fighter", enemy = false) {
-  const group = new T.Group(),
-    spec = CLASSES[classId(role)],
+  const spec = CLASSES[classId(role)],
     value = appearance(look);
+  const avatar = createCharacter(value),
+    group = avatar.group,
+    rig = group.children[0].userData;
   const material = (color) => softMaterial(color);
-  const cloth = material(enemy ? 0x34324c : spec.color),
-    dark = material(0x252435),
+  const cloth = rig.jacket,
+    dark = rig.dark,
     gold = material(0xe4c480);
-  const skin = material(
-    enemy ? 0x716c8f : SKIN_TONES.find((s) => s.id === value.skin).color,
-  );
-  const hair = material(
-    enemy ? 0x282332 : hairstyle(value.hair, value.gender).hair,
-  );
+  cloth.color.setHex(enemy ? 0x34324c : spec.color);
+  if (enemy) {
+    rig.skinMat.color.setHex(0x716c8f);
+    rig.hair.color.setHex(0x282332);
+  }
+  const body = rig.torso,
+    arms = rig.arms,
+    legs = rig.legs;
   const mesh = (geo, mat, x, y, z, parent = group) => {
     const m = new T.Mesh(geo, mat);
     m.position.set(x, y, z);
     parent.add(m);
     return m;
   };
-  const oval = (w, h, d, mat, x, y, z, parent = group) => {
-    const m = mesh(new T.SphereGeometry(1, 16, 12), mat, x, y, z, parent);
-    m.scale.set(w, h, d);
-    return m;
-  };
-  function outline(m) {
-    const edge = new T.Mesh(
-      m.geometry,
-      new T.MeshBasicMaterial({ color: 0x201c30, side: T.BackSide }),
-    );
-    edge.scale.setScalar(1.04);
-    m.add(edge);
-  }
-  const body = oval(0.46, 0.5, 0.28, cloth, 0, 1.05, 0);
-  outline(body);
-  const head = oval(0.64, 0.62, 0.52, skin, 0, 1.98, 0);
-  outline(head);
-  oval(0.66, 0.39, 0.54, hair, 0, 2.23, -0.04);
-  for (let i = 0; i < 5; i++) {
-    const tuft = mesh(
-      new T.ConeGeometry(0.19, 0.38, 4),
-      hair,
-      (i - 2) * 0.22,
-      2.48,
-      0.12,
-    );
-    tuft.rotation.z = (i - 2) * -0.16;
-  }
-  if (value.gender === "female") {
-    oval(0.22, 0.52, 0.3, hair, -0.5, 1.85, -0.18);
-    oval(0.22, 0.52, 0.3, hair, 0.5, 1.85, -0.18);
-  }
-  for (const x of [-0.22, 0.22]) {
-    oval(0.09, 0.125, 0.045, dark, x, 2.01, 0.48);
-    oval(0.025, 0.035, 0.015, material(0xfff8e9), x - 0.02, 2.05, 0.52);
-  }
-  const smile = mesh(
-    new T.TorusGeometry(0.1, 0.017, 4, 12, Math.PI),
-    dark,
-    0,
-    1.76,
-    0.5,
-  );
-  smile.rotation.z = Math.PI;
-  oval(0.09, 0.07, 0.045, skin, -0.35, 1.83, 0.44);
-  oval(0.09, 0.07, 0.045, skin, 0.35, 1.83, 0.44);
-  mesh(new T.BoxGeometry(0.82, 0.12, 0.62), gold, 0, 0.82, 0);
-  const arms = [],
-    legs = [];
-  for (const sign of [-1, 1]) {
-    const arm = new T.Group();
-    arm.position.set(sign * 0.5, 1.35, 0);
-    group.add(arm);
-    arms.push(arm);
-    oval(0.15, 0.3, 0.16, cloth, 0, -0.18, 0, arm);
-    oval(0.15, 0.16, 0.15, skin, 0, -0.48, 0.04, arm);
-    const leg = new T.Group();
-    leg.position.set(sign * 0.22, 0.72, 0);
-    group.add(leg);
-    legs.push(leg);
-    mesh(new T.CylinderGeometry(0.13, 0.15, 0.45, 8), dark, 0, -0.19, 0, leg);
-    oval(0.19, 0.13, 0.28, dark, 0, -0.45, 0.09, leg);
-  }
   const weapon = new T.Group();
   arms[1].add(weapon);
-  weapon.position.set(0, -0.48, 0.12);
+  weapon.position.set(0, -0.4, 0.12);
   const steel = material(0xe2e5ee),
     glow = new T.MeshBasicMaterial({ color: spec.color });
   if (role === "mage" || role === "support") {
@@ -213,11 +155,9 @@ export function createHunter(look, role = "fighter", enemy = false) {
         arms[0].rotation.z = -0.35;
       }
       group.rotation.y = state.heading || 0;
-      body.position.y =
-        1.05 +
-        (state.speed
-          ? Math.abs(Math.sin(gait)) * 0.06
-          : Math.sin(time * 0.003) * 0.015);
+      body.position.y = state.speed
+        ? Math.abs(Math.sin(gait)) * 0.06
+        : Math.sin(time * 0.003) * 0.015;
     },
   };
 }

@@ -693,7 +693,12 @@ function frame(now) {
     streetElapsed >=
     (document.body.classList.contains("mobile-ui") ? 1 / 15 : 1 / 30)
   ) {
-    streetLife.update(streetElapsed, time);
+    streetLife.update(
+      streetElapsed,
+      time,
+      self || { x: spawn[0], z: spawn[1] },
+      Math.hypot(camera.right, camera.top) * 4,
+    );
     streetElapsed = 0;
   }
   world.facades.setNight(activity.night);

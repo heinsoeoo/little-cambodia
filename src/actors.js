@@ -3,7 +3,7 @@ import {
   animateVehicle,
   roadHeight,
 } from "./vehicle-motion.js";
-import { createCharacter } from "./character.js";
+import { createCharacter, disposeMeshes } from "./character.js";
 import { vehicleModel, repaintVehicle } from "./vehicle-model.js";
 import * as T from "three";
 import { updateVehicleLighting } from "./vehicle-lighting.js";
@@ -43,10 +43,7 @@ export function createActor(scene, player) {
       if ((state.vehicle?.type || null) !== type) {
         if (vehicle) {
           scene.remove(vehicle);
-          vehicle.traverse((o) => {
-            o.geometry?.dispose();
-            if (o.material) o.material.dispose();
-          });
+          disposeMeshes(vehicle);
         }
         type = state.vehicle?.type || null;
         vehicle = type ? vehicleModel(type, state.vehicle.paint) : null;
@@ -106,10 +103,7 @@ export function createActor(scene, player) {
       scene.remove(group);
       if (vehicle) {
         scene.remove(vehicle);
-        vehicle.traverse((o) => {
-          o.geometry?.dispose();
-          o.material?.dispose();
-        });
+        disposeMeshes(vehicle);
       }
       character.dispose();
       label.remove();

@@ -1,6 +1,6 @@
+import { createLumaCrowd } from "./luma-crowd.js";
 import { softMaterial, roundedGeometry } from "./art-direction.js";
 import * as T from "three";
-import { personTexture } from "./pixel-art.js";
 import { samplePath } from "./riverside.js";
 import { activityAt } from "./schedule.js";
 import { nearestRoad } from "./geo.js";
@@ -79,93 +79,7 @@ export function createStreetLife(scene, path, map) {
       bulb,
     });
   }
-  const bodies = new T.InstancedMesh(
-    new T.LatheGeometry(
-      [
-        [0.2, -0.31],
-        [0.18, -0.08],
-        [0.23, 0.24],
-        [0.2, 0.32],
-      ].map(([x, y]) => new T.Vector2(x, y)),
-      10,
-    ).scale(1, 1, 0.7),
-    new T.MeshStandardMaterial({ roughness: 0.85, color: 0xffffff }),
-    262,
-  );
-  const heads = new T.InstancedMesh(
-    new T.SphereGeometry(1, 16, 10).scale(0.225, 0.265, 0.2),
-    new T.MeshStandardMaterial({ roughness: 0.85, color: 0xbb8b67 }),
-    262,
-  );
-  const legs = new T.InstancedMesh(
-    new T.CylinderGeometry(0.08, 0.065, 0.8, 6),
-    new T.MeshStandardMaterial({ roughness: 0.85, color: 0x3b4d53 }),
-    524,
-  );
-  const hair = new T.InstancedMesh(
-    new T.SphereGeometry(0.235, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.5).scale(
-      1,
-      1,
-      0.9,
-    ),
-    new T.MeshStandardMaterial({ roughness: 0.85, color: 0x342f2a }),
-    262,
-  );
-  const arms = new T.InstancedMesh(
-    new T.CylinderGeometry(0.065, 0.045, 0.57, 6),
-    new T.MeshStandardMaterial({ roughness: 0.85, color: 0xffffff }),
-    524,
-  );
-  const eyes = new T.InstancedMesh(
-    new T.SphereGeometry(0.027, 8, 6),
-    softMaterial(0x30443b),
-    524,
-  );
-  group.add(bodies, heads, legs, hair, arms, eyes);
-  const spriteMap =
-    typeof document === "undefined" || map?.style === "cozy"
-      ? null
-      : personTexture();
-  const pixelPeople = spriteMap
-    ? new T.InstancedMesh(
-        new T.PlaneGeometry(1.9, 2.85),
-        new T.MeshBasicMaterial({
-          map: spriteMap,
-          alphaTest: 0.5,
-          side: T.DoubleSide,
-        }),
-        262,
-      )
-    : null;
-  if (pixelPeople) {
-    group.add(pixelPeople);
-    bodies.visible =
-      heads.visible =
-      legs.visible =
-      hair.visible =
-      arms.visible =
-        false;
-    pixelPeople.instanceMatrix.setUsage(T.DynamicDrawUsage);
-  }
-
-  bodies.instanceMatrix.setUsage(T.DynamicDrawUsage);
-  heads.instanceMatrix.setUsage(T.DynamicDrawUsage);
-  legs.instanceMatrix.setUsage(T.DynamicDrawUsage);
-  const dummy = new T.Object3D(),
-    color = new T.Color();
-  for (let i = 0; i < 262; i++) {
-    color.setHex(
-      [0xe1b36b, 0x719caa, 0xd97869, 0x8ba77b, 0xf0d6a8, 0x927aa4][i % 6],
-    );
-    bodies.setColorAt(i, color);
-    arms.setColorAt(i * 2, color);
-    arms.setColorAt(i * 2 + 1, color);
-    if (pixelPeople)
-      pixelPeople.setColorAt(
-        i,
-        new T.Color([0xffffff, 0xffe1b3, 0xd2e8da, 0xe1d5ee][i % 4]),
-      );
-  }
+  const crowd = createLumaCrowd(group);
   const walkingSeeds = Array.from({ length: 240 }, (_, k) => {
     const sample = samplePath(path, (k * 0.61803398875) % 1);
     return {
@@ -173,7 +87,7 @@ export function createStreetLife(scene, path, map) {
       heading: sample.heading,
     };
   });
-  function update(dt, time) {
+  function update(dt, time, focus = null, radius = Infinity) {
     activity = activityAt(time);
     elapsed += dt;
     const activeVendors = Array.from(
@@ -190,6 +104,7 @@ export function createStreetLife(scene, path, map) {
       v.bulb.visible = activity.night;
     });
     const count = activity.people + activity.vendors;
+    let rendered = 0;
     for (let i = 0; i < count; i++) {
       let point, heading;
       if (i < activity.vendors) {
@@ -207,68 +122,11 @@ export function createStreetLife(scene, path, map) {
         heading =
           seed.heading + (Math.cos(elapsed * 0.25 + k) > 0 ? 0 : Math.PI);
       }
-      dummy.rotation.set(0, heading, 0);
-      dummy.scale.set(1, 1, 1);
-      dummy.position.set(point[0], 1.22, point[1]);
-      dummy.updateMatrix();
-      bodies.setMatrixAt(i, dummy.matrix);
-      dummy.position.y = 1.81;
-      dummy.updateMatrix();
-      heads.setMatrixAt(i, dummy.matrix);
-      dummy.position.y = 1.91;
-      dummy.updateMatrix();
-      hair.setMatrixAt(i, dummy.matrix);
-      for (let side = 0; side < 2; side++) {
-        const ex = (side ? 1 : -1) * 0.082,
-          ez = 0.19;
-        dummy.position.set(
-          point[0] + Math.cos(heading) * ex + Math.sin(heading) * ez,
-          1.84,
-          point[1] - Math.sin(heading) * ex + Math.cos(heading) * ez,
-        );
-        dummy.rotation.set(0, heading, 0);
-        dummy.updateMatrix();
-        eyes.setMatrixAt(i * 2 + side, dummy.matrix);
-        dummy.position.set(point[0] + (side ? 1 : -1) * 0.11, 0.5, point[1]);
-        dummy.rotation.x =
-          i < activity.vendors
-            ? 0
-            : Math.sin(elapsed * 5 + i + side * Math.PI) * 0.3;
-        dummy.updateMatrix();
-        legs.setMatrixAt(i * 2 + side, dummy.matrix);
-        dummy.position.set(
-          point[0] + Math.cos(heading) * (side ? 1 : -1) * 0.27,
-          1.18,
-          point[1] - Math.sin(heading) * (side ? 1 : -1) * 0.27,
-        );
-        dummy.rotation.x *= -0.65;
-        dummy.updateMatrix();
-        arms.setMatrixAt(i * 2 + side, dummy.matrix);
-      }
-      if (pixelPeople) {
-        dummy.position.set(point[0], 1.43, point[1]);
-        dummy.rotation.set(
-          0,
-          map?.layout === "town" ? 0 : Math.atan2(36, 48),
-          0,
-        );
-        dummy.updateMatrix();
-        pixelPeople.setMatrixAt(i, dummy.matrix);
-      }
+      if (focus && Math.hypot(point[0] - focus.x, point[1] - focus.z) > radius)
+        continue;
+      crowd.pose(rendered++, point, heading, elapsed, i >= activity.vendors, i);
     }
-    if (pixelPeople) {
-      pixelPeople.count = count;
-      pixelPeople.instanceMatrix.needsUpdate = true;
-      pixelPeople.computeBoundingSphere();
-      spriteMap.offset.x = (Math.floor(elapsed * 3) % 2) * 0.5;
-    }
-    bodies.count = heads.count = hair.count = count;
-    eyes.count = arms.count = count * 2;
-    legs.count = count * 2;
-    for (const mesh of [bodies, heads, legs, hair, arms, eyes]) {
-      mesh.instanceMatrix.needsUpdate = true;
-      mesh.computeBoundingSphere();
-    }
+    crowd.flush(rendered);
   }
   return {
     access(roads) {

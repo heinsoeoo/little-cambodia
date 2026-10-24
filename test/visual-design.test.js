@@ -57,7 +57,7 @@ test("car silhouettes have distinct shaped cabins and preserve the Skyline round
   [sedan, coupe, suv].forEach(disposeMeshes);
 });
 
-test("adult character details survive mixed clothes and seated/standing pose changes", () => {
+test("Luma character details survive mixed clothes and seated/standing pose changes", () => {
   const character = createCharacter({
     gender: "female",
     top: "luxury",
@@ -87,7 +87,7 @@ test("adult character details survive mixed clothes and seated/standing pose cha
     Math.abs(
       character.group
         .getObjectByName("illustrated-head")
-        .getWorldPosition(new T.Vector3()).y - 1.656,
+        .getWorldPosition(new T.Vector3()).y - 1.57,
     ) < 0.02,
     "idle breathing keeps the head close to its mount height",
   );

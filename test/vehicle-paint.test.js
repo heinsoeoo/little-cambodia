@@ -49,7 +49,7 @@ test("both scooters have distinct geometry, driving tune, and a visible seated r
 
 test("tuk-tuk, pedal rickshaw and scooters have distinct functional silhouettes", () => {
   const designs = [
-    ["tuktuk", "tuktuk-windscreen", "enclosed-tuktuk"],
+    ["tuktuk", "tuktuk-windscreen", "luma-tuktuk"],
     ["rickshaw", "pedal-crank", "open-pedal-rickshaw"],
     ["vespa", "vespa-high-round-lamp", "classic-steel-scooter"],
     ["scoopy", "scoopy-body-mounted-headlamp", "modern-step-through-scooter"],

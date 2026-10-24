@@ -40,15 +40,15 @@ export function buildIntroCouple() {
   const head = hein.group.getObjectByName("illustrated-head");
   for (const x of [-0.06, 0.06]) {
     for (const y of [-0.008, 0.06])
-      box(head, 0.108, 0.006, 0.009, x, y, 0.153, dark);
+      box(head, 0.19, 0.009, 0.012, x * 1.75, y + 0.005, 0.28, dark);
     for (const dx of [-0.054, 0.054])
-      box(head, 0.006, 0.068, 0.009, x + dx, 0.026, 0.153, dark);
+      box(head, 0.009, 0.08, 0.012, (x + dx) * 1.75, 0.04, 0.28, dark);
   }
-  box(head, 0.02, 0.006, 0.009, 0, 0.035, 0.155, dark);
+  box(head, 0.03, 0.009, 0.012, 0, 0.04, 0.28, dark);
   // Exactly one watch: navy woven-looking band, blue dial and rose-gold rim.
   const watch = new T.Group();
   watch.name = "hein-single-watch";
-  watch.position.set(-0.04, -0.52, 0.04);
+  watch.position.set(-0.04, -0.36, 0.04);
   const strap = new T.Mesh(new T.TorusGeometry(0.05, 0.014, 6, 12), navy);
   strap.rotation.x = Math.PI / 2;
   watch.add(strap);

@@ -15,6 +15,16 @@ export function bikeLean(speed, turnRate) {
   );
 }
 export function prepareVehicleMotion(model) {
+  if (model.userData.nativeWheels) {
+    model.userData.wheelPivots = model.userData.nativeWheels;
+    for (const wheel of model.userData.wheelPivots) {
+      wheel.name = "rolling-wheel";
+      wheel.userData.radius = wheel.position.y;
+      wheel.userData.front = wheel.position.z > 0;
+    }
+    model.rotation.order = "YXZ";
+    return;
+  }
   const grouped = new Map();
   for (const object of [...model.children]) {
     const wheel = object.userData.wheel;
