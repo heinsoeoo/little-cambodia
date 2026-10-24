@@ -37,6 +37,7 @@ export function createCameraZoom({ camera, canvas, viewport }) {
   );
   let yaw = Math.atan2(40, 90),
     pitch = Math.atan2(58, Math.hypot(40, 90));
+  let manualUntil = 0;
   const pointers = new Map();
   let pinch = null;
   canvas.addEventListener("pointerdown", (event) => {
@@ -49,6 +50,7 @@ export function createCameraZoom({ camera, canvas, viewport }) {
   });
   canvas.addEventListener("pointermove", (event) => {
     if (!pointers.has(event.pointerId)) return;
+    manualUntil = performance.now() + 4000;
     const previous = pointers.get(event.pointerId);
     pointers.set(event.pointerId, [event.clientX, event.clientY]);
     if (pointers.size === 1) {
@@ -80,6 +82,10 @@ export function createCameraZoom({ camera, canvas, viewport }) {
   return {
     resize: apply,
     yaw: () => yaw,
+    setYaw: (value) => {
+      yaw = value;
+    },
+    manual: () => pointers.size > 0 || performance.now() < manualUntil,
     offset() {
       const radius = Math.hypot(40, 58, 90);
       return {

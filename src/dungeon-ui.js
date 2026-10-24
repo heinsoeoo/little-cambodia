@@ -334,7 +334,7 @@ export function createDungeonUI({
 
       document.body.classList.toggle("in-dungeon", Boolean(self?.dungeonId));
       $("dungeon-hud").hidden = !self?.dungeonId;
-      $("rift-open").hidden = !self || Boolean(self.dungeonId);
+      $("rift-open").hidden = true;
       if (!self) {
         closePanel();
         held = false;
@@ -357,6 +357,14 @@ export function createDungeonUI({
               ? `${translate("Next portal in")} ${cooldown}s`
               : translate("Raid in progress");
       const distanceToPortal = Math.hypot(self.x - p.x, self.z - p.z);
+      $("rift-open").hidden =
+        Boolean(self.dungeonId) ||
+        !p.active ||
+        self.mode !== "walk" ||
+        self.posture === "sit" ||
+        distanceToPortal > PORTAL_ENTRY_RANGE ||
+        !["ready", "joining"].includes(p.phase) ||
+        !$("sit-action").hidden;
       setText(
         "rift-open",
         !p.active

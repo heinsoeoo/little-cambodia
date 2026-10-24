@@ -73,10 +73,10 @@ export function createCharacter(initial) {
           sphere(
             rig.head,
             side * (0.22 + i * 0.015),
-            shape === "bob" ? -0.04 : -0.17,
+            shape === "bob" ? -0.04 : shape === "long" ? -0.3 : -0.17,
             -0.09 - i * 0.035,
             0.075,
-            shape === "bob" ? 0.22 : 0.34,
+            shape === "bob" ? 0.22 : shape === "long" ? 0.5 : 0.34,
             0.09,
             rig.hair,
           ).name = "hair-lock";

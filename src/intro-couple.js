@@ -14,7 +14,7 @@ export function buildIntroCouple() {
   const claraa = createCharacter({
     gender: "female",
     skin: "light",
-    hair: "workwear",
+    hair: "bohemian",
     top: "luxury",
     bottom: "luxury",
     shoes: "luxury",
